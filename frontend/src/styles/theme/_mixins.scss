@@ -1,0 +1,93 @@
+@use "sass:map";
+@use "sass:list";
+
+// // Theme Mixins
+// @mixin theme-aware($property, $light-value, $dark-value) {
+//   #{$property}: $light-value;
+  
+//   [data-theme="dark"] & {
+//     #{$property}: $dark-value;
+//   }
+// }
+
+// Color Mixins
+@mixin theme-color($category, $variant) {
+  color: var(--theme-#{$category}-#{$variant});
+}
+
+@mixin theme-background($category, $variant) {
+  background-color: var(--theme-#{$category}-#{$variant});
+}
+
+@mixin theme-border($category, $variant) {
+  border-color: var(--theme-#{$category}-#{$variant});
+}
+
+// Shadow Mixins
+@mixin theme-shadow($size) {
+  box-shadow: var(--theme-shadow-#{$size});
+}
+
+// Transition Mixins
+@mixin theme-transition($properties...) {
+  $transition-list: ();
+  @each $property in $properties {
+    $transition-list: list.append($transition-list, $property var(--transition-normal), comma);
+  }
+  transition: $transition-list;
+}
+
+// Media Query Mixins
+@mixin respond-to($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (min-width: map-get($breakpoints, $breakpoint)) {
+      @content;
+    }
+  } @else {
+    @warn "Unknown breakpoint: #{$breakpoint}";
+  }
+}
+
+// Typography Mixins
+@mixin font-size($size) {
+  font-size: var(--font-size-#{$size});
+}
+
+@mixin font-weight($weight) {
+  font-weight: var(--font-weight-#{$weight});
+}
+
+@mixin line-height($height) {
+  line-height: var(--line-height-#{$height});
+}
+
+// Spacing Mixins
+@mixin spacing($property, $size) {
+  #{$property}: var(--spacing-#{$size});
+}
+
+// Border Radius Mixins
+@mixin border-radius($size) {
+  border-radius: var(--border-radius-#{$size});
+}
+
+// Button Base Mixin
+@mixin button-base {
+  @include spacing(padding, 'md');
+  @include border-radius('md');
+  @include font-weight('medium');
+  @include theme-transition(background-color, color, transform);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  
+  &:focus {
+    @include theme-shadow('base');
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} 

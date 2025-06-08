@@ -1,0 +1,12 @@
+### Generate high quality anime wallpaper
+POST http://localhost:5001/api/images/generate
+Content-Type: application/json
+
+{
+    "prompt": "masterpiece, best quality, ultra-detailed, anime naruto wallpaper with heroes in studio ghibli style, soft lighting, vibrant colors, dynamic composition, cinematic, 8k uhd, high resolution, trending on artstation, professional photography",
+    "negative_prompt": "blurry, low quality, distorted, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name",
+    "width": 1024,
+    "height": 512,
+    "steps": 50,
+    "cfg_scale": 12.0
+}

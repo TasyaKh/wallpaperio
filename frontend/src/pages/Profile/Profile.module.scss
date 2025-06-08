@@ -1,0 +1,54 @@
+@use "../../styles/theme/mixins" as *;
+
+.profile {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.content {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  h1 {
+    @include theme-color("text", "primary");
+    @include font-size("2xl");
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  .avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    object-fit: cover;
+    border: 3px solid var(--primary);
+  }
+
+  h2 {
+    @include theme-color("text", "primary");
+    @include font-size("xl");
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    @include theme-color("text", "secondary");
+    @include font-size("md");
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}

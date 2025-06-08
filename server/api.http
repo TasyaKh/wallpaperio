@@ -1,0 +1,17 @@
+### Variables
+@baseUrl = http://localhost:3000
+
+### Generate Image (Anime)
+POST {{baseUrl}}/api/images/generate
+Content-Type: application/json
+
+{
+    "prompt": "masterpiece, best quality, ultra-detailed, anime naruto wallpaper in studio ghibli style, soft lighting, vibrant colors, dynamic composition, cinematic, 8k uhd, high resolution, trending on artstation, professional photography",
+    "width": 1024,
+    "height": 768,
+    "steps": 200,
+    "cfg_scale": 12.0,
+    "category": "anime",
+    "tags": ["naruto", "studio ghibli", "anime", "wallpaper"]
+}
+

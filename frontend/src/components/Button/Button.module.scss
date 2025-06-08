@@ -1,0 +1,62 @@
+@use "../../styles/theme/mixins" as *;
+
+.button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &.fullWidth {
+    width: 100%;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+}
+
+.primary {
+  background-color: var(--color-primary);
+  color: white;
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-primary-dark);
+  }
+}
+
+.secondary {
+  background-color: var(--theme-background-secondary);
+  color: var(--theme-text-primary);
+  border: 1px solid var(--theme-border-base);
+
+  &:hover:not(:disabled) {
+    background-color: var(--theme-background-hover);
+  }
+}
+
+.card {
+  background-color: var(--theme-background-secondary);
+  border: 1px solid var(--theme-border-base);
+  
+  &:hover {
+    background-color: var(--theme-background-hover);
+  }
+}
+
+.modal {
+  background-color: var(--theme-overlay-light);
+  backdrop-filter: blur(4px);
+} 

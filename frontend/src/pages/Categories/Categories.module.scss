@@ -1,0 +1,78 @@
+@use "../../styles/theme/mixins" as *;
+
+.categories {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  h1 {
+    @include spacing(margin-bottom, "xl");
+    @include theme-color("text", "primary");
+    @include font-size("2xl");
+    text-align: center;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.categoryCard {
+  position: relative;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  aspect-ratio: 16/9;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
+    .content {
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    }
+  }
+}
+
+.content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--spacing-lg);
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+  color: white;
+  transition: background 0.3s ease;
+
+  h2 {
+    margin: 0 0 var(--spacing-xs);
+    @include font-size("lg");
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    @include font-size("sm");
+    opacity: 0.9;
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  @include font-size("lg");
+  @include theme-color("text", "secondary");
+}
+
+.error {
+  text-align: center;
+  padding: var(--spacing-xl);
+  @include font-size("lg");
+  @include theme-color("text", "error");
+} 
