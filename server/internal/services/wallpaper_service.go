@@ -2,11 +2,6 @@ package services
 
 import (
 	"fmt"
-	"io"
-	"net/http"
-	"os"
-	"path/filepath"
-	"time"
 
 	"wallpaperio/server/internal/domain/models"
 
@@ -26,52 +21,18 @@ func NewWallpaperService(db *gorm.DB, imagesDir string) *WallpaperService {
 }
 
 type CreateWallpaperParams struct {
-	Title      string
-	ImageURL   string
-	CategoryID uint
-	Tags       []models.Tag
+	Title        string
+	ImageURL     string
+	ThumbnailURL string
+	CategoryID   uint
+	Tags         []models.Tag
 }
 
-func (s *WallpaperService) CreateWallpaperFromURL(params CreateWallpaperParams) (*models.Wallpaper, error) {
-	// Download image
-	resp, err := http.Get(params.ImageURL)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to download image: status code %d", resp.StatusCode)
-	}
-
-	// Create unique filename using timestamp and category
-	timestamp := time.Now().Unix()
-	filename := fmt.Sprintf("%d_%d.jpg", params.CategoryID, timestamp)
-	filepath := filepath.Join(s.imagesDir, filename)
-
-	fmt.Printf("Creating file: %s\n", filepath)
-
-	// Create directory if it doesn't exist
-	if err := os.MkdirAll(s.imagesDir, 0755); err != nil {
-		return nil, fmt.Errorf("failed to create images directory: %w", err)
-	}
-
-	// Save image
-	file, err := os.Create(filepath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create file: %w", err)
-	}
-	defer file.Close()
-
-	// Copy image data to file
-	if _, err := io.Copy(file, resp.Body); err != nil {
-		return nil, fmt.Errorf("failed to save image: %w", err)
-	}
-
+func (s *WallpaperService) CreateWallpaper(params CreateWallpaperParams) (*models.Wallpaper, error) {
 	// Create wallpaper record
 	wallpaper := models.Wallpaper{
 		Title:      params.Title,
-		ImageURL:   filepath,
+		ImageURL:   params.ImageURL,
 		CategoryID: params.CategoryID,
 	}
 
@@ -183,4 +144,57 @@ func (s *WallpaperService) GetWallpapers(filter WallpaperFilter) (*WallpaperResu
 		Wallpapers: wallpapers,
 		Total:      total,
 	}, nil
+}
+
+// DeleteWallpaper deletes a wallpaper by ID
+func (s *WallpaperService) DeleteWallpaper(id uint) error {
+	// First delete associated wallpaper tags
+	if err := s.db.Where("wallpaper_id = ?", id).Delete(&models.WallpaperTag{}).Error; err != nil {
+		return fmt.Errorf("failed to delete wallpaper tags: %w", err)
+	}
+
+	// Then delete the wallpaper
+	if err := s.db.Delete(&models.Wallpaper{}, id).Error; err != nil {
+		return fmt.Errorf("failed to delete wallpaper: %w", err)
+	}
+
+	return nil
+}
+
+// GetNextWallpaper returns the next wallpaper in the same category
+func (s *WallpaperService) GetNextWallpaper(currentID uint) (*models.Wallpaper, error) {
+	var currentWallpaper models.Wallpaper
+	if err := s.db.First(&currentWallpaper, currentID).Error; err != nil {
+		return nil, fmt.Errorf("current wallpaper not found: %w", err)
+	}
+
+	var nextWallpaper models.Wallpaper
+	err := s.db.Where("id > ? AND category_id = ?", currentID, currentWallpaper.CategoryID).
+		Order("id ASC").
+		Preload("Tags").
+		Preload("Category").
+		First(&nextWallpaper).Error
+	if err != nil {
+		return nil, fmt.Errorf("no next wallpaper found: %w", err)
+	}
+	return &nextWallpaper, nil
+}
+
+// GetPreviousWallpaper returns the previous wallpaper in the same category
+func (s *WallpaperService) GetPreviousWallpaper(currentID uint) (*models.Wallpaper, error) {
+	var currentWallpaper models.Wallpaper
+	if err := s.db.First(&currentWallpaper, currentID).Error; err != nil {
+		return nil, fmt.Errorf("current wallpaper not found: %w", err)
+	}
+
+	var prevWallpaper models.Wallpaper
+	err := s.db.Where("id < ? AND category_id = ?", currentID, currentWallpaper.CategoryID).
+		Order("id DESC").
+		Preload("Tags").
+		Preload("Category").
+		First(&prevWallpaper).Error
+	if err != nil {
+		return nil, fmt.Errorf("no previous wallpaper found: %w", err)
+	}
+	return &prevWallpaper, nil
 }

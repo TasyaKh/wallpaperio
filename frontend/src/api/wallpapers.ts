@@ -10,4 +10,14 @@ interface GetWallpapersParams {
 export const getWallpapers = async (params: GetWallpapersParams = {}): Promise<WallpaperResponse> => {
   const response = await api.get<WallpaperResponse>('/api/wallpapers', { params });
   return response.data;
+};
+
+export const getNextWallpaper = async (id: number): Promise<Wallpaper> => {
+  const response = await api.get<Wallpaper>(`/api/wallpapers/${id}/next`);
+  return response.data;
+};
+
+export const getPreviousWallpaper = async (id: number): Promise<Wallpaper> => {
+  const response = await api.get<Wallpaper>(`/api/wallpapers/${id}/previous`);
+  return response.data;
 }; 

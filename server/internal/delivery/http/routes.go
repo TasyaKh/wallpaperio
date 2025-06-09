@@ -4,16 +4,22 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"wallpaperio/server/internal/handlers"
+	"wallpaperio/server/internal/middleware"
+	"wallpaperio/server/pkg/auth"
 )
 
 // Router holds all the handlers for the application
 type Router struct {
-	handlers map[string]interface{}
+	handlers   map[string]interface{}
+	jwtService *auth.JWTService
 }
 
 // NewRouter creates a new Router instance
-func NewRouter() *Router {
-	return &Router{handlers: make(map[string]interface{})}
+func NewRouter(jwtService *auth.JWTService) *Router {
+	return &Router{
+		handlers:   make(map[string]interface{}),
+		jwtService: jwtService,
+	}
 }
 
 func (r *Router) AddHandler(name string, handler interface{}) {
@@ -58,8 +64,12 @@ func (r *Router) Setup(router *gin.Engine) {
 	})
 
 	// Wallpaper routes
-	router.GET("/api/wallpapers", func(c *gin.Context) {
+	wallpaper := router.Group("/api/wallpapers")
+	{
 		wallpaperHandler := r.handlers["wallpaper"].(*handlers.WallpaperHandler)
-		wallpaperHandler.GetWallpapers(c)
-	})
+		wallpaper.GET("", wallpaperHandler.GetWallpapers)
+		wallpaper.GET("/:id/next", wallpaperHandler.GetNextWallpaper)
+		wallpaper.GET("/:id/previous", wallpaperHandler.GetPreviousWallpaper)
+		wallpaper.DELETE("/:id", middleware.RequireAdmin(r.jwtService), wallpaperHandler.DeleteWallpaper)
+	}
 }

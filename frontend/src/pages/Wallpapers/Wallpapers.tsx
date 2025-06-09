@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { getWallpapers } from '../../api/wallpapers';
+import { getWallpapers, getNextWallpaper, getPreviousWallpaper } from '../../api/wallpapers';
 import { getCategories } from '../../api/categories';
 import styles from './Wallpapers.module.scss';
 import { Wallpaper } from '../../models/wallpaper';
 import { Category } from '../../models/category';
+import WallpaperCard from './components/WallpaperCard/WallpaperCard';
+import ImagePreview from '../../components/ImagePreview/ImagePreview';
+import CategoryFilter from './components/CategoryFilter/CategoryFilter';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -18,6 +21,9 @@ export default function Wallpapers() {
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
   const [total, setTotal] = useState(0);
+  const [selectedWallpaper, setSelectedWallpaper] = useState<Wallpaper | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const selectedCategory = searchParams.get('category');
 
@@ -77,6 +83,39 @@ export default function Wallpapers() {
     setSearchParams(categoryName ? { category: categoryName } : {});
   };
 
+  const handleWallpaperClick = (wallpaper: Wallpaper) => {
+    setSelectedWallpaper(wallpaper);
+    setIsPreviewOpen(true);
+  };
+
+  const handleNextImage = async () => {
+    if (!selectedWallpaper) return;
+    
+    try {
+      setIsNavigating(true);
+      const nextWallpaper = await getNextWallpaper(selectedWallpaper.id);
+      setSelectedWallpaper(nextWallpaper);
+    } catch (err) {
+      console.error('Error fetching next wallpaper:', err);
+    } finally {
+      setIsNavigating(false);
+    }
+  };
+
+  const handlePreviousImage = async () => {
+    if (!selectedWallpaper) return;
+    
+    try {
+      setIsNavigating(true);
+      const prevWallpaper = await getPreviousWallpaper(selectedWallpaper.id);
+      setSelectedWallpaper(prevWallpaper);
+    } catch (err) {
+      console.error('Error fetching previous wallpaper:', err);
+    } finally {
+      setIsNavigating(false);
+    }
+  };
+
   if (loading && wallpapers.length === 0) {
     return <div className={styles.loading}>Loading wallpapers...</div>;
   }
@@ -85,26 +124,15 @@ export default function Wallpapers() {
     return <div className={styles.error}>{error}</div>;
   }
 
-  return (
-    <div className={styles.wallpapers}>
-      <div className={styles.categories}>
-        <button
-          className={`${styles.categoryButton} ${!selectedCategory ? styles.active : ''}`}
-          onClick={() => handleCategoryChange(null)}
-        >
-          All
-        </button>
-        {categories.map((category) => (
-          <button
-            key={category.id}
-            className={`${styles.categoryButton} ${selectedCategory === category.name ? styles.active : ''}`}
-            onClick={() => handleCategoryChange(category.name)}
-          >
-            {category.name}
-          </button>
-        ))}
-      </div>
 
+  return (
+    <div className={"container"}>
+      <h1>Wallpapers</h1>
+      <CategoryFilter
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={handleCategoryChange}
+      />
       <InfiniteScroll
         dataLength={wallpapers.length}
         next={loadMore}
@@ -118,21 +146,26 @@ export default function Wallpapers() {
       >
         <div className={styles.grid}>
           {wallpapers.map((wallpaper) => (
-            <div key={wallpaper.id} className={styles.wallpaperCard}>
-              <img src={wallpaper.image_url} alt={wallpaper.title} />
-              <div className={styles.overlay}>
-                <div className={styles.tags}>
-                  {wallpaper.tags.map((tag) => (
-                    <span key={tag.id} className={styles.tag}>
-                      {tag.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <WallpaperCard
+              key={wallpaper.id}
+              wallpaper={wallpaper}
+              onClick={() => handleWallpaperClick(wallpaper)}
+            />
           ))}
         </div>
       </InfiniteScroll>
+
+      {selectedWallpaper && (
+        <ImagePreview
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          imageUrl={selectedWallpaper.image_url}
+          title={selectedWallpaper.title}
+          onNext={handleNextImage}
+          onPrevious={handlePreviousImage}
+          isLoading={isNavigating}
+        />
+      )}
     </div>
   );
 } 

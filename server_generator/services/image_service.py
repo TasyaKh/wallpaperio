@@ -1,6 +1,5 @@
 from g4f import Client
 from typing import Optional, List
-import os
 
 class ImageService:
     def __init__(self):
@@ -34,6 +33,7 @@ class ImageService:
         image_paths = []
         for img in response.data:
             if hasattr(img, 'url'):
+                print("generate img url ", img.url)
                 image_paths.append(img.url)
         
         return image_paths 

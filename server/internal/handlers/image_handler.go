@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"wallpaperio/server/internal/config"
@@ -35,6 +36,7 @@ type ImageHandler struct {
 	db           *gorm.DB
 	wallpaperSvc *services.WallpaperService
 	tagSvc       *services.TagService
+	imageSvc     *services.ImageService
 }
 
 func NewImageHandler(cfg *config.ImageGeneratorConfig, db *gorm.DB) *ImageHandler {
@@ -44,16 +46,17 @@ func NewImageHandler(cfg *config.ImageGeneratorConfig, db *gorm.DB) *ImageHandle
 		db:           db,
 		wallpaperSvc: services.NewWallpaperService(db, cfg.ImagesDir),
 		tagSvc:       services.NewTagService(db),
+		imageSvc:     services.NewImageService(db, cfg.ImagesDir),
 	}
 }
 
 func (h *ImageHandler) GenerateImage(c *gin.Context) {
-
 	var req ImageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
+
 	// Validate category
 	var category models.Category
 	if err := h.db.Where("name = ?", req.Category).First(&category).Error; err != nil {
@@ -80,23 +83,32 @@ func (h *ImageHandler) GenerateImage(c *gin.Context) {
 	}
 
 	genResp, err := h.client.GenerateImages(genReq)
-
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Create wallpapers from generated images
+	// Process and save images
 	var savedPaths []string
 	for _, imageURL := range genResp.Images {
-		wallpaper, err := h.wallpaperSvc.CreateWallpaperFromURL(services.CreateWallpaperParams{
-			Title:      req.Prompt,
-			ImageURL:   imageURL,
-			CategoryID: category.ID,
-			Tags:       tags,
+		// Process image using image service
+		imagePath, thumbnailPath, err := h.imageSvc.ProcessImage(c.Request.Context(), imageURL)
+		if err != nil {
+			fmt.Println("error processing image:", err)
+			continue
+		}
+
+		// Create wallpaper with processed image
+		wallpaper, err := h.wallpaperSvc.CreateWallpaper(services.CreateWallpaperParams{
+			Title:        req.Prompt,
+			ImageURL:     imagePath,
+			ThumbnailURL: thumbnailPath,
+			CategoryID:   category.ID,
+			Tags:         tags,
 		})
 
 		if err != nil {
+			fmt.Println("error creating wallpaper:", err)
 			continue
 		}
 		savedPaths = append(savedPaths, wallpaper.ImageURL)

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-
 	"wallpaperio/server/internal/services"
 
 	"github.com/gin-gonic/gin"
@@ -22,9 +21,7 @@ func NewWallpaperHandler(wallpaperSvc *services.WallpaperService, hostURL string
 	}
 }
 
-// GetWallpapers handles GET /api/wallpapers
 func (h *WallpaperHandler) GetWallpapers(c *gin.Context) {
-	// Get query parameters
 	tags := c.QueryArray("tags")
 	category := c.Query("category")
 
@@ -57,12 +54,8 @@ func (h *WallpaperHandler) GetWallpapers(c *gin.Context) {
 
 	// Add host URL to image paths
 	for i := range result.Wallpapers {
-		// Convert from "images/filename.jpg" to "static/images/filename.jpg"
 		imagePath := result.Wallpapers[i].ImageURL
-		if len(imagePath) > 7 && imagePath[:7] == "images/" {
-			imagePath = "static/" + imagePath
-		}
-		result.Wallpapers[i].ImageURL = fmt.Sprintf("%s/%s", h.hostURL, imagePath)
+		result.Wallpapers[i].ImageURL = getImagePath(h.hostURL, imagePath)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -71,4 +64,59 @@ func (h *WallpaperHandler) GetWallpapers(c *gin.Context) {
 		"limit":      limit,
 		"offset":     offset,
 	})
+}
+
+func (h *WallpaperHandler) DeleteWallpaper(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid wallpaper ID"})
+		return
+	}
+
+	if err := h.wallpaperSvc.DeleteWallpaper(uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete wallpaper"})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+func (h *WallpaperHandler) GetNextWallpaper(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid wallpaper ID"})
+		return
+	}
+
+	wallpaper, err := h.wallpaperSvc.GetNextWallpaper(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No next wallpaper found"})
+		return
+	}
+
+	wallpaper.ImageURL = getImagePath(h.hostURL, wallpaper.ImageURL)
+
+	c.JSON(http.StatusOK, wallpaper)
+}
+
+func (h *WallpaperHandler) GetPreviousWallpaper(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid wallpaper ID"})
+		return
+	}
+
+	wallpaper, err := h.wallpaperSvc.GetPreviousWallpaper(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No previous wallpaper found"})
+		return
+	}
+
+	wallpaper.ImageURL = getImagePath(h.hostURL, wallpaper.ImageURL)
+
+	c.JSON(http.StatusOK, wallpaper)
+}
+
+func getImagePath(hostURL string, imagePath string) string {
+	return fmt.Sprintf("%s/%s", hostURL, imagePath)
 }
