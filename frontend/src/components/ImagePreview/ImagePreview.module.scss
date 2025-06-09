@@ -1,14 +1,11 @@
 .previewContainer {
   position: relative;
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
   background: var(--theme-background-primary);
   overflow: hidden;
   display: flex;
-  border-radius: 8px;
   flex-direction: column;
-  gap: 2rem;
 }
 
 .loading {
