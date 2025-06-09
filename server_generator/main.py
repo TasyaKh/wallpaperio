@@ -18,7 +18,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers with global api prefix
 app.include_router(image_router, prefix="/api")
 
 if __name__ == "__main__":
