@@ -5,6 +5,9 @@ import { ThemeMode } from "../../styles/theme";
 import { Loader } from "../Loader/Loader";
 import styles from "./Navbar.module.scss";
 import { Button } from "../Button";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMoon } from "@fortawesome/free-regular-svg-icons/faMoon";
+import { faSun } from "@fortawesome/free-solid-svg-icons";
 
 export const Navbar = () => {
   const { user, loading } = useAuth();
@@ -39,7 +42,7 @@ export const Navbar = () => {
               theme.mode === ThemeMode.Light ? "dark" : "light"
             } theme`}
           >
-            {theme.mode === ThemeMode.Light ? "🌙" : "☀️"}
+            {theme.mode === ThemeMode.Light ? <FontAwesomeIcon icon={faMoon} color="var(--color-primary" /> : <FontAwesomeIcon icon={faSun} color="var(--color-primary" />}
           </button>
         </div>
         <div className="col-auto align-items-center d-flex">

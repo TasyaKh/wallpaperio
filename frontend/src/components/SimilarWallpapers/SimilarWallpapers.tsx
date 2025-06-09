@@ -4,6 +4,7 @@ import { getSimilarWallpapers } from "../../api/wallpapers";
 import styles from "./SimilarWallpapers.module.scss";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
+import defaultImage from "../../assets/not-found-image.svg";
 
 interface SimilarWallpapersProps {
   currentWallpaperId: number;
@@ -17,6 +18,7 @@ const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
 
   useEffect(() => {
     const fetchSimilarWallpapers = async () => {
@@ -24,6 +26,7 @@ const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
         setLoading(true);
         const similar = await getSimilarWallpapers(currentWallpaperId);
         setWallpapers(similar);
+        setImageErrors({});
       } catch (err) {
         setError("Failed to load similar wallpapers");
         console.error("Error loading similar wallpapers:", err);
@@ -34,6 +37,13 @@ const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
 
     fetchSimilarWallpapers();
   }, [currentWallpaperId]);
+
+  const handleImageError = (wallpaperId: number) => {
+    setImageErrors(prev => ({
+      ...prev,
+      [wallpaperId]: true
+    }));
+  };
 
   if (loading) {
     return <div className={styles.loading}>Loading similar wallpapers...</div>;
@@ -56,11 +66,12 @@ const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
           onClick={() => onWallpaperClick(wallpaper)}
         >
           <LazyLoadImage
-            src={wallpaper.image_url}
+            src={imageErrors[wallpaper.id] ? defaultImage : wallpaper.image_url}
             alt={wallpaper.title}
             effect="blur"
             className={styles.image}
             placeholderSrc={`${wallpaper.image_url}?w=50`}
+            onError={() => handleImageError(wallpaper.id)}
           />
         </div>
       ))}
