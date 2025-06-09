@@ -117,6 +117,36 @@ func (h *WallpaperHandler) GetPreviousWallpaper(c *gin.Context) {
 	c.JSON(http.StatusOK, wallpaper)
 }
 
+func (h *WallpaperHandler) GetSimilarWallpapers(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid wallpaper ID"})
+		return
+	}
+
+	limit := 12 // Default limit
+	if limitStr := c.Query("limit"); limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+			limit = l
+		}
+	}
+
+	wallpapers, err := h.wallpaperSvc.GetSimilarWallpapers(uint(id), limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch similar wallpapers"})
+		return
+	}
+
+	// Add host URL to image paths
+	for i := range wallpapers {
+		imagePath := wallpapers[i].ImageURL
+
+		wallpapers[i].ImageURL = getImagePath(h.hostURL, imagePath)
+	}
+
+	c.JSON(http.StatusOK, wallpapers)
+}
+
 func getImagePath(hostURL string, imagePath string) string {
 	return fmt.Sprintf("%s/%s", hostURL, imagePath)
 }

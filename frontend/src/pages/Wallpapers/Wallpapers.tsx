@@ -164,6 +164,8 @@ export default function Wallpapers() {
           onNext={handleNextImage}
           onPrevious={handlePreviousImage}
           isLoading={isNavigating}
+          currentWallpaper={selectedWallpaper}
+          onWallpaperClick={handleWallpaperClick}
         />
       )}
     </div>

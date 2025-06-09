@@ -1,8 +1,9 @@
 import React from 'react';
 import Modal from '../Modal/Modal';
 import styles from './ImagePreview.module.scss';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import ImageNavigation from './ImageNavigation';
+import SimilarWallpapers from '../SimilarWallpapers/SimilarWallpapers';
+import { Wallpaper } from '../../models/wallpaper';
 
 interface ImagePreviewProps {
   isOpen: boolean;
@@ -12,6 +13,8 @@ interface ImagePreviewProps {
   onNext: () => void;
   onPrevious: () => void;
   isLoading?: boolean;
+  currentWallpaper: Wallpaper;
+  onWallpaperClick: (wallpaper: Wallpaper) => void;
 }
 
 const ImagePreview: React.FC<ImagePreviewProps> = ({
@@ -22,32 +25,28 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
   onNext,
   onPrevious,
   isLoading = false,
+  currentWallpaper,
+  onWallpaperClick,
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className={styles.previewContainer}>
-        <div className={styles.imageContainer}>
-          <img 
-            src={imageUrl} 
-            alt={title || 'Preview'} 
-            className={`${styles.image} ${isLoading ? styles.loading : ''}`} 
+        <div className={styles.mainContent}>
+          <ImageNavigation
+            imageUrl={imageUrl}
+            title={title}
+            onNext={onNext}
+            onPrevious={onPrevious}
+            isLoading={isLoading}
           />
-          
-          <button 
-            className={`${styles.navButton} ${styles.prevButton}`} 
-            onClick={onPrevious}
-            disabled={isLoading}
-          >
-            <FontAwesomeIcon icon={faChevronLeft} />
-          </button>
-          
-          <button 
-            className={`${styles.navButton} ${styles.nextButton}`} 
-            onClick={onNext}
-            disabled={isLoading}
-          >
-            <FontAwesomeIcon icon={faChevronRight} />
-          </button>
+        </div>
+
+        <div className={styles.similarContainer}>
+          <h3>Similar Wallpapers</h3>
+          <SimilarWallpapers
+            currentWallpaperId={currentWallpaper.id}
+            onWallpaperClick={onWallpaperClick}
+          />
         </div>
       </div>
     </Modal>

@@ -70,6 +70,7 @@ func (r *Router) Setup(router *gin.Engine) {
 		wallpaper.GET("", wallpaperHandler.GetWallpapers)
 		wallpaper.GET("/:id/next", wallpaperHandler.GetNextWallpaper)
 		wallpaper.GET("/:id/previous", wallpaperHandler.GetPreviousWallpaper)
+		wallpaper.GET("/:id/similar", wallpaperHandler.GetSimilarWallpapers)
 		wallpaper.DELETE("/:id", middleware.RequireAdmin(r.jwtService), wallpaperHandler.DeleteWallpaper)
 	}
 }

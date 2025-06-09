@@ -20,4 +20,11 @@ export const getNextWallpaper = async (id: number): Promise<Wallpaper> => {
 export const getPreviousWallpaper = async (id: number): Promise<Wallpaper> => {
   const response = await api.get<Wallpaper>(`/api/wallpapers/${id}/previous`);
   return response.data;
+};
+
+export const getSimilarWallpapers = async (id: number, limit?: number): Promise<Wallpaper[]> => {
+  const response = await api.get<Wallpaper[]>(`/api/wallpapers/${id}/similar`, {
+    params: { limit }
+  });
+  return response.data;
 }; 
