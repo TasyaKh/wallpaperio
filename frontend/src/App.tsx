@@ -2,8 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Suspense } from 'react';
-import { Login, Home, Wallpapers } from './pages';
-import AuthGoogleCallback from './pages/AuthGoogleCallback/AuthGoogleCallback';
+import { Login, Home, Wallpapers, AuthGoogleCallback } from './pages';
 import { Navbar } from './components/Navbar/Navbar';
 import Categories from './pages/Categories/Categories';
 import Profile from './pages/Profile/Profile';

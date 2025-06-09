@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type User struct {
 	ID            uint      `json:"id" gorm:"primaryKey"`
@@ -9,6 +11,7 @@ type User struct {
 	AuthType      string    `gorm:"not null"`
 	AuthID        string    `gorm:"index"` // ID from auth provider
 	ProfilePicURL string    `json:"profile_pic_url"`
+	Role          UserRole  `json:"role" gorm:"type:varchar(20);default:'user'"` // Using UserRole type
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }

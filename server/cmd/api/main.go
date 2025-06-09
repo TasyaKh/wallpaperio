@@ -41,11 +41,12 @@ func main() {
 	imageCfg := config.LoadImageGeneratorConfig()
 	imageHandler := handlers.NewImageHandler(imageCfg, db.DB)
 	categoryHandler := handlers.NewCategoryHandler(categorySvc)
+	// TODO: back
 	wallpaperHandler := handlers.NewWallpaperHandler(wallpaperSvc, fmt.Sprintf("http://localhost:%s", cfg.Server.Port))
 
 	// Initialize router
 	router := gin.Default()
-	appRouter := http.NewRouter()
+	appRouter := http.NewRouter(jwtService)
 	appRouter.AddHandler("auth", authHandler)
 	appRouter.AddHandler("image", imageHandler)
 	appRouter.AddHandler("category", categoryHandler)
