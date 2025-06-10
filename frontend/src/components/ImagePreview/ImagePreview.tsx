@@ -31,7 +31,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className={styles.previewContainer}>
-        <div className={styles.mainContent}>
+        <div >
           <ImageNavigation
             imageUrl={imageUrl}
             title={title}

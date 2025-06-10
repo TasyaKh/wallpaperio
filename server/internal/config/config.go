@@ -12,7 +12,8 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port string
+	Port          string
+	ImagesHostURL string
 }
 
 type DatabaseConfig struct {
@@ -37,7 +38,8 @@ type JWTConfig struct {
 func LoadConfig() *Config {
 	return &Config{
 		Server: ServerConfig{
-			Port: getEnv("SERVER_PORT", "8080"),
+			Port:          getEnv("SERVER_PORT", "8080"),
+			ImagesHostURL: getEnv("SERVER_IMAGES_HOST_URL", ""),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
@@ -50,7 +52,7 @@ func LoadConfig() *Config {
 		Google: GoogleConfig{
 			ClientID:     getEnv("GOOGLE_CLIENT_ID", ""),
 			ClientSecret: getEnv("GOOGLE_CLIENT_SECRET", ""),
-			RedirectURL:  getEnv("GOOGLE_REDIRECT_URL", "http://localhost:8080/auth/google/callback"),
+			RedirectURL:  getEnv("GOOGLE_REDIRECT_URL", ""),
 		},
 		JWT: JWTConfig{
 			Secret: getEnv("JWT_SECRET", ""),

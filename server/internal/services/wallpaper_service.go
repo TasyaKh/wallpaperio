@@ -9,31 +9,54 @@ import (
 )
 
 type WallpaperService struct {
-	db        *gorm.DB
-	imagesDir string
-}
-
-func NewWallpaperService(db *gorm.DB, imagesDir string) *WallpaperService {
-	return &WallpaperService{
-		db:        db,
-		imagesDir: imagesDir,
-	}
+	db     *gorm.DB
+	tagSvc *TagService
 }
 
 type CreateWallpaperParams struct {
-	Title        string
-	ImageURL     string
-	ThumbnailURL string
-	CategoryID   uint
-	Tags         []models.Tag
+	Title    string
+	ImageURL string
+	Category string
+	Tags     []string
+}
+
+type WallpaperFilter struct {
+	Tags     []string
+	Category string
+	Limit    int
+	Offset   int
+}
+
+type WallpaperResult struct {
+	Wallpapers []models.Wallpaper
+	Total      int64
+}
+
+func NewWallpaperService(db *gorm.DB, tagSvc *TagService) *WallpaperService {
+	return &WallpaperService{
+		db:     db,
+		tagSvc: tagSvc,
+	}
 }
 
 func (s *WallpaperService) CreateWallpaper(params CreateWallpaperParams) (*models.Wallpaper, error) {
+	// Get or create category
+	var category models.Category
+	if err := s.db.Where("name = ?", params.Category).FirstOrCreate(&category, models.Category{Name: params.Category}).Error; err != nil {
+		return nil, fmt.Errorf("failed to process category: %w", err)
+	}
+
+	// Get or create tags
+	tags, err := s.tagSvc.GetOrCreateTags(params.Tags)
+	if err != nil {
+		return nil, fmt.Errorf("failed to process tags: %w", err)
+	}
+
 	// Create wallpaper record
 	wallpaper := models.Wallpaper{
 		Title:      params.Title,
 		ImageURL:   params.ImageURL,
-		CategoryID: params.CategoryID,
+		CategoryID: category.ID,
 	}
 
 	if err := s.db.Create(&wallpaper).Error; err != nil {
@@ -41,7 +64,7 @@ func (s *WallpaperService) CreateWallpaper(params CreateWallpaperParams) (*model
 	}
 
 	// Create wallpaper tags
-	for _, tag := range params.Tags {
+	for _, tag := range tags {
 		wallpaperTag := models.WallpaperTag{
 			WallpaperID: wallpaper.ID,
 			TagID:       tag.ID,
@@ -89,18 +112,6 @@ func (s *WallpaperService) GetAllWallpapers() ([]models.Wallpaper, error) {
 	return wallpapers, err
 }
 
-type WallpaperFilter struct {
-	Tags     []string
-	Category string
-	Limit    int
-	Offset   int
-}
-
-type WallpaperResult struct {
-	Wallpapers []models.Wallpaper
-	Total      int64
-}
-
 // GetWallpapers returns wallpapers with optional filters and pagination
 func (s *WallpaperService) GetWallpapers(filter WallpaperFilter) (*WallpaperResult, error) {
 	query := s.db.Model(&models.Wallpaper{})
@@ -132,6 +143,7 @@ func (s *WallpaperService) GetWallpapers(filter WallpaperFilter) (*WallpaperResu
 	err := query.
 		Preload("Tags").
 		Preload("Category").
+		Order("id DESC").
 		Limit(filter.Limit).
 		Offset(filter.Offset).
 		Find(&wallpapers).Error

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/joho/godotenv"
@@ -33,16 +32,16 @@ func main() {
 	// Initialize services
 	googleAuth := auth.NewGoogleAuth(&cfg.Google)
 	jwtService := auth.NewJWTService(cfg.JWT.Secret)
-	categorySvc := services.NewCategoryService(db.DB)
-	wallpaperSvc := services.NewWallpaperService(db.DB, "images")
+	categorySvc := services.NewCategoryService(db.DB, cfg.Server.ImagesHostURL)
+	tagSvc := services.NewTagService(db.DB)
+	wallpaperSvc := services.NewWallpaperService(db.DB, tagSvc)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(googleAuth, db, jwtService)
 	imageCfg := config.LoadImageGeneratorConfig()
 	imageHandler := handlers.NewImageHandler(imageCfg, db.DB)
 	categoryHandler := handlers.NewCategoryHandler(categorySvc)
-	// TODO: back
-	wallpaperHandler := handlers.NewWallpaperHandler(wallpaperSvc, fmt.Sprintf("http://localhost:%s", cfg.Server.Port))
+	wallpaperHandler := handlers.NewWallpaperHandler(wallpaperSvc, tagSvc, db.DB, cfg.Server.ImagesHostURL)
 
 	// Initialize router
 	router := gin.Default()

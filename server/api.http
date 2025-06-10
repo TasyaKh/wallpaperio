@@ -9,9 +9,13 @@ Content-Type: application/json
     "prompt": "masterpiece, best quality, ultra-detailed, anime naruto wallpaper in studio ghibli style, soft lighting, vibrant colors, dynamic composition, cinematic, 8k uhd, high resolution, trending on artstation, professional photography",
     "width": 1024,
     "height": 768,
-    "steps": 50,
-    "cfg_scale": 6.0,
     "category": "anime",
     "tags": ["naruto", "studio ghibli", "anime", "wallpaper"]
 }
 
+### Get Image Generation Status
+GET {{baseUrl}}/api/images/generators
+Content-Type: application/json
+
+### Get Image Generation Status
+GET {{baseUrl}}/api/images/status/62b04cff-adb2-4ac2-983c-89ce84ef6244

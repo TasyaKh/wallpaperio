@@ -13,7 +13,7 @@ type ImageGeneratorConfig struct {
 
 func LoadImageGeneratorConfig() *ImageGeneratorConfig {
 	generatorURL := os.Getenv("GENERATOR_URL")
-	baseURL := os.Getenv("BASE_URL")
+	baseURL := os.Getenv("GENERATOR_URL")
 	imagesDir := filepath.Join("static", "images")
 
 	return &ImageGeneratorConfig{

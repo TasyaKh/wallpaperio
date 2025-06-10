@@ -51,11 +51,14 @@ func (r *Router) Setup(router *gin.Engine) {
 		auth.GET("/google/callback", authHandler.GoogleCallback)
 	}
 
-	// Image generation route
-	router.POST("/api/images/generate", func(c *gin.Context) {
+	// Image routes
+	images := router.Group("/api/images")
+	{
 		imageHandler := r.handlers["image"].(*handlers.ImageHandler)
-		imageHandler.GenerateImage(c)
-	})
+		images.POST("/generate", imageHandler.GenerateImage)
+		images.GET("/generators", imageHandler.GetAvailableGenerators)
+		images.GET("/status/:task_id", imageHandler.GetGenerationStatus)
+	}
 
 	// Category routes
 	router.GET("/api/categories", func(c *gin.Context) {
@@ -71,6 +74,7 @@ func (r *Router) Setup(router *gin.Engine) {
 		wallpaper.GET("/:id/next", wallpaperHandler.GetNextWallpaper)
 		wallpaper.GET("/:id/previous", wallpaperHandler.GetPreviousWallpaper)
 		wallpaper.GET("/:id/similar", wallpaperHandler.GetSimilarWallpapers)
+		wallpaper.POST("", middleware.RequireAdmin(r.jwtService), wallpaperHandler.CreateWallpaper)
 		wallpaper.DELETE("/:id", middleware.RequireAdmin(r.jwtService), wallpaperHandler.DeleteWallpaper)
 	}
 }

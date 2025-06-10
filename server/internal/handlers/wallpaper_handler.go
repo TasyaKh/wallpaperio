@@ -7,16 +7,28 @@ import (
 	"wallpaperio/server/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type WallpaperHandler struct {
 	wallpaperSvc *services.WallpaperService
+	tagSvc       *services.TagService
+	db           *gorm.DB
 	hostURL      string
 }
 
-func NewWallpaperHandler(wallpaperSvc *services.WallpaperService, hostURL string) *WallpaperHandler {
+type CreateWallpaperRequest struct {
+	Title    string   `json:"title"`
+	ImageURL string   `json:"image_url"`
+	Category string   `json:"category"`
+	Tags     []string `json:"tags"`
+}
+
+func NewWallpaperHandler(wallpaperSvc *services.WallpaperService, tagSvc *services.TagService, db *gorm.DB, hostURL string) *WallpaperHandler {
 	return &WallpaperHandler{
 		wallpaperSvc: wallpaperSvc,
+		tagSvc:       tagSvc,
+		db:           db,
 		hostURL:      hostURL,
 	}
 }
@@ -145,6 +157,32 @@ func (h *WallpaperHandler) GetSimilarWallpapers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, wallpapers)
+}
+
+func (h *WallpaperHandler) CreateWallpaper(c *gin.Context) {
+	var req CreateWallpaperRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	// Create wallpaper
+	wallpaper, err := h.wallpaperSvc.CreateWallpaper(services.CreateWallpaperParams{
+		Title:    req.Title,
+		ImageURL: req.ImageURL,
+		Category: req.Category,
+		Tags:     req.Tags,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create wallpaper: %v", err)})
+		return
+	}
+
+	// Add host URL to image path
+	wallpaper.ImageURL = getImagePath(h.hostURL, wallpaper.ImageURL)
+
+	c.JSON(http.StatusCreated, wallpaper)
 }
 
 func getImagePath(hostURL string, imagePath string) string {

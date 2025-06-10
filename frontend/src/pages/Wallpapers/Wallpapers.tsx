@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { getWallpapers, getNextWallpaper, getPreviousWallpaper } from '../../api/wallpapers';
+import { getWallpapers, getNextWallpaper as getPrevWallpaper, getPreviousWallpaper as getNextWallpaper, deleteWallpaper } from '../../api/wallpapers';
 import { getCategories } from '../../api/categories';
 import styles from './Wallpapers.module.scss';
 import { Wallpaper } from '../../models/wallpaper';
@@ -9,10 +9,14 @@ import { Category } from '../../models/category';
 import WallpaperCard from './components/WallpaperCard/WallpaperCard';
 import ImagePreview from '../../components/ImagePreview/ImagePreview';
 import CategoryFilter from './components/CategoryFilter/CategoryFilter';
+import { useAuth } from '../../contexts/AuthContext';
+import { RoleManager } from '../../utils/roles';
+import { toast } from 'react-toastify';
 
 const ITEMS_PER_PAGE = 12;
 
 export default function Wallpapers() {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -24,6 +28,7 @@ export default function Wallpapers() {
   const [selectedWallpaper, setSelectedWallpaper] = useState<Wallpaper | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const selectedCategory = searchParams.get('category');
 
@@ -93,7 +98,22 @@ export default function Wallpapers() {
     
     try {
       setIsNavigating(true);
-      const nextWallpaper = await getNextWallpaper(selectedWallpaper.id);
+      const prevWallpaper = await getNextWallpaper(selectedWallpaper.id);
+      setSelectedWallpaper(prevWallpaper);
+    } catch (err) {
+      console.error('Error fetching previous wallpaper:', err);
+    } finally {
+      setIsNavigating(false);
+    }
+    
+  };
+
+  const handlePreviousImage = async () => {
+    if (!selectedWallpaper) return;
+    
+    try {
+      setIsNavigating(true);
+      const nextWallpaper = await getPrevWallpaper(selectedWallpaper.id);
       setSelectedWallpaper(nextWallpaper);
     } catch (err) {
       console.error('Error fetching next wallpaper:', err);
@@ -102,17 +122,27 @@ export default function Wallpapers() {
     }
   };
 
-  const handlePreviousImage = async () => {
-    if (!selectedWallpaper) return;
-    
+  const handleDeleteWallpaper = async (wallpaperId: number) => {
+    if (!user || !RoleManager.canManageContent(user.role)) {
+      toast.error('You do not have permission to delete wallpapers');
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to delete this wallpaper?')) {
+      return;
+    }
+
     try {
-      setIsNavigating(true);
-      const prevWallpaper = await getPreviousWallpaper(selectedWallpaper.id);
-      setSelectedWallpaper(prevWallpaper);
+      setIsDeleting(true);
+      await deleteWallpaper(wallpaperId);
+      setWallpapers((prev) => prev.filter((w) => w.id !== wallpaperId));
+      setTotal((prev) => prev - 1);
+      toast.success('Wallpaper deleted successfully');
     } catch (err) {
-      console.error('Error fetching previous wallpaper:', err);
+      console.error('Error deleting wallpaper:', err);
+      toast.error('Failed to delete wallpaper');
     } finally {
-      setIsNavigating(false);
+      setIsDeleting(false);
     }
   };
 
@@ -150,6 +180,8 @@ export default function Wallpapers() {
               key={wallpaper.id}
               wallpaper={wallpaper}
               onClick={() => handleWallpaperClick(wallpaper)}
+              onDelete={user && RoleManager.canManageContent(user.role) ? () => handleDeleteWallpaper(wallpaper.id) : undefined}
+              isDeleting={isDeleting}
             />
           ))}
         </div>

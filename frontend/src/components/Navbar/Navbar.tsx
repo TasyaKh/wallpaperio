@@ -8,6 +8,7 @@ import { Button } from "../Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon } from "@fortawesome/free-regular-svg-icons/faMoon";
 import { faSun } from "@fortawesome/free-solid-svg-icons";
+import { RoleManager } from "../../utils/roles";
 
 export const Navbar = () => {
   const { user, loading } = useAuth();
@@ -31,6 +32,11 @@ export const Navbar = () => {
           <div className="col-auto align-items-center d-flex">
             <Link to="/categories">Categories</Link>
           </div>
+          {user && RoleManager.canAccessAdminPanel(user.role) && (
+            <div className="col-auto align-items-center d-flex">
+              <Link to="/admin-panel">Admin Panel</Link>
+            </div>
+          )}
         </div>
       </div>
       <div className="row g-4">

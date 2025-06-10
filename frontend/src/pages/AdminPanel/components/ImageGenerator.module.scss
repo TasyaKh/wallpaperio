@@ -1,0 +1,110 @@
+.imageGenerator {
+  h3 {
+    color: var(--theme-text-primary);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  h4 {
+    color: var(--theme-text-primary);
+    margin: var(--spacing-lg) 0 var(--spacing-md);
+    font-size: var(--font-size-base);
+  }
+}
+
+.content {
+  gap: var(--spacing-lg);
+  background: var(--theme-background-secondary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.sidebar {
+  h3 {
+    color: var(--theme-text-primary);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-base);
+  }
+}
+
+.loaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+}
+
+.error {
+  color: var(--theme-error);
+  text-align: center;
+  padding: var(--spacing-md);
+}
+
+.placeholder {
+  color: var(--theme-text-tertiary);
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.promptPreview {
+  margin: var(--spacing-lg) 0;
+
+  h4 {
+    color: var(--theme-text-primary);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-base);
+  }
+}
+
+.prompt {
+  padding: var(--spacing-md);
+  background: var(--theme-background-primary);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--border-radius-md);
+  color: var(--theme-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.generateButton {
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-md) 0;
+  border-top: 1px solid var(--theme-border);
+
+  :global(.buttonIcon) {
+    margin-right: var(--spacing-sm);
+  }
+}
+
+.preview {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: var(--theme-background-primary);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--theme-border);
+
+  h4 {
+    color: var(--theme-text-primary);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-base);
+  }
+}
+
+.previewImage {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  align-items: center;
+}
+
+.buttonIcon {
+  margin-right: 0.5rem;
+}

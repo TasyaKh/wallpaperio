@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"wallpaperio/server/internal/config"
@@ -23,51 +24,42 @@ type ImageRequest struct {
 	CfgScale       float64  `json:"cfg_scale"`
 	Category       string   `json:"category"`
 	Tags           []string `json:"tags"`
-}
-
-type ImageResponse struct {
-	Images []string `json:"images"`
-	Error  *string  `json:"error,omitempty"`
+	GeneratorType  *string  `json:"generator_type,omitempty"`
 }
 
 type ImageHandler struct {
-	config       *config.ImageGeneratorConfig
-	client       *image_generator.Client
-	db           *gorm.DB
-	wallpaperSvc *services.WallpaperService
-	tagSvc       *services.TagService
-	imageSvc     *services.ImageService
+	config *config.ImageGeneratorConfig
+	client *image_generator.Client
+	db     *gorm.DB
+	tagSvc *services.TagService
 }
 
 func NewImageHandler(cfg *config.ImageGeneratorConfig, db *gorm.DB) *ImageHandler {
 	return &ImageHandler{
-		config:       cfg,
-		client:       image_generator.NewClient(cfg.URL),
-		db:           db,
-		wallpaperSvc: services.NewWallpaperService(db, cfg.ImagesDir),
-		tagSvc:       services.NewTagService(db),
-		imageSvc:     services.NewImageService(db, cfg.ImagesDir),
+		config: cfg,
+		client: image_generator.NewClient(cfg.URL),
+		db:     db,
+		tagSvc: services.NewTagService(db),
 	}
 }
 
 func (h *ImageHandler) GenerateImage(c *gin.Context) {
 	var req ImageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		c.JSON(http.StatusBadRequest, models.FailedResponse{
+			Status: "failed",
+			Error:  "Invalid request body",
+		})
 		return
 	}
 
-	// Validate category
+	// Check category
 	var category models.Category
 	if err := h.db.Where("name = ?", req.Category).First(&category).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Category not found"})
-		return
-	}
-
-	// Get or create tags
-	tags, err := h.tagSvc.GetOrCreateTags(req.Tags)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process tags"})
+		c.JSON(http.StatusBadRequest, models.FailedResponse{
+			Status: "failed",
+			Error:  "Category not found",
+		})
 		return
 	}
 
@@ -80,42 +72,93 @@ func (h *ImageHandler) GenerateImage(c *gin.Context) {
 		Height:         req.Height,
 		Steps:          req.Steps,
 		CfgScale:       req.CfgScale,
+		GeneratorType:  req.GeneratorType,
 	}
 
-	genResp, err := h.client.GenerateImages(genReq)
+	genResp, err := h.client.GenerateImageAI(genReq)
+	fmt.Println("Generated image response ", genResp)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, models.FailedResponse{
+			Status: "failed",
+			Error:  err.Error(),
+		})
 		return
 	}
 
-	// Process and save images
-	var savedPaths []string
-	for _, imageURL := range genResp.Images {
-		// Process image using image service
-		imagePath, thumbnailPath, err := h.imageSvc.ProcessImage(c.Request.Context(), imageURL)
-		if err != nil {
-			fmt.Println("error processing image:", err)
-			continue
-		}
-
-		// Create wallpaper with processed image
-		wallpaper, err := h.wallpaperSvc.CreateWallpaper(services.CreateWallpaperParams{
-			Title:        req.Prompt,
-			ImageURL:     imagePath,
-			ThumbnailURL: thumbnailPath,
-			CategoryID:   category.ID,
-			Tags:         tags,
+	// If we got a task ID, return pending response
+	if genResp.TaskID != nil {
+		c.JSON(http.StatusOK, models.PendingResponse{
+			Status: "pending",
+			TaskID: *genResp.TaskID,
 		})
-
-		if err != nil {
-			fmt.Println("error creating wallpaper:", err)
-			continue
-		}
-		savedPaths = append(savedPaths, wallpaper.ImageURL)
+		return
 	}
 
-	// Return saved paths
-	c.JSON(http.StatusOK, gin.H{
-		"file_paths": savedPaths,
+	// If we got a direct response with saved path, return the image URL
+	if genResp.SavedPathURL != "" {
+		imageURL := getImagePath(h.config.BaseURL, genResp.SavedPathURL)
+		c.JSON(http.StatusOK, models.CompletedResponse{
+			Status:       "completed",
+			SavedPathURL: imageURL,
+		})
+		return
+	}
+
+	// If we got neither task ID nor saved path, return error
+	c.JSON(http.StatusBadRequest, models.FailedResponse{
+		Status: "failed",
+		Error:  "No task ID or saved path received",
 	})
+}
+
+func (h *ImageHandler) GetGenerationStatus(c *gin.Context) {
+	log.Printf("GetGenerationStatus called with task_id: %s", c.Param("task_id"))
+	taskID := c.Param("task_id")
+	if taskID == "" {
+		log.Printf("Task ID is empty")
+		c.JSON(http.StatusBadRequest, models.FailedResponse{
+			Status: "failed",
+			Error:  "Task ID is required",
+		})
+		return
+	}
+
+	status, err := h.client.GetTaskStatus(taskID)
+	if err != nil {
+		log.Printf("Error getting task status: %v", err)
+		c.JSON(http.StatusInternalServerError, models.FailedResponse{
+			Status: "failed",
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	// If the task is completed and we have a saved path, return the image URL
+	if status.Status == "completed" && status.SavedPathURL != "" {
+		imageServerURL := getImagePath(h.config.BaseURL, status.SavedPathURL)
+		log.Printf("Task completed, returning image URL: %s", status.SavedPathURL)
+		c.JSON(http.StatusOK, models.CompletedResponse{
+			Status:        "completed",
+			SavedPathURL:  status.SavedPathURL,
+			ServerPathURL: imageServerURL,
+		})
+		return
+	}
+
+	// For pending or failed status, return as is
+	log.Printf("Task status: %s", status.Status)
+	c.JSON(http.StatusOK, status)
+}
+
+func (h *ImageHandler) GetAvailableGenerators(c *gin.Context) {
+	generators, err := h.client.GetAvailableGenerators()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.FailedResponse{
+			Status: "failed",
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, generators)
 }

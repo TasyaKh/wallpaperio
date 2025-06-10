@@ -1,11 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { Suspense } from 'react';
 import { Login, Home, Wallpapers, AuthGoogleCallback } from './pages';
 import { Navbar } from './components/Navbar/Navbar';
 import Categories from './pages/Categories/Categories';
 import Profile from './pages/Profile/Profile';
+import AdminPanel from './pages/AdminPanel/AdminPanel';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -26,6 +29,25 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   return <>{children}</>;
+};
+
+// ToastContainer with theme
+const ThemedToastContainer = () => {
+  const { theme } = useTheme();
+  return (
+    <ToastContainer
+      position="top-right"
+      autoClose={3000}
+      hideProgressBar={false}
+      newestOnTop
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme={theme.mode}
+    />
+  );
 };
 
 function App() {
@@ -56,8 +78,17 @@ function App() {
               />
               <Route path="/profile" element={<Profile />} />
               <Route path="/categories" element={<Categories />} />
+              <Route
+                path="/admin-panel"
+                element={
+                  <ProtectedRoute>
+                    <AdminPanel />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Suspense>
+          <ThemedToastContainer />
         </Router>
       </AuthProvider>
     </ThemeProvider>

@@ -18,10 +18,11 @@ func NewJWTService(secret string) *JWTService {
 	}
 }
 
-func (s *JWTService) GenerateToken(userID uint, email string) (string, error) {
+func (s *JWTService) GenerateToken(userID uint, email string, role string) (string, error) {
 	claims := &domain.Claims{
 		UserID: userID,
 		Email:  email,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

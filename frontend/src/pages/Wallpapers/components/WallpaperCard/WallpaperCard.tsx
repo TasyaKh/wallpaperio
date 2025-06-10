@@ -4,13 +4,17 @@ import 'react-lazy-load-image-component/src/effects/blur.css';
 import styles from './WallpaperCard.module.scss';
 import { Wallpaper } from '../../../../models/wallpaper';
 import defaultImage from '../../../../assets/not-found-image.svg';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
-interface WallpaperCardProps {
+export interface WallpaperCardProps {
   wallpaper: Wallpaper;
   onClick: () => void;
+  onDelete?: () => void;
+  isDeleting?: boolean;
 }
 
-const WallpaperCard: React.FC<WallpaperCardProps> = ({ wallpaper, onClick }) => {
+const WallpaperCard: React.FC<WallpaperCardProps> = ({ wallpaper, onClick, onDelete, isDeleting }) => {
   const [imgError, setImgError] = useState(false);
 
   const handleImageError = () => {
@@ -20,6 +24,11 @@ const WallpaperCard: React.FC<WallpaperCardProps> = ({ wallpaper, onClick }) => 
   useEffect(() => {
     setImgError(false);
   }, [wallpaper.image_url]);
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete?.();
+  };
 
   return (
     <div className={styles.wallpaperCard} onClick={onClick}>
@@ -41,6 +50,16 @@ const WallpaperCard: React.FC<WallpaperCardProps> = ({ wallpaper, onClick }) => 
             </span>
           ))}
         </div>
+        {onDelete && (
+          <button
+            className={styles.deleteButton}
+            onClick={handleDelete}
+            disabled={isDeleting}
+            title="Delete wallpaper"
+          >
+            <FontAwesomeIcon icon={faTrash} />
+          </button>
+        )}
       </div>
     </div>
   );

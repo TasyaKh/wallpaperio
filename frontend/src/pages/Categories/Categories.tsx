@@ -48,6 +48,13 @@ export default function Categories() {
             className={styles.categoryCard}
             onClick={() => handleCategoryClick(category.name)}
           >
+            <div className={styles.imageContainer}>
+              <img 
+                src={category.image_url} 
+                alt={category.name}
+                className={styles.categoryImage}
+              />
+            </div>
             <div className={styles.content}>
               <h2>{category.name}</h2>
               <p>{category.description}</p>

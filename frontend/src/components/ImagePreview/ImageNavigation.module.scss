@@ -1,11 +1,14 @@
 .imageContainer {
   position: relative;
   width: 100%;
+  max-height: 80vh;
+  overflow: hidden;
 }
 
 .image {
   width: 100%;
-  object-fit: contain;
+  max-height: 80vh;
+    object-fit: contain;
   transition: opacity 0.3s ease;
 
   &.loading {

@@ -10,5 +10,6 @@ type CallbackGoogleRequest struct {
 type Claims struct {
 	UserID uint   `json:"user_id"`
 	Email  string `json:"email"`
+	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }

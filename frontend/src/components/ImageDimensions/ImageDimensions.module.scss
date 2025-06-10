@@ -1,0 +1,36 @@
+.dimensions {
+  margin: var(--spacing-lg) 0;
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.dimensionField {
+  flex: 1;
+  
+  label {
+    display: block;
+    color: var(--theme-text-secondary);
+    margin-bottom: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+  }
+
+  input {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--theme-border);
+    border-radius: var(--border-radius-md);
+    background: var(--theme-background-primary);
+    color: var(--theme-text-primary);
+    font-size: var(--font-size-base);
+
+    &:focus {
+      outline: none;
+      border-color: var(--theme-primary);
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      opacity: 1;
+    }
+  }
+} 

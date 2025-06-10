@@ -27,4 +27,17 @@ export const getSimilarWallpapers = async (id: number, limit?: number): Promise<
     params: { limit }
   });
   return response.data;
+};
+
+export const createWallpaper = async (data: {
+  image_url: string;
+  category: string;
+  tags: string[];
+}): Promise<Wallpaper> => {
+  const response = await api.post<Wallpaper>('/api/wallpapers', data);
+  return response.data;
+};
+
+export const deleteWallpaper = async (id: number): Promise<void> => {
+  await api.delete(`/api/wallpapers/${id}`);
 }; 

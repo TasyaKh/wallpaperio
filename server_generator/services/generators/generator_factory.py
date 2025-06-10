@@ -1,0 +1,21 @@
+from typing import Dict, Type
+from services.generators.image_generator import ImageGenerator
+from services.generators.fusion_brain_generator import FusionBrainAIGenerator
+from services.generators.g4f_generator import G4FGenerator
+
+class GeneratorFactory:
+    _generators: Dict[str, Type[ImageGenerator]] = {
+        "fusion_brain": FusionBrainAIGenerator,
+        "g4f": G4FGenerator
+    }
+
+    @classmethod
+    def get_generator(cls, generator_type: str) -> ImageGenerator:
+        generator_class = cls._generators.get(generator_type)
+        if not generator_class:
+            raise ValueError(f"Unsupported generator type: {generator_type}")
+        return generator_class()
+
+    @classmethod
+    def get_available_generators(cls) -> list[str]:
+        return list(cls._generators.keys()) 

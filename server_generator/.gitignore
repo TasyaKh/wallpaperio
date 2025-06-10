@@ -33,3 +33,5 @@ logs/
 .coverage
 htmlcov/
 .pytest_cache/ 
+
+static/images
