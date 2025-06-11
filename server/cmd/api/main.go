@@ -32,7 +32,7 @@ func main() {
 	// Initialize services
 	googleAuth := auth.NewGoogleAuth(&cfg.Google)
 	jwtService := auth.NewJWTService(cfg.JWT.Secret)
-	categorySvc := services.NewCategoryService(db.DB, cfg.Server.ImagesHostURL)
+	categorySvc := services.NewCategoryService(db.DB, cfg.Server.GeneratorImagesHostURL)
 	tagSvc := services.NewTagService(db.DB)
 	wallpaperSvc := services.NewWallpaperService(db.DB, tagSvc)
 
@@ -41,7 +41,7 @@ func main() {
 	imageCfg := config.LoadImageGeneratorConfig()
 	imageHandler := handlers.NewImageHandler(imageCfg, db.DB)
 	categoryHandler := handlers.NewCategoryHandler(categorySvc)
-	wallpaperHandler := handlers.NewWallpaperHandler(wallpaperSvc, tagSvc, db.DB, cfg.Server.ImagesHostURL)
+	wallpaperHandler := handlers.NewWallpaperHandler(wallpaperSvc, tagSvc, db.DB)
 
 	// Initialize router
 	router := gin.Default()

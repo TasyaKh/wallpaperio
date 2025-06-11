@@ -211,35 +211,23 @@ func (s *WallpaperService) GetPreviousWallpaper(currentID uint) (*models.Wallpap
 	return &prevWallpaper, nil
 }
 
-// GetSimilarWallpapers returns wallpapers from the same category with similar tags
+// GetSimilarWallpapers returns wallpapers from the same category
 func (s *WallpaperService) GetSimilarWallpapers(currentID uint, limit int) ([]models.Wallpaper, error) {
 	var currentWallpaper models.Wallpaper
-	if err := s.db.Preload("Tags").First(&currentWallpaper, currentID).Error; err != nil {
+	if err := s.db.First(&currentWallpaper, currentID).Error; err != nil {
 		return nil, fmt.Errorf("current wallpaper not found: %w", err)
 	}
 
-	// Get tag IDs from current wallpaper
-	tagIDs := make([]uint, len(currentWallpaper.Tags))
-	for i, tag := range currentWallpaper.Tags {
-		tagIDs[i] = tag.ID
-	}
-
-	// Query similar wallpapers
-	var similarWallpapers []models.Wallpaper
-	query := s.db.Model(&models.Wallpaper{}).
-		Joins("JOIN wallpaper_tags ON wallpaper_tags.wallpaper_id = wallpapers.id").
-		Where("wallpapers.id != ? AND wallpapers.category_id = ?", currentID, currentWallpaper.CategoryID).
-		Where("wallpaper_tags.tag_id IN ?", tagIDs).
-		Group("wallpapers.id").
-		Order("COUNT(wallpaper_tags.tag_id) DESC").
+	// Get wallpapers in the same category
+	var wallpapers []models.Wallpaper
+	if err := s.db.Where("category_id = ? AND id != ?", currentWallpaper.CategoryID, currentID).
 		Preload("Tags").
 		Preload("Category").
-		Limit(limit)
-
-	err := query.Find(&similarWallpapers).Error
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch similar wallpapers: %w", err)
+		Order("id DESC").
+		Limit(limit).
+		Find(&wallpapers).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch wallpapers: %w", err)
 	}
 
-	return similarWallpapers, nil
+	return wallpapers, nil
 }

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"wallpaperio/server/internal/services"
+	"wallpaperio/server/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -14,7 +15,6 @@ type WallpaperHandler struct {
 	wallpaperSvc *services.WallpaperService
 	tagSvc       *services.TagService
 	db           *gorm.DB
-	hostURL      string
 }
 
 type CreateWallpaperRequest struct {
@@ -24,12 +24,11 @@ type CreateWallpaperRequest struct {
 	Tags     []string `json:"tags"`
 }
 
-func NewWallpaperHandler(wallpaperSvc *services.WallpaperService, tagSvc *services.TagService, db *gorm.DB, hostURL string) *WallpaperHandler {
+func NewWallpaperHandler(wallpaperSvc *services.WallpaperService, tagSvc *services.TagService, db *gorm.DB) *WallpaperHandler {
 	return &WallpaperHandler{
 		wallpaperSvc: wallpaperSvc,
 		tagSvc:       tagSvc,
 		db:           db,
-		hostURL:      hostURL,
 	}
 }
 
@@ -67,7 +66,7 @@ func (h *WallpaperHandler) GetWallpapers(c *gin.Context) {
 	// Add host URL to image paths
 	for i := range result.Wallpapers {
 		imagePath := result.Wallpapers[i].ImageURL
-		result.Wallpapers[i].ImageURL = getImagePath(h.hostURL, imagePath)
+		result.Wallpapers[i].ImageURL = utils.GetImagePath(imagePath)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -106,7 +105,7 @@ func (h *WallpaperHandler) GetNextWallpaper(c *gin.Context) {
 		return
 	}
 
-	wallpaper.ImageURL = getImagePath(h.hostURL, wallpaper.ImageURL)
+	wallpaper.ImageURL = utils.GetImagePath(wallpaper.ImageURL)
 
 	c.JSON(http.StatusOK, wallpaper)
 }
@@ -124,7 +123,7 @@ func (h *WallpaperHandler) GetPreviousWallpaper(c *gin.Context) {
 		return
 	}
 
-	wallpaper.ImageURL = getImagePath(h.hostURL, wallpaper.ImageURL)
+	wallpaper.ImageURL = utils.GetImagePath(wallpaper.ImageURL)
 
 	c.JSON(http.StatusOK, wallpaper)
 }
@@ -153,7 +152,7 @@ func (h *WallpaperHandler) GetSimilarWallpapers(c *gin.Context) {
 	for i := range wallpapers {
 		imagePath := wallpapers[i].ImageURL
 
-		wallpapers[i].ImageURL = getImagePath(h.hostURL, imagePath)
+		wallpapers[i].ImageURL = utils.GetImagePath(imagePath)
 	}
 
 	c.JSON(http.StatusOK, wallpapers)
@@ -180,11 +179,7 @@ func (h *WallpaperHandler) CreateWallpaper(c *gin.Context) {
 	}
 
 	// Add host URL to image path
-	wallpaper.ImageURL = getImagePath(h.hostURL, wallpaper.ImageURL)
+	wallpaper.ImageURL = utils.GetImagePath(wallpaper.ImageURL)
 
 	c.JSON(http.StatusCreated, wallpaper)
-}
-
-func getImagePath(hostURL string, imagePath string) string {
-	return fmt.Sprintf("%s/%s", hostURL, imagePath)
 }

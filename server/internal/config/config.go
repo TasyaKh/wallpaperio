@@ -12,8 +12,8 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port          string
-	ImagesHostURL string
+	Port                   string
+	GeneratorImagesHostURL string
 }
 
 type DatabaseConfig struct {
@@ -38,8 +38,8 @@ type JWTConfig struct {
 func LoadConfig() *Config {
 	return &Config{
 		Server: ServerConfig{
-			Port:          getEnv("SERVER_PORT", "8080"),
-			ImagesHostURL: getEnv("SERVER_IMAGES_HOST_URL", ""),
+			Port:                   getEnv("SERVER_PORT", "8080"),
+			GeneratorImagesHostURL: getEnv("SERVER_IMAGES_HOST_URL", ""),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),

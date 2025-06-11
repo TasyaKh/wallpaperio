@@ -8,6 +8,7 @@ import (
 	"wallpaperio/server/internal/config"
 	"wallpaperio/server/internal/domain/models"
 	"wallpaperio/server/internal/services"
+	"wallpaperio/server/internal/utils"
 	"wallpaperio/server/pkg/image_generator"
 
 	"github.com/gin-gonic/gin"
@@ -96,7 +97,7 @@ func (h *ImageHandler) GenerateImage(c *gin.Context) {
 
 	// If we got a direct response with saved path, return the image URL
 	if genResp.SavedPathURL != "" {
-		imageURL := getImagePath(h.config.BaseURL, genResp.SavedPathURL)
+		imageURL := utils.GetImagePath(genResp.SavedPathURL)
 		c.JSON(http.StatusOK, models.CompletedResponse{
 			Status:       "completed",
 			SavedPathURL: imageURL,
@@ -135,7 +136,7 @@ func (h *ImageHandler) GetGenerationStatus(c *gin.Context) {
 
 	// If the task is completed and we have a saved path, return the image URL
 	if status.Status == "completed" && status.SavedPathURL != "" {
-		imageServerURL := getImagePath(h.config.BaseURL, status.SavedPathURL)
+		imageServerURL := utils.GetImagePath(status.SavedPathURL)
 		log.Printf("Task completed, returning image URL: %s", status.SavedPathURL)
 		c.JSON(http.StatusOK, models.CompletedResponse{
 			Status:        "completed",
