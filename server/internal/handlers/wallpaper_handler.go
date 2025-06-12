@@ -36,7 +36,6 @@ func (h *WallpaperHandler) GetWallpapers(c *gin.Context) {
 	tags := c.QueryArray("tags")
 	category := c.Query("category")
 
-	// Get pagination parameters with defaults
 	limit := 20
 	offset := 0
 	if limitStr := c.Query("limit"); limitStr != "" {
@@ -85,7 +84,7 @@ func (h *WallpaperHandler) DeleteWallpaper(c *gin.Context) {
 	}
 
 	if err := h.wallpaperSvc.DeleteWallpaper(uint(id)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete wallpaper"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to delete wallpaper %v", err)})
 		return
 	}
 
@@ -144,7 +143,7 @@ func (h *WallpaperHandler) GetSimilarWallpapers(c *gin.Context) {
 
 	wallpapers, err := h.wallpaperSvc.GetSimilarWallpapers(uint(id), limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch similar wallpapers"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to fetch similar wallpapers: %v", err)})
 		return
 	}
 

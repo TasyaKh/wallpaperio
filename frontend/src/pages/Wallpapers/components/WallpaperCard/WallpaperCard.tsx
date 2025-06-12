@@ -44,10 +44,10 @@ const WallpaperCard: React.FC<WallpaperCardProps> = ({ wallpaper, onClick, onDel
       />
       <div className={styles.overlay}>
         <div className={styles.tags}>
-          {wallpaper.tags.map((tag) => (
-            <span key={tag.id} className={styles.tag}>
+          {wallpaper.tags.map((tag, index) => (
+            <div key={`tag ${tag.id} index ${index}`} className={styles.tag}>
               {tag.name}
-            </span>
+            </div>
           ))}
         </div>
         {onDelete && (

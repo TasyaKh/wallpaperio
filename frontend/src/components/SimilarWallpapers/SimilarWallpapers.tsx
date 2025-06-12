@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Wallpaper } from "../../models/wallpaper";
 import { getSimilarWallpapers } from "../../api/wallpapers";
 import styles from "./SimilarWallpapers.module.scss";
@@ -18,30 +18,35 @@ const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
+  const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>(
+    {}
+  );
 
-  useEffect(() => {
-    const fetchSimilarWallpapers = async () => {
-      try {
-        setLoading(true);
-        const similar = await getSimilarWallpapers(currentWallpaperId);
-        setWallpapers(similar);
-        setImageErrors({});
-      } catch (err) {
-        setError("Failed to load similar wallpapers");
-        console.error("Error loading similar wallpapers:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSimilarWallpapers();
+  const fetchSimilarWallpapers = useCallback(async () => {
+    setError("")
+    try {
+      setLoading(true);
+      const similar = await getSimilarWallpapers(currentWallpaperId);
+      setWallpapers(similar);
+      
+      setImageErrors({});
+    } catch (err) {
+      setError("Failed to load similar wallpapers");
+      setWallpapers([]);
+      console.error("Error loading similar wallpapers:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [currentWallpaperId]);
 
+  useEffect(() => {
+    fetchSimilarWallpapers();
+  }, [fetchSimilarWallpapers]);
+
   const handleImageError = (wallpaperId: number) => {
-    setImageErrors(prev => ({
+    setImageErrors((prev) => ({
       ...prev,
-      [wallpaperId]: true
+      [wallpaperId]: true,
     }));
   };
 
@@ -61,7 +66,7 @@ const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
     <div className={styles.grid}>
       {wallpapers.map((wallpaper) => (
         <div
-          key={wallpaper.id}
+          key={`similar wallpaper ${wallpaper.id}`}
           className={styles.wallpaperItem}
           onClick={() => onWallpaperClick(wallpaper)}
         >

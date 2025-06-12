@@ -177,7 +177,7 @@ export default function Wallpapers() {
         <div className={styles.grid}>
           {wallpapers.map((wallpaper) => (
             <WallpaperCard
-              key={wallpaper.id}
+              key={`wallpaper ${wallpaper.id}`}
               wallpaper={wallpaper}
               onClick={() => handleWallpaperClick(wallpaper)}
               onDelete={user && RoleManager.canManageContent(user.role) ? () => handleDeleteWallpaper(wallpaper.id) : undefined}

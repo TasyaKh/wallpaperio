@@ -2,22 +2,24 @@ package services
 
 import (
 	"fmt"
-
 	"wallpaperio/server/internal/domain/models"
 
 	"gorm.io/gorm"
 )
 
 type WallpaperService struct {
-	db     *gorm.DB
-	tagSvc *TagService
+	db            *gorm.DB
+	tagSvc        *TagService
+	featureSvc    *FeatureService
+	milvusService *MilvusService
 }
 
 type CreateWallpaperParams struct {
-	Title    string
-	ImageURL string
-	Category string
-	Tags     []string
+	Title       string   `json:"title"`
+	Description string   `json:"description"`
+	ImageURL    string   `json:"image_url"`
+	Category    string   `json:"category"`
+	Tags        []string `json:"tags"`
 }
 
 type WallpaperFilter struct {
@@ -32,11 +34,18 @@ type WallpaperResult struct {
 	Total      int64
 }
 
-func NewWallpaperService(db *gorm.DB, tagSvc *TagService) *WallpaperService {
-	return &WallpaperService{
-		db:     db,
-		tagSvc: tagSvc,
+func NewWallpaperService(db *gorm.DB, tagSvc *TagService, featureSvc *FeatureService) (*WallpaperService, error) {
+	milvusService, err := NewMilvusService()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create Milvus service: %w", err)
 	}
+
+	return &WallpaperService{
+		db:            db,
+		tagSvc:        tagSvc,
+		featureSvc:    featureSvc,
+		milvusService: milvusService,
+	}, nil
 }
 
 func (s *WallpaperService) CreateWallpaper(params CreateWallpaperParams) (*models.Wallpaper, error) {
@@ -52,29 +61,52 @@ func (s *WallpaperService) CreateWallpaper(params CreateWallpaperParams) (*model
 		return nil, fmt.Errorf("failed to process tags: %w", err)
 	}
 
-	// Create wallpaper record
-	wallpaper := models.Wallpaper{
-		Title:      params.Title,
-		ImageURL:   params.ImageURL,
-		CategoryID: category.ID,
+	// Extract features from image
+	features, err := s.featureSvc.ExtractFeatures(params.ImageURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract features: %w", err)
 	}
 
-	if err := s.db.Create(&wallpaper).Error; err != nil {
+	// Start a transaction
+	tx := s.db.Begin()
+	if tx.Error != nil {
+		return nil, fmt.Errorf("failed to start transaction: %w", tx.Error)
+	}
+
+	// Create wallpaper record
+	wallpaper := &models.Wallpaper{
+		Title:       params.Title,
+		Description: params.Description,
+		ImageURL:    params.ImageURL,
+		CategoryID:  category.ID,
+		Tags:        tags,
+	}
+
+	if err := tx.Create(wallpaper).Error; err != nil {
+		tx.Rollback()
 		return nil, fmt.Errorf("failed to create wallpaper record: %w", err)
 	}
 
-	// Create wallpaper tags
-	for _, tag := range tags {
-		wallpaperTag := models.WallpaperTag{
-			WallpaperID: wallpaper.ID,
-			TagID:       tag.ID,
-		}
-		if err := s.db.Create(&wallpaperTag).Error; err != nil {
-			return nil, fmt.Errorf("failed to create wallpaper tag: %w", err)
-		}
+	// Store features in Milvus and get feature ID
+	featureID, err := s.milvusService.StoreFeatures(wallpaper.ID, features)
+	if err != nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("failed to store features in Milvus: %w", err)
 	}
 
-	return &wallpaper, nil
+	// Update wallpaper with feature ID
+	wallpaper.FeatureID = featureID
+	if err := tx.Save(wallpaper).Error; err != nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("failed to update wallpaper with feature ID: %w", err)
+	}
+
+	// Commit transaction
+	if err := tx.Commit().Error; err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return wallpaper, nil
 }
 
 // GetWallpapersByTags returns wallpapers that have all the specified tags
@@ -158,16 +190,35 @@ func (s *WallpaperService) GetWallpapers(filter WallpaperFilter) (*WallpaperResu
 	}, nil
 }
 
-// DeleteWallpaper deletes a wallpaper by ID
+// DeleteWallpaper deletes a wallpaper and its features
 func (s *WallpaperService) DeleteWallpaper(id uint) error {
-	// First delete associated wallpaper tags
-	if err := s.db.Where("wallpaper_id = ?", id).Delete(&models.WallpaperTag{}).Error; err != nil {
-		return fmt.Errorf("failed to delete wallpaper tags: %w", err)
+	// Get wallpaper to get its feature ID
+	var wallpaper models.Wallpaper
+	if err := s.db.First(&wallpaper, id).Error; err != nil {
+		return fmt.Errorf("failed to find wallpaper: %w", err)
 	}
 
-	// Then delete the wallpaper
-	if err := s.db.Delete(&models.Wallpaper{}, id).Error; err != nil {
+	// Start a transaction
+	tx := s.db.Begin()
+	if tx.Error != nil {
+		return fmt.Errorf("failed to start transaction: %w", tx.Error)
+	}
+
+	// Delete wallpaper from database
+	if err := tx.Delete(&models.Wallpaper{}, id).Error; err != nil {
+		tx.Rollback()
 		return fmt.Errorf("failed to delete wallpaper: %w", err)
+	}
+
+	// Delete features from Milvus using feature ID
+	if err := s.milvusService.DeleteFeatures(uint(wallpaper.FeatureID)); err != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to delete features: %w", err)
+	}
+
+	// Commit transaction
+	if err := tx.Commit().Error; err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil
@@ -211,23 +262,31 @@ func (s *WallpaperService) GetPreviousWallpaper(currentID uint) (*models.Wallpap
 	return &prevWallpaper, nil
 }
 
-// GetSimilarWallpapers returns wallpapers from the same category
-func (s *WallpaperService) GetSimilarWallpapers(currentID uint, limit int) ([]models.Wallpaper, error) {
+// GetSimilarWallpapers returns wallpapers similar to the current one based on feature vectors
+func (s *WallpaperService) GetSimilarWallpapers(currWalppaperId uint, limit int) ([]models.Wallpaper, error) {
+	// Get the current wallpaper to get its feature ID
 	var currentWallpaper models.Wallpaper
-	if err := s.db.First(&currentWallpaper, currentID).Error; err != nil {
-		return nil, fmt.Errorf("current wallpaper not found: %w", err)
+	if err := s.db.First(&currentWallpaper, currWalppaperId).Error; err != nil {
+		return nil, fmt.Errorf("failed to find wallpaper: %w", err)
 	}
 
-	// Get wallpapers in the same category
-	var wallpapers []models.Wallpaper
-	if err := s.db.Where("category_id = ? AND id != ?", currentWallpaper.CategoryID, currentID).
-		Preload("Tags").
-		Preload("Category").
-		Order("id DESC").
-		Limit(limit).
-		Find(&wallpapers).Error; err != nil {
-		return nil, fmt.Errorf("failed to fetch wallpapers: %w", err)
+	// Get features for the current wallpaper using its feature ID
+	features, err := s.milvusService.GetFeaturesOneWallpaper(uint(currentWallpaper.FeatureID))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get features: %w", err)
 	}
 
-	return wallpapers, nil
+	// Find similar wallpapers, excluding current feature ID
+	similarIDs, err := s.milvusService.FindSimilar(features, limit, uint64(currentWallpaper.FeatureID))
+	if err != nil {
+		return nil, fmt.Errorf("failed to find similar wallpapers: %w", err)
+	}
+
+	// Get wallpaper details for similar IDs
+	var similarWallpapers []models.Wallpaper
+	if err := s.db.Where("feature_id IN ?", similarIDs).Find(&similarWallpapers).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch similar wallpapers: %w", err)
+	}
+
+	return similarWallpapers, nil
 }

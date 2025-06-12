@@ -6,8 +6,13 @@ from models.response_model import CompletedResponse, FailedResponse
 
 # Initialize service
 image_service = ImageService()
-
-@shared_task(name="generate_image_task", bind=True)
+# 24 hours max task to process
+@shared_task(
+    name="generate_image_task", 
+    bind=True, 
+    time_limit=86400,
+    result_expires=86400  # 24 hours in seconds
+)
 def generate_image_task(self, request_data: dict) -> dict:
     """Celery task for image generation"""
     print("/generate_image_task entered")

@@ -34,7 +34,11 @@ func main() {
 	jwtService := auth.NewJWTService(cfg.JWT.Secret)
 	categorySvc := services.NewCategoryService(db.DB, cfg.Server.GeneratorImagesHostURL)
 	tagSvc := services.NewTagService(db.DB)
-	wallpaperSvc := services.NewWallpaperService(db.DB, tagSvc)
+	featureSvc := services.NewFeatureService()
+	wallpaperSvc, err := services.NewWallpaperService(db.DB, tagSvc, featureSvc)
+	if err != nil {
+		log.Fatalf("Failed to initialize wallpaper service: %v", err)
+	}
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(googleAuth, db, jwtService)

@@ -29,6 +29,13 @@ interface GenerateImageRequest {
   tags: string[];
 }
 
+interface GenerationStatus {
+  status: string;
+  saved_path_url?: string;
+  server_path_url?: string;
+  task_id?: string;
+}
+
 interface ImageGeneratorForm {
   generator_type: string;
   category: string;
@@ -62,7 +69,7 @@ export const ImageGenerator: React.FC = () => {
   const [error, setError] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [taskId, setTaskId] = useState<string | null>(null);
-  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
+  const [generationStatus, setGenerationStatus] = useState<GenerationStatus | null>(null);
 
   const selectedGenerator = watch("generator_type");
   const selectedCategory = watch("category");
@@ -102,7 +109,7 @@ export const ImageGenerator: React.FC = () => {
         const status = await getGenerationStatus(taskId);
         
         if (status.status === "completed" && status.saved_path_url && status.server_path_url) {
-          setGeneratedImageUrl(status.server_path_url);
+          setGenerationStatus(status);
           // Create wallpaper when generation is successful
           try {
             await createWallpaper({
@@ -160,7 +167,7 @@ export const ImageGenerator: React.FC = () => {
   const onSubmit = async (data: ImageGeneratorForm) => {
     setIsGenerating(true);
     setError("");
-    setGeneratedImageUrl(null);
+    setGenerationStatus(null);
     try {
       const request: GenerateImageRequest = {
         prompt: generatePrompt(data.category, data.tags),
@@ -175,7 +182,11 @@ export const ImageGenerator: React.FC = () => {
       if ((response.status === "pending" || response.status === "started") && response.task_id) {
         setTaskId(response.task_id);
       } else if (response.status === "completed" && response.server_path_url) {
-        setGeneratedImageUrl(response.server_path_url);
+        setGenerationStatus({
+          status: response.status,
+          server_path_url: response.server_path_url,
+          saved_path_url: response.saved_path_url
+        });
         setIsGenerating(false);
       } else {
         setError("Unexpected response from server");
@@ -193,11 +204,11 @@ export const ImageGenerator: React.FC = () => {
   };
 
   const handleManualCreateWallpaper = async () => {
-    if (!generatedImageUrl || !selectedCategory) return;
+    if (!generationStatus?.saved_path_url || !selectedCategory) return;
     
     try {
       await createWallpaper({
-        image_url: generatedImageUrl,
+        image_url: generationStatus.saved_path_url,
         category: selectedCategory,
         tags: tags,
       });
@@ -257,7 +268,7 @@ export const ImageGenerator: React.FC = () => {
                   <FontAwesomeIcon icon={faWandMagicSparkles} className={styles.buttonIcon} />
                   {isGenerating ? "Generating..." : "Generate Image"}
                 </Button>
-                {generatedImageUrl && !isGenerating && (
+                {generationStatus && !isGenerating && (
                   <Button
                     type="button"
                     variant="secondary"
@@ -270,10 +281,10 @@ export const ImageGenerator: React.FC = () => {
             </form>
           )}
         </div>
-        {generatedImageUrl && (
+        {generationStatus && (
           <div className={styles.preview}>
             <h4>Generated Image</h4>
-            <img src={generatedImageUrl} alt="Generated wallpaper" className={styles.previewImage} />
+            <img src={generationStatus.server_path_url} alt="Generated wallpaper" className={styles.previewImage} />
           </div>
         )}
       </div>

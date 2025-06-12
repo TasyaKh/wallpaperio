@@ -11,5 +11,13 @@ Content-Type: application/json
 }
 
 ### Get task status by ID
-GET http://localhost:5001/api/images/status/ab3323c7-e4fc-4df7-9246-95c3bbbb40bc
+GET http://localhost:5001/api/images/status/4bd58e2e-8096-4067-bdc9-1bc67d49ea94
 Content-Type: application/json
+
+### Test Feature Extraction
+POST http://localhost:5001/api/images/extract-features
+Content-Type: application/json
+
+{
+    "image_path": "static/images/5c8e4a61-8ad2-4f40-ab3e-18f056622f41.jpg"
+}

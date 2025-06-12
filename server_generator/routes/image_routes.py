@@ -2,12 +2,15 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional
 from services.generators.generator_factory import GeneratorFactory
+from services.image_service import ImageService
 from celery.result import AsyncResult
-from models.response_model import BaseResponse
+from models.response_model import BaseResponse, FeatureExtractionResponse
 from celery_config import celery_app
 from tasks.image_tasks import generate_image_task
+import numpy as np
 
 router = APIRouter(prefix="/images", tags=["images"])
+image_service = ImageService()
 
 class ImageRequest(BaseModel):
     prompt: str
@@ -17,6 +20,9 @@ class ImageRequest(BaseModel):
     steps: int = 20
     cfg_scale: float = 7.0
     generator_type: str = "fusion_brain"
+
+class ImagePathRequest(BaseModel):
+    image_path: str
 
 @router.get("/generators")
 async def get_available_generators():
@@ -56,11 +62,18 @@ async def get_generation_status(task_id: str):
             )
         elif task_result.status == "SUCCESS":
             result = task_result.result
+            # Convert numpy array to list if features exist
+            features = result.get("features")
+            print("features", features)
+            if isinstance(features, np.ndarray):
+                features = features.tolist()
+                
             return BaseResponse(
                 task_id=task_id,
                 status=result["status"],
                 saved_path_url=result.get("saved_path_url"),
-                error=result.get("error")
+                error=result.get("error"),
+                features=features
             )
         elif task_result.status == "STARTED":
             return BaseResponse(
@@ -86,4 +99,30 @@ async def get_generation_status(task_id: str):
             task_id=task_id,
             status="failed",
             error=str(e)
+        )
+
+@router.post("/extract-features", response_model=FeatureExtractionResponse)
+async def extract_features(request: ImagePathRequest):
+    """
+    Extract features from an image using EfficientNet-B0
+    """
+    try:
+        # Extract features
+        features = image_service.extract_features(request.image_path)
+        
+        return FeatureExtractionResponse(
+            status="success",
+            features=features.tolist(),
+            feature_shape=features.shape,
+            feature_mean=float(features.mean()),
+            feature_std=float(features.std())
+        )
+    except Exception as e:
+        return FeatureExtractionResponse(
+            status="error",
+            features=[],
+            feature_shape=(0,),
+            feature_mean=0.0,
+            feature_std=0.0,
+            error_message=str(e)
         ) 

@@ -3,21 +3,65 @@ services:
     image: redis:7.2-alpine
     command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
     volumes:
       - redis_data:/data
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     restart: unless-stopped
 
-  celery_worker:
-    build: 
-      context: ./server_generator
-      dockerfile: Dockerfile
-    command: celery -A celery_config.celery_app worker --loglevel=info --concurrency=1 --pythonpath=/app
+  milvus:
+    image: milvusdb/milvus:v2.3.5
+    platform: linux/arm64
+    ports:
+      - "${MILVUS_PORT}:19530"
+      - "9091:9091"
+    environment:
+      - MILVUS_HOST=${MILVUS_HOST}
+      - MILVUS_PORT=${MILVUS_PORT}
+      - MILVUS_USERNAME=${MILVUS_USERNAME}
+      - MILVUS_PASSWORD=${MILVUS_PASSWORD}
+      - ETCD_USE_EMBED=true
+      - MINIO_ADDRESS=localhost
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - COMMON_STORAGETYPE=local
+      - COMMON_STORAGEPATH=/var/lib/milvus/data
+      - COMMON_METASTORETYPE=local
+      - COMMON_METASTOREPATH=/var/lib/milvus/meta
+    volumes:
+      - milvus_data:/var/lib/milvus
+    restart: unless-stopped
+    init: true
+    command: ["milvus", "run", "standalone"]
+
+  attu:
+    image: zilliz/attu:latest
+    platform: linux/arm64
+    ports:
+      - "8000:3000"
+    environment:
+      - MILVUS_URL=milvus:19530
     depends_on:
-      - redis
+      - milvus
     restart: unless-stopped
 
+  # celery_worker:
+  #   build: 
+  #     context: ./server_generator
+  #     dockerfile: Dockerfile.celery
+  #   command: celery -A celery_config.celery_app worker --loglevel=info --concurrency=1
+  #   volumes:
+  #     - ./server_generator:/app
+  #     - ./server_generator/static:/app/static
+  #   environment:
+  #     - REDIS_PASSWORD=${REDIS_PASSWORD}
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #   depends_on:
+  #     - redis
+  #   restart: unless-stopped
+
 volumes:
-  redis_data: 
+  redis_data:
+  milvus_data: 

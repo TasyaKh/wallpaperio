@@ -19,3 +19,18 @@ Content-Type: application/json
 
 ### Get Image Generation Status
 GET {{baseUrl}}/api/images/status/62b04cff-adb2-4ac2-983c-89ce84ef6244
+
+### Create Wallpaper from Path
+POST {{baseUrl}}/api/wallpapers
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImFraXRhc3BhbUBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjE3NDk3MzIwNTMsImlhdCI6MTc0OTY0NTY1M30.cNg21YHdKFk3DIyYzR8Niix2jqFxswUv6dxhffB5K2g
+
+{
+    "image_url": "static/images/fe02d422-4725-4231-bbfb-50120033c318.jpg",
+    "title": "My Custom Wallpaper",
+    "category": "anime",
+    "tags": ["custom", "personal"]
+}
+
+### Get similar similar
+GET {{baseUrl}}/api/wallpapers/108/similar
