@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"math"
 
 	schema "wallpaperio/server/internal/schema/milvus"
 	"wallpaperio/server/pkg/database"
@@ -40,7 +39,7 @@ func NewMilvusService() (*MilvusService, error) {
 		}
 
 		// Create index
-		index, err := entity.NewIndexIvfFlat(entity.IP, 1024)
+		index, err := entity.NewIndexIvfFlat(entity.COSINE, 1024)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create index: %w", err)
 		}
@@ -113,10 +112,10 @@ func (s *MilvusService) FindSimilar(features []float32, limit int, excludeID uin
 		expr,                  // Boolean expression to exclude current ID
 		[]string{"id"},        // Output fields
 		[]entity.Vector{entity.FloatVector(features)}, // Query vectors
-		"features",   // Vector field name
-		entity.IP,    // Metric type
-		limit,        // TopK
-		searchParams, // Search parameters
+		"features",    // Vector field name
+		entity.COSINE, // Use cosine similarity
+		limit,         // TopK
+		searchParams,  // Search parameters
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to search similar wallpapers: %w", err)
@@ -124,24 +123,34 @@ func (s *MilvusService) FindSimilar(features []float32, limit int, excludeID uin
 
 	// Extract IDs from results with similarity threshold
 	var wallpaperIDs []uint64
-	const similarityThreshold = 30.0 // Only include results with similarity > 30%
+	const similarityThreshold = 0.5 // 50% similarity threshold
+
+	fmt.Printf("\nSearch Results (showing all results before threshold):\n")
+	fmt.Printf("Total results before threshold: %d\n", len(results))
 
 	for _, hit := range results {
 		// Get IDs and scores
 		ids := hit.IDs.(*entity.ColumnInt64).Data()
 		for i, id := range ids {
-			// Calculate similarity (0-100%)
-			similarity := 100.0 * (1.0 - math.Min(1.0, float64(hit.Scores[i])/1000.0))
+			// For normalized vectors, cosine similarity is in range [0, 1]
+			// - 1.0 = identical vectors
+			// - 0.0 = completely different vectors
+			similarity := float64(hit.Scores[i])
+
+			// Print all results for debugging
+			fmt.Printf("ID: %d, Similarity: %.2f%%\n",
+				id, similarity*100)
 
 			// Only include results above threshold
 			if similarity > similarityThreshold {
 				wallpaperIDs = append(wallpaperIDs, uint64(id))
-				fmt.Printf("ID: %d, Similarity: %.1f%%\n", id, similarity)
 			}
 		}
 	}
 
-	fmt.Println("wallpaperIDs", wallpaperIDs)
+	fmt.Printf("\nResults after threshold (%.0f%%): %d wallpapers found\n",
+		similarityThreshold*100, len(wallpaperIDs))
+	fmt.Println("wallpaperIDs:", wallpaperIDs)
 
 	return wallpaperIDs, nil
 }

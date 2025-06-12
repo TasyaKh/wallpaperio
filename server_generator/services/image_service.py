@@ -110,7 +110,7 @@ class ImageService:
     def extract_features(self, image_path_url: str) -> np.ndarray:
         """
         Extract features from an image using MobileNetV2
-        Returns a 1280-dimensional feature vector
+        Returns a 1280-dimensional feature vector, L2 normalized
         """
         try:
             print(f"Starting feature extraction for image: {image_path_url}")
@@ -133,11 +133,18 @@ class ImageService:
             img_array = np.expand_dims(img_array, axis=0)            
             img_array = preprocess_input(img_array)            
             features = self.base_model.predict(img_array, verbose=0)
-            print(f"Feature extraction completed. Shape: {features.shape}")
             
-            return features.flatten()
+            # Flatten and normalize features
+            features = features.flatten()
+            norm = np.linalg.norm(features)
+            if norm > 0:
+                features = features / norm
+            
+            print(f"Feature extraction completed. Shape: {features.shape}")
+            return features
             
         except Exception as pred_error:
             print(f"Feature extraction failed: {str(pred_error)}")
             print(f"Error type: {type(pred_error).__name__}")
-            return np.zeros(1280)
+            # Return normalized zero vector
+            return np.zeros(1280, dtype=np.float32)
