@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"wallpaperio/server/internal/domain/models/dto"
 	"wallpaperio/server/internal/services"
 	"wallpaperio/server/pkg/utils"
 
@@ -51,7 +52,7 @@ func (h *WallpaperHandler) GetWallpapers(c *gin.Context) {
 	}
 
 	// Get wallpapers with filters and pagination
-	result, err := h.wallpaperSvc.GetWallpapers(services.WallpaperFilter{
+	result, err := h.wallpaperSvc.GetWallpapers(dto.WallpaperFilter{
 		Tags:     tags,
 		Category: category,
 		Limit:    limit,
@@ -98,7 +99,14 @@ func (h *WallpaperHandler) GetNextWallpaper(c *gin.Context) {
 		return
 	}
 
-	wallpaper, err := h.wallpaperSvc.GetNextWallpaper(uint(id))
+	category := c.Query("category")
+
+	filter := dto.NextPreviousWallpaperFilter{
+		Category:  category,
+		CurrentID: id,
+	}
+
+	wallpaper, err := h.wallpaperSvc.GetNextWallpaper(filter)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "No next wallpaper found"})
 		return
@@ -116,7 +124,15 @@ func (h *WallpaperHandler) GetPreviousWallpaper(c *gin.Context) {
 		return
 	}
 
-	wallpaper, err := h.wallpaperSvc.GetPreviousWallpaper(uint(id))
+	// Get category from query parameter
+	category := c.Query("category")
+
+	filter := dto.NextPreviousWallpaperFilter{
+		Category:  category,
+		CurrentID: id,
+	}
+
+	wallpaper, err := h.wallpaperSvc.GetPreviousWallpaper(filter)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "No previous wallpaper found"})
 		return
@@ -165,7 +181,7 @@ func (h *WallpaperHandler) CreateWallpaper(c *gin.Context) {
 	}
 
 	// Create wallpaper
-	wallpaper, err := h.wallpaperSvc.CreateWallpaper(services.CreateWallpaperParams{
+	wallpaper, err := h.wallpaperSvc.CreateWallpaper(dto.CreateWallpaper{
 		Title:    req.Title,
 		ImageURL: req.ImageURL,
 		Category: req.Category,

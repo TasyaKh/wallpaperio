@@ -1,4 +1,4 @@
-import { Category } from './category';
+import { Category } from "./category";
 
 export interface Tag {
   id: number;
@@ -20,4 +20,8 @@ export interface WallpaperResponse {
   total: number;
   limit: number;
   offset: number;
-} 
+}
+
+export interface NextPreviousWallpaperFilter {
+  category?: string;
+}

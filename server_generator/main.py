@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-import os
 from dotenv import load_dotenv
 from routes import image_routes
+from config import DEBUG, HOST, PORT
 
 # Load environment variables
 load_dotenv()
@@ -31,11 +31,11 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.getenv("PORT", 5001))
+    port = PORT
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
+        host=HOST,
         port=port,
         reload=True,
-        log_level="debug"
+        log_level=DEBUG
     ) 

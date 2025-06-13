@@ -46,21 +46,37 @@ services:
       - milvus
     restart: unless-stopped
 
-  # celery_worker:
-  #   build: 
-  #     context: ./server_generator
-  #     dockerfile: Dockerfile.celery
-  #   command: celery -A celery_config.celery_app worker --loglevel=info --concurrency=1
-  #   volumes:
-  #     - ./server_generator:/app
-  #     - ./server_generator/static:/app/static
-  #   environment:
-  #     - REDIS_PASSWORD=${REDIS_PASSWORD}
-  #     - REDIS_HOST=redis
-  #     - REDIS_PORT=6379
-  #   depends_on:
-  #     - redis
-  #   restart: unless-stopped
+  celery_worker:
+    build: 
+      context: ./server_generator
+      dockerfile: Dockerfile.celery
+    command: celery -A celery_config.celery_app worker --loglevel=info --concurrency=1
+    volumes:
+      - ./server_generator:/app
+      - ./server_generator/static:/app/static
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  python_generator_server:
+    build:
+      context: ./server_generator
+      dockerfile: Dockerfile.server
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./server_generator:/app
+      - ./server_generator/static:/app/static
+    depends_on:
+      - redis
+    restart: unless-stopped
+    environment:
+      - HOST=0.0.0.0
+      - REDIS_HOST=redis
 
 volumes:
   redis_data:

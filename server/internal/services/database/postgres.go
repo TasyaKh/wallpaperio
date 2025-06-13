@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"wallpaperio/server/internal/config"
-	models "wallpaperio/server/internal/domain/models/db"
+	"wallpaperio/server/internal/domain/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

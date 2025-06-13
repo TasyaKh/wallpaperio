@@ -21,3 +21,6 @@ Content-Type: application/json
 {
     "image_path": "static/images/5c8e4a61-8ad2-4f40-ab3e-18f056622f41.jpg"
 }
+
+###
+GET http://localhost:5001/api/images/generators

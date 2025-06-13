@@ -3,7 +3,8 @@ package services
 import (
 	"fmt"
 
-	models "wallpaperio/server/internal/domain/models/db"
+	"wallpaperio/server/internal/domain/models"
+	"wallpaperio/server/internal/domain/models/dto"
 
 	"gorm.io/gorm"
 )
@@ -13,26 +14,6 @@ type WallpaperService struct {
 	tagSvc        *TagService
 	featureSvc    *FeatureService
 	milvusService *MilvusService
-}
-
-type CreateWallpaperParams struct {
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	ImageURL    string   `json:"image_url"`
-	Category    string   `json:"category"`
-	Tags        []string `json:"tags"`
-}
-
-type WallpaperFilter struct {
-	Tags     []string
-	Category string
-	Limit    int
-	Offset   int
-}
-
-type WallpaperResult struct {
-	Wallpapers []models.Wallpaper
-	Total      int64
 }
 
 func NewWallpaperService(db *gorm.DB, tagSvc *TagService, featureSvc *FeatureService) (*WallpaperService, error) {
@@ -49,7 +30,7 @@ func NewWallpaperService(db *gorm.DB, tagSvc *TagService, featureSvc *FeatureSer
 	}, nil
 }
 
-func (s *WallpaperService) CreateWallpaper(params CreateWallpaperParams) (*models.Wallpaper, error) {
+func (s *WallpaperService) CreateWallpaper(params dto.CreateWallpaper) (*models.Wallpaper, error) {
 	// Get or create category
 	var category models.Category
 	if err := s.db.Where("name = ?", params.Category).FirstOrCreate(&category, models.Category{Name: params.Category}).Error; err != nil {
@@ -146,7 +127,7 @@ func (s *WallpaperService) GetAllWallpapers() ([]models.Wallpaper, error) {
 }
 
 // GetWallpapers returns wallpapers with optional filters and pagination
-func (s *WallpaperService) GetWallpapers(filter WallpaperFilter) (*WallpaperResult, error) {
+func (s *WallpaperService) GetWallpapers(filter dto.WallpaperFilter) (*dto.WallpaperResult, error) {
 	query := s.db.Model(&models.Wallpaper{})
 
 	// Apply filters if provided
@@ -184,7 +165,7 @@ func (s *WallpaperService) GetWallpapers(filter WallpaperFilter) (*WallpaperResu
 		return nil, err
 	}
 
-	return &WallpaperResult{
+	return &dto.WallpaperResult{
 		Wallpapers: wallpapers,
 		Total:      total,
 	}, nil
@@ -224,17 +205,24 @@ func (s *WallpaperService) DeleteWallpaper(id uint) error {
 	return nil
 }
 
-// GetNextWallpaper returns the next wallpaper in the same category
-func (s *WallpaperService) GetNextWallpaper(currentID uint) (*models.Wallpaper, error) {
+func (s *WallpaperService) GetNextWallpaper(filter dto.NextPreviousWallpaperFilter) (*models.Wallpaper, error) {
 	var currentWallpaper models.Wallpaper
-	if err := s.db.First(&currentWallpaper, currentID).Error; err != nil {
+	if err := s.db.First(&currentWallpaper, filter.CurrentID).Error; err != nil {
 		return nil, fmt.Errorf("current wallpaper not found: %w", err)
 	}
 
+	query := s.db.Model(&models.Wallpaper{}).
+		Where("wallpapers.id < ?", filter.CurrentID)
+
+	if filter.Category != "" {
+		query = query.
+			Joins("JOIN categories ON categories.id = wallpapers.category_id").
+			Where("categories.name = ?", filter.Category)
+	}
+
 	var nextWallpaper models.Wallpaper
-	err := s.db.Where("id > ? AND category_id = ?", currentID, currentWallpaper.CategoryID).
-		Order("id ASC").
-		Preload("Tags").
+	err := query.
+		Order("wallpapers.id DESC").
 		Preload("Category").
 		First(&nextWallpaper).Error
 	if err != nil {
@@ -243,17 +231,24 @@ func (s *WallpaperService) GetNextWallpaper(currentID uint) (*models.Wallpaper, 
 	return &nextWallpaper, nil
 }
 
-// GetPreviousWallpaper returns the previous wallpaper in the same category
-func (s *WallpaperService) GetPreviousWallpaper(currentID uint) (*models.Wallpaper, error) {
+func (s *WallpaperService) GetPreviousWallpaper(filter dto.NextPreviousWallpaperFilter) (*models.Wallpaper, error) {
 	var currentWallpaper models.Wallpaper
-	if err := s.db.First(&currentWallpaper, currentID).Error; err != nil {
+	if err := s.db.First(&currentWallpaper, filter.CurrentID).Error; err != nil {
 		return nil, fmt.Errorf("current wallpaper not found: %w", err)
 	}
 
+	query := s.db.Model(&models.Wallpaper{}).
+		Where("wallpapers.id > ?", filter.CurrentID)
+
+	if filter.Category != "" {
+		query = query.
+			Joins("JOIN categories ON categories.id = wallpapers.category_id").
+			Where("categories.name = ?", filter.Category)
+	}
+
 	var prevWallpaper models.Wallpaper
-	err := s.db.Where("id < ? AND category_id = ?", currentID, currentWallpaper.CategoryID).
-		Order("id DESC").
-		Preload("Tags").
+	err := query.
+		Order("wallpapers.id ASC").
 		Preload("Category").
 		First(&prevWallpaper).Error
 	if err != nil {
@@ -262,27 +257,22 @@ func (s *WallpaperService) GetPreviousWallpaper(currentID uint) (*models.Wallpap
 	return &prevWallpaper, nil
 }
 
-// GetSimilarWallpapers returns wallpapers similar to the current one based on feature vectors
 func (s *WallpaperService) GetSimilarWallpapers(currWalppaperId uint, limit int) ([]models.Wallpaper, error) {
-	// Get the current wallpaper to get its feature ID
 	var currentWallpaper models.Wallpaper
 	if err := s.db.First(&currentWallpaper, currWalppaperId).Error; err != nil {
 		return nil, fmt.Errorf("failed to find wallpaper: %w", err)
 	}
 
-	// Get features for the current wallpaper using its feature ID
 	features, err := s.milvusService.GetFeaturesOneWallpaper(uint(currentWallpaper.FeatureID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get features: %w", err)
 	}
 
-	// Find similar wallpapers, excluding current feature ID
 	similarIDs, err := s.milvusService.FindSimilar(features, limit, uint64(currentWallpaper.FeatureID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to find similar wallpapers: %w", err)
 	}
 
-	// Get wallpaper details for similar IDs
 	var similarWallpapers []models.Wallpaper
 	if err := s.db.Where("feature_id IN ?", similarIDs).Find(&similarWallpapers).Error; err != nil {
 		return nil, fmt.Errorf("failed to fetch similar wallpapers: %w", err)

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	models "wallpaperio/server/internal/domain/models/db"
+	"wallpaperio/server/internal/domain/models"
 	"wallpaperio/server/internal/services/database"
 	"wallpaperio/server/pkg/auth"
 

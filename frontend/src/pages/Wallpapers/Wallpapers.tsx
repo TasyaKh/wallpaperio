@@ -1,17 +1,22 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { getWallpapers, getNextWallpaper as getPrevWallpaper, getPreviousWallpaper as getNextWallpaper, deleteWallpaper } from '../../api/wallpapers';
-import { getCategories } from '../../api/categories';
-import styles from './Wallpapers.module.scss';
-import { Wallpaper } from '../../models/wallpaper';
-import { Category } from '../../models/category';
-import WallpaperCard from './components/WallpaperCard/WallpaperCard';
-import ImagePreview from '../../components/ImagePreview/ImagePreview';
-import CategoryFilter from './components/CategoryFilter/CategoryFilter';
-import { useAuth } from '../../contexts/AuthContext';
-import { RoleManager } from '../../utils/roles';
-import { toast } from 'react-toastify';
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import InfiniteScroll from "react-infinite-scroll-component";
+import {
+  getWallpapers,
+  getNextWallpaper,
+  getPreviousWallpaper,
+  deleteWallpaper,
+} from "../../api/wallpapers";
+import { getCategories } from "../../api/categories";
+import styles from "./Wallpapers.module.scss";
+import { Wallpaper } from "../../models/wallpaper";
+import { Category } from "../../models/category";
+import WallpaperCard from "./components/WallpaperCard/WallpaperCard";
+import ImagePreview from "../../components/ImagePreview/ImagePreview";
+import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
+import { useAuth } from "../../contexts/AuthContext";
+import { RoleManager } from "../../utils/roles";
+import { toast } from "react-toastify";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -25,12 +30,14 @@ export default function Wallpapers() {
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
   const [total, setTotal] = useState(0);
-  const [selectedWallpaper, setSelectedWallpaper] = useState<Wallpaper | null>(null);
+  const [selectedWallpaper, setSelectedWallpaper] = useState<Wallpaper | null>(
+    null
+  );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const selectedCategory = searchParams.get('category');
+  const selectedCategory = searchParams.get("category") ?? "";
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -38,7 +45,7 @@ export default function Wallpapers() {
         const data = await getCategories();
         setCategories(data);
       } catch (err) {
-        console.error('Error loading categories:', err);
+        console.error("Error loading categories:", err);
       }
     };
 
@@ -59,8 +66,8 @@ export default function Wallpapers() {
         setOffset(ITEMS_PER_PAGE);
         setHasMore(response.wallpapers.length < response.total);
       } catch (err) {
-        setError('Failed to load wallpapers');
-        console.error('Error loading wallpapers:', err);
+        setError("Failed to load wallpapers");
+        console.error("Error loading wallpapers:", err);
       } finally {
         setLoading(false);
       }
@@ -80,7 +87,7 @@ export default function Wallpapers() {
       setOffset((prev) => prev + ITEMS_PER_PAGE);
       setHasMore(wallpapers.length + response.wallpapers.length < total);
     } catch (err) {
-      console.error('Error loading more wallpapers:', err);
+      console.error("Error loading more wallpapers:", err);
     }
   };
 
@@ -95,28 +102,31 @@ export default function Wallpapers() {
 
   const handleNextImage = async () => {
     if (!selectedWallpaper) return;
-    
+
     try {
       setIsNavigating(true);
-      const prevWallpaper = await getNextWallpaper(selectedWallpaper.id);
+      const prevWallpaper = await getNextWallpaper(selectedWallpaper.id, {
+        category: selectedCategory,
+      });
       setSelectedWallpaper(prevWallpaper);
     } catch (err) {
-      console.error('Error fetching previous wallpaper:', err);
+      console.error("Error fetching previous wallpaper:", err);
     } finally {
       setIsNavigating(false);
     }
-    
   };
 
   const handlePreviousImage = async () => {
     if (!selectedWallpaper) return;
-    
+
     try {
       setIsNavigating(true);
-      const nextWallpaper = await getPrevWallpaper(selectedWallpaper.id);
+      const nextWallpaper = await getPreviousWallpaper(selectedWallpaper.id, {
+        category: selectedCategory,
+      });
       setSelectedWallpaper(nextWallpaper);
     } catch (err) {
-      console.error('Error fetching next wallpaper:', err);
+      console.error("Error fetching next wallpaper:", err);
     } finally {
       setIsNavigating(false);
     }
@@ -124,11 +134,11 @@ export default function Wallpapers() {
 
   const handleDeleteWallpaper = async (wallpaperId: number) => {
     if (!user || !RoleManager.canManageContent(user.role)) {
-      toast.error('You do not have permission to delete wallpapers');
+      toast.error("You do not have permission to delete wallpapers");
       return;
     }
 
-    if (!window.confirm('Are you sure you want to delete this wallpaper?')) {
+    if (!window.confirm("Are you sure you want to delete this wallpaper?")) {
       return;
     }
 
@@ -137,10 +147,10 @@ export default function Wallpapers() {
       await deleteWallpaper(wallpaperId);
       setWallpapers((prev) => prev.filter((w) => w.id !== wallpaperId));
       setTotal((prev) => prev - 1);
-      toast.success('Wallpaper deleted successfully');
+      toast.success("Wallpaper deleted successfully");
     } catch (err) {
-      console.error('Error deleting wallpaper:', err);
-      toast.error('Failed to delete wallpaper');
+      console.error("Error deleting wallpaper:", err);
+      toast.error("Failed to delete wallpaper");
     } finally {
       setIsDeleting(false);
     }
@@ -153,7 +163,6 @@ export default function Wallpapers() {
   if (error && wallpapers.length === 0) {
     return <div className={styles.error}>{error}</div>;
   }
-
 
   return (
     <div className={"container"}>
@@ -170,7 +179,9 @@ export default function Wallpapers() {
         loader={<div className={styles.loading}>Loading more...</div>}
         endMessage={
           <p className={styles.endMessage}>
-            {wallpapers.length > 0 ? "You've seen all wallpapers!" : 'No wallpapers found.'}
+            {wallpapers.length > 0
+              ? "You've seen all wallpapers!"
+              : "No wallpapers found."}
           </p>
         }
       >
@@ -180,7 +191,11 @@ export default function Wallpapers() {
               key={`wallpaper ${wallpaper.id}`}
               wallpaper={wallpaper}
               onClick={() => handleWallpaperClick(wallpaper)}
-              onDelete={user && RoleManager.canManageContent(user.role) ? () => handleDeleteWallpaper(wallpaper.id) : undefined}
+              onDelete={
+                user && RoleManager.canManageContent(user.role)
+                  ? () => handleDeleteWallpaper(wallpaper.id)
+                  : undefined
+              }
               isDeleting={isDeleting}
             />
           ))}
@@ -202,4 +217,4 @@ export default function Wallpapers() {
       )}
     </div>
   );
-} 
+}

@@ -1,7 +1,7 @@
 package services
 
 import (
-	models "wallpaperio/server/internal/domain/models/db"
+	"wallpaperio/server/internal/domain/models"
 
 	"gorm.io/gorm"
 )

@@ -84,6 +84,7 @@ func (c *Client) GetTaskStatus(taskID string) (*GenerateResponse, error) {
 func (c *Client) GetAvailableGenerators() (GeneratorsResponse, error) {
 	resp, err := c.httpClient.Get(c.baseURL + "/api/images/generators")
 	if err != nil {
+		fmt.Println("/GetAvailableGenerators error", err)
 		return GeneratorsResponse{}, fmt.Errorf("failed to send request: %w", err)
 	}
 	defer resp.Body.Close()
