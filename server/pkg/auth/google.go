@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"wallpaperio/server/internal/config"
+	constants "wallpaperio/server/internal/config/constants"
+
 	"wallpaperio/server/internal/domain"
 
 	"golang.org/x/oauth2"
@@ -21,7 +23,7 @@ func NewGoogleAuth(cfg *config.GoogleConfig) *GoogleAuth {
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
 		RedirectURL:  cfg.RedirectURL,
-		Scopes:       config.GoogleAuthScopes,
+		Scopes:       constants.GoogleAuthScopes,
 		Endpoint:     google.Endpoint,
 	}
 
@@ -39,7 +41,7 @@ func (g *GoogleAuth) GetUserInfo(code string) (*domain.GoogleUserInfo, error) {
 	}
 
 	client := g.config.Client(context.Background(), token)
-	resp, err := client.Get(config.GoogleUserInfoEndpoint)
+	resp, err := client.Get(constants.GoogleUserInfoEndpoint)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting user info: %v", err)
 	}

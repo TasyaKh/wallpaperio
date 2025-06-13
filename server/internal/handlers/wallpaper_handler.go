@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
 	"wallpaperio/server/internal/services"
-	"wallpaperio/server/internal/utils"
+	"wallpaperio/server/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -56,7 +57,6 @@ func (h *WallpaperHandler) GetWallpapers(c *gin.Context) {
 		Limit:    limit,
 		Offset:   offset,
 	})
-
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch wallpapers"})
 		return
@@ -171,7 +171,6 @@ func (h *WallpaperHandler) CreateWallpaper(c *gin.Context) {
 		Category: req.Category,
 		Tags:     req.Tags,
 	})
-
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create wallpaper: %v", err)})
 		return

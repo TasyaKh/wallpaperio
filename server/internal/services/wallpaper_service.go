@@ -2,7 +2,8 @@ package services
 
 import (
 	"fmt"
-	"wallpaperio/server/internal/domain/models"
+
+	models "wallpaperio/server/internal/domain/models/db"
 
 	"gorm.io/gorm"
 )
@@ -179,7 +180,6 @@ func (s *WallpaperService) GetWallpapers(filter WallpaperFilter) (*WallpaperResu
 		Limit(filter.Limit).
 		Offset(filter.Offset).
 		Find(&wallpapers).Error
-
 	if err != nil {
 		return nil, err
 	}

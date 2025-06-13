@@ -46,7 +46,7 @@ func (r *Router) Setup(router *gin.Engine) {
 	// Auth routes
 	auth := router.Group("/auth")
 	{
-		authHandler := r.handlers["auth"].(*handlers.AuthHandler)
+		authHandler := r.handlers["auth"].(*handlers.GoogleAuthHandler)
 		auth.GET("/google", authHandler.InitiateGoogleAuth)
 		auth.GET("/google/callback", authHandler.GoogleCallback)
 	}

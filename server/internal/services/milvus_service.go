@@ -3,9 +3,11 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
 
 	schema "wallpaperio/server/internal/schema/milvus"
-	"wallpaperio/server/pkg/database"
+	"wallpaperio/server/internal/services/database"
 
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
@@ -135,7 +137,7 @@ func (s *MilvusService) FindSimilar(features []float32, limit int, excludeID uin
 			// For normalized vectors, cosine similarity is in range [0, 1]
 			// - 1.0 = identical vectors
 			// - 0.0 = completely different vectors
-			similarity := float64(hit.Scores[i])
+			similarity := hit.Scores[i]
 
 			// Print all results for debugging
 			fmt.Printf("ID: %d, Similarity: %.2f%%\n",
@@ -167,34 +169,57 @@ func (s *MilvusService) DeleteFeatures(wallpaperID uint) error {
 
 // GetFeaturesOneWallpaper retrieves features for a wallpaper using its feature ID
 func (s *MilvusService) GetFeaturesOneWallpaper(featureID uint) ([]float32, error) {
-	// Create query parameters
+	const (
+		maxRetries = 2
+		timeout    = 10 * time.Second
+	)
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		features, err := s.queryFeatures(ctx, featureID)
+		if err == nil {
+			return features, nil
+		}
+
+		// Log attempt failure
+		log.Printf("Attempt %d/%d failed: %v", attempt+1, maxRetries, err)
+
+		// Don't sleep on last attempt
+		if attempt < maxRetries-1 {
+			time.Sleep(time.Second * time.Duration(attempt+1))
+		}
+	}
+
+	return nil, fmt.Errorf("failed to get features after %d attempts", maxRetries)
+}
+
+// queryFeatures performs a single query attempt to get features
+func (s *MilvusService) queryFeatures(ctx context.Context, featureID uint) ([]float32, error) {
 	expr := fmt.Sprintf("id == %d", featureID)
 	outputFields := []string{"features"}
 
-	// Query the collection
-	results, err := s.client.Query(context.Background(),
-		schema.CollectionName, []string{}, expr, outputFields)
+	results, err := s.client.Query(ctx, schema.CollectionName, []string{}, expr, outputFields)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query features: %w", err)
+		return nil, fmt.Errorf("query failed: %w", err)
 	}
 
 	if len(results) == 0 {
-		return nil, fmt.Errorf("no features found for feature ID %d", featureID)
+		return nil, fmt.Errorf("no results found for feature ID %d", featureID)
 	}
 
-	// Extract the vector column
 	featuresCol, ok := results[0].(*entity.ColumnFloatVector)
 	if !ok {
-		return nil, fmt.Errorf("expected float vector column but got different type")
+		return nil, fmt.Errorf("invalid result type: expected float vector")
 	}
+
 	data := featuresCol.Data()
-
 	if len(data) == 0 {
-		return nil, fmt.Errorf("no features found for feature ID %d", featureID)
+		return nil, fmt.Errorf("empty feature vector for ID %d", featureID)
 	}
-	vector := data[0]
 
-	return vector, nil
+	return data[0], nil
 }
 
 // Close closes the Milvus connection

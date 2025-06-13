@@ -9,12 +9,9 @@ import (
 
 type GenerateRequest struct {
 	Prompt         string  `json:"prompt"`
-	N              int     `json:"n"`
 	NegativePrompt *string `json:"negative_prompt,omitempty"`
 	Width          int     `json:"width"`
 	Height         int     `json:"height"`
-	Steps          int     `json:"steps"`
-	CfgScale       float64 `json:"cfg_scale"`
 	GeneratorType  *string `json:"generator_type,omitempty"`
 }
 

@@ -1,5 +1,64 @@
 {
     "files.exclude": {
-        "**/.svn": false
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/tmp": true
+    },
+    "go.useLanguageServer": true,
+    "go.toolsManagement.checkForUpdates": "local",
+    "go.toolsManagement.autoUpdate": true,
+    "go.lintTool": "golangci-lint",
+    "go.lintOnSave": "package",
+    "go.vetOnSave": "package",
+    "go.testOnSave": false,
+    "go.coverOnSave": false,
+    "go.usePlaceholders": true,
+    "go.formatTool": "gofmt",
+    "go.delveConfig": {
+        "dlvLoadConfig": {
+            "followPointers": true,
+            "maxVariableRecurse": 1,
+            "maxStringLen": 512,
+            "maxArrayValues": 64,
+            "maxStructFields": -1
+        },
+        "apiVersion": 2,
+        "showGlobalVariables": true
+    },
+    "go.inferGopath": true,
+    "go.alternateTools": {
+        "go": "go"
+    },
+    "go.toolsEnvVars": {
+        "GO111MODULE": "on"
+    },
+    "[go]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+        "editor.snippetSuggestions": "none"
+    },
+    "gopls": {
+        "ui.semanticTokens": true,
+        "formatting.gofumpt": true,
+        "ui.completion.usePlaceholders": true,
+        "ui.completion.completeFunctionCalls": true,
+        "ui.diagnostic.analyses": {
+            "unusedparams": true,
+            "shadow": true
+        },
+        "ui.codelenses": {
+            "gc_details": true,
+            "regenerate_cgo": true,
+            "tidy": true,
+            "upgrade_dependency": true,
+            "vendor": true
+        },
+        "ui.completion.matcher": "Fuzzy",
+       
     }
 }

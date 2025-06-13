@@ -8,8 +8,6 @@ interface GenerateImageRequest {
   prompt: string;
   width: number;
   height: number;
-  //   steps: number;
-  //   cfg_scale: number;
   category: string;
   tags: string[];
   generator_type: string;
