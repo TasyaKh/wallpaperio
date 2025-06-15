@@ -1,9 +1,10 @@
 .previewContainer {
   position: relative;
   width: 100%;
+  height: 100%;
   margin: 0 auto;
   background: var(--theme-background-primary);
-  overflow: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
@@ -20,6 +21,7 @@
   color: var(--error);
 }
 
-.similarContainer{
-    padding: var(--spacing-md);
+.similarContainer {
+  padding: var(--spacing-md);
+  flex: 1;
 }

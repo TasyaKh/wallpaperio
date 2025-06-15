@@ -94,19 +94,18 @@ func (s *MilvusService) StoreFeatures(wallpaperID uint, features []float32) (int
 
 // FindSimilar finds similar wallpapers based on features
 func (s *MilvusService) FindSimilar(features []float32, limit int, excludeID uint64) ([]uint64, error) {
-	// Create search parameters for IVF_FLAT
-	searchParams, err := entity.NewIndexIvfFlatSearchParam(1024) // nlist=1024 for good balance
+	searchParams, err := entity.NewIndexIvfFlatSearchParam(1024)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create search parameters: %w", err)
 	}
 
-	// Create expression to exclude current ID
 	expr := ""
 	if excludeID > 0 {
 		expr = fmt.Sprintf("id != %d", excludeID)
 	}
 
-	// Execute search
+	similarityThreshold := float32(0.5)
+
 	results, err := s.client.Search(
 		context.Background(),
 		schema.CollectionName, // Collection name
@@ -114,45 +113,28 @@ func (s *MilvusService) FindSimilar(features []float32, limit int, excludeID uin
 		expr,                  // Boolean expression to exclude current ID
 		[]string{"id"},        // Output fields
 		[]entity.Vector{entity.FloatVector(features)}, // Query vectors
-		"features",    // Vector field name
-		entity.COSINE, // Use cosine similarity
-		limit,         // TopK
-		searchParams,  // Search parameters
+		"features",           // Vector field name
+		entity.COSINE,        // Use cosine similarity
+		limit,                // TopK
+		searchParams,         // Search parameters
+		client.WithOffset(0), // Set offset to 0
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to search similar wallpapers: %w", err)
 	}
 
-	// Extract IDs from results with similarity threshold
 	var wallpaperIDs []uint64
-	const similarityThreshold = 0.5 // 50% similarity threshold
+	if len(results) > 0 {
+		result := results[0]
+		resultIDs := result.IDs.(*entity.ColumnInt64).Data()
+		scores := result.Scores
 
-	fmt.Printf("\nSearch Results (showing all results before threshold):\n")
-	fmt.Printf("Total results before threshold: %d\n", len(results))
-
-	for _, hit := range results {
-		// Get IDs and scores
-		ids := hit.IDs.(*entity.ColumnInt64).Data()
-		for i, id := range ids {
-			// For normalized vectors, cosine similarity is in range [0, 1]
-			// - 1.0 = identical vectors
-			// - 0.0 = completely different vectors
-			similarity := hit.Scores[i]
-
-			// Print all results for debugging
-			fmt.Printf("ID: %d, Similarity: %.2f%%\n",
-				id, similarity*100)
-
-			// Only include results above threshold
-			if similarity > similarityThreshold {
+		for i, id := range resultIDs {
+			if scores[i] > similarityThreshold {
 				wallpaperIDs = append(wallpaperIDs, uint64(id))
 			}
 		}
 	}
-
-	fmt.Printf("\nResults after threshold (%.0f%%): %d wallpapers found\n",
-		similarityThreshold*100, len(wallpaperIDs))
-	fmt.Println("wallpaperIDs:", wallpaperIDs)
 
 	return wallpaperIDs, nil
 }

@@ -1,9 +1,9 @@
-import React from 'react';
-import Modal from '../Modal/Modal';
-import styles from './ImagePreview.module.scss';
-import ImageNavigation from './ImageNavigation';
-import SimilarWallpapers from '../SimilarWallpapers/SimilarWallpapers';
-import { Wallpaper } from '../../models/wallpaper';
+import React from "react";
+import Modal from "../Modal/Modal";
+import styles from "./ImagePreview.module.scss";
+import ImageNavigation from "./ImageNavigation";
+import SimilarWallpapers from "../SimilarWallpapers/SimilarWallpapers";
+import { Wallpaper } from "../../models/wallpaper";
 
 interface ImagePreviewProps {
   isOpen: boolean;
@@ -30,8 +30,8 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className={styles.previewContainer}>
-        <div >
+      <div id="previewContainer" className={styles.previewContainer}>
+        <div>
           <ImageNavigation
             imageUrl={imageUrl}
             title={title}
@@ -53,4 +53,4 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
   );
 };
 
-export default ImagePreview; 
+export default ImagePreview;

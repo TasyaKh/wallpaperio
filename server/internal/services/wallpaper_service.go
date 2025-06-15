@@ -10,23 +10,23 @@ import (
 )
 
 type WallpaperService struct {
-	db            *gorm.DB
-	tagSvc        *TagService
-	featureSvc    *FeatureService
-	milvusService *MilvusService
+	db         *gorm.DB
+	tagSvc     *TagService
+	featureSvc *FeatureService
+	milvusSvc  *MilvusService
 }
 
 func NewWallpaperService(db *gorm.DB, tagSvc *TagService, featureSvc *FeatureService) (*WallpaperService, error) {
-	milvusService, err := NewMilvusService()
+	milvusSvc, err := NewMilvusService()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Milvus service: %w", err)
 	}
 
 	return &WallpaperService{
-		db:            db,
-		tagSvc:        tagSvc,
-		featureSvc:    featureSvc,
-		milvusService: milvusService,
+		db:         db,
+		tagSvc:     tagSvc,
+		featureSvc: featureSvc,
+		milvusSvc:  milvusSvc,
 	}, nil
 }
 
@@ -70,7 +70,7 @@ func (s *WallpaperService) CreateWallpaper(params dto.CreateWallpaper) (*models.
 	}
 
 	// Store features in Milvus and get feature ID
-	featureID, err := s.milvusService.StoreFeatures(wallpaper.ID, features)
+	featureID, err := s.milvusSvc.StoreFeatures(wallpaper.ID, features)
 	if err != nil {
 		tx.Rollback()
 		return nil, fmt.Errorf("failed to store features in Milvus: %w", err)
@@ -192,7 +192,7 @@ func (s *WallpaperService) DeleteWallpaper(id uint) error {
 	}
 
 	// Delete features from Milvus using feature ID
-	if err := s.milvusService.DeleteFeatures(uint(wallpaper.FeatureID)); err != nil {
+	if err := s.milvusSvc.DeleteFeatures(uint(wallpaper.FeatureID)); err != nil {
 		tx.Rollback()
 		return fmt.Errorf("failed to delete features: %w", err)
 	}
@@ -263,12 +263,12 @@ func (s *WallpaperService) GetSimilarWallpapers(currWalppaperId uint, limit int)
 		return nil, fmt.Errorf("failed to find wallpaper: %w", err)
 	}
 
-	features, err := s.milvusService.GetFeaturesOneWallpaper(uint(currentWallpaper.FeatureID))
+	features, err := s.milvusSvc.GetFeaturesOneWallpaper(uint(currentWallpaper.FeatureID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get features: %w", err)
 	}
 
-	similarIDs, err := s.milvusService.FindSimilar(features, limit, uint64(currentWallpaper.FeatureID))
+	similarIDs, err := s.milvusSvc.FindSimilar(features, limit, uint64(currentWallpaper.FeatureID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to find similar wallpapers: %w", err)
 	}

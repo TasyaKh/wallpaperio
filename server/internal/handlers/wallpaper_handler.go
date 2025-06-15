@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"wallpaperio/server/internal/domain/models"
 	"wallpaperio/server/internal/domain/models/dto"
 	"wallpaperio/server/internal/services"
 	"wallpaperio/server/pkg/utils"
@@ -24,6 +25,11 @@ type CreateWallpaperRequest struct {
 	ImageURL string   `json:"image_url"`
 	Category string   `json:"category"`
 	Tags     []string `json:"tags"`
+}
+
+type SimilarWallpapersResponse struct {
+	Data       []models.Wallpaper `json:"data"`
+	TotalCount int64              `json:"total_count"`
 }
 
 func NewWallpaperHandler(wallpaperSvc *services.WallpaperService, tagSvc *services.TagService, db *gorm.DB) *WallpaperHandler {
@@ -150,7 +156,7 @@ func (h *WallpaperHandler) GetSimilarWallpapers(c *gin.Context) {
 		return
 	}
 
-	limit := 12 // Default limit
+	limit := 150 // Default limit
 	if limitStr := c.Query("limit"); limitStr != "" {
 		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
 			limit = l
@@ -166,7 +172,6 @@ func (h *WallpaperHandler) GetSimilarWallpapers(c *gin.Context) {
 	// Add host URL to image paths
 	for i := range wallpapers {
 		imagePath := wallpapers[i].ImageURL
-
 		wallpapers[i].ImageURL = utils.GetImagePath(imagePath)
 	}
 

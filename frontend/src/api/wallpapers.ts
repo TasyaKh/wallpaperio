@@ -44,7 +44,7 @@ export const getPreviousWallpaper = async (
 
 export const getSimilarWallpapers = async (
   id: number,
-  limit?: number
+  limit: number = 150
 ): Promise<Wallpaper[]> => {
   const response = await api.get<Wallpaper[]>(`/api/wallpapers/${id}/similar`, {
     params: { limit },

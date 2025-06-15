@@ -20,7 +20,6 @@ func NewCategoryService(db *gorm.DB, baseURL string) *CategoryService {
 	}
 }
 
-// GetAllCategories returns all categories
 func (s *CategoryService) GetAllCategories() ([]models.Category, error) {
 	var categories []models.Category
 	err := s.db.Find(&categories).Error
