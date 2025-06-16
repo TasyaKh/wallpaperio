@@ -10,7 +10,7 @@ import { getCategories } from "../../../api/categories";
 import { createWallpaper } from "../../../api/wallpapers";
 import { Category } from "../../../models/category";
 import { SelectableList } from "../../../components/SelectableList/SelectableList";
-import { Button } from "../../../components/Button/Button";
+import { Button } from "../../../components/Buttons/BaseButton";
 import { Loader } from "../../../components/Loader/Loader";
 import { Alert } from "../../../components/Alert/Alert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -106,14 +106,14 @@ export const ImageGenerator: React.FC = () => {
       if (!taskId) return;
 
       try {
-        const status = await getGenerationStatus(taskId);
+        const responseStatus = await getGenerationStatus(taskId);
         
-        if (status.status === "completed" && status.saved_path_url && status.server_path_url) {
-          setGenerationStatus(status);
+        if (responseStatus.status === "completed" && responseStatus.saved_path_url && responseStatus.server_path_url) {
+          setGenerationStatus(responseStatus);
           // Create wallpaper when generation is successful
           try {
             await createWallpaper({
-              image_url: status.saved_path_url,
+              image_url: responseStatus.saved_path_url,
               category: selectedCategory,
               tags: tags,
             });
@@ -124,8 +124,8 @@ export const ImageGenerator: React.FC = () => {
           }
           setTaskId(null);
           setIsGenerating(false);
-        } else if (status.status === "failed") {
-          toast.error("Image generation failed");
+        } else if (responseStatus.status === "failed") {
+          toast.error("Image generation failed. " + (responseStatus?.error ?? "") );
           setTaskId(null);
           setIsGenerating(false);
         }

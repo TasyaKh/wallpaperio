@@ -2,12 +2,12 @@
 <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="w-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#FFB6C1;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#00f2fe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff00ff;stop-opacity:1" />
     </linearGradient>
     <linearGradient id="dot-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#FFB6C1;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#00f2fe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff00ff;stop-opacity:1" />
     </linearGradient>
     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
       <feMerge>
@@ -22,9 +22,10 @@
     .w-shape {
       fill: none;
       stroke: url(#w-gradient);
-      stroke-width: 20;
-      stroke-linecap: round;
-      stroke-linejoin: round;
+      stroke-width: 27;
+      stroke-linecap: butt;
+      stroke-linejoin: miter;
+      stroke-miterlimit: 2;
       filter: url(#glow) url(#drop-shadow);
     }
     .dot {

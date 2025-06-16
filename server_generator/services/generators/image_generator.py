@@ -7,7 +7,7 @@ class ImageGenerator(ABC):
     """base class for image generators"""
     
     @abstractmethod
-    def generate_image(
+    def gen_image(
         self,
         prompt: str,
         negative_prompt: Optional[str] = None,

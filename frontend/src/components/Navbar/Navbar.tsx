@@ -1,72 +1,108 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../hooks/useTheme";
 import { ThemeMode } from "../../styles/theme";
 import { Loader } from "../Loader/Loader";
 import styles from "./Navbar.module.scss";
-import { Button } from "../Button";
+import { Button } from "../Buttons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon } from "@fortawesome/free-regular-svg-icons/faMoon";
 import { faSun } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { RoleManager } from "../../utils/roles";
+import { useEffect, useState } from "react";
 
 export const Navbar = () => {
   const { user, loading } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
-  const handleThemeToggle = () => {
-    toggleTheme();
+  const toggleMenu = () => {
+    const isOpen = !isMenuOpen;
+    if(isOpen) document.body.classList.add('modal-open');
+    else document.body.classList.remove('modal-open');
+    setIsMenuOpen(isOpen);
   };
+
+  // Close menu on route change
+  useEffect(() => {
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
+      document.body.classList.remove('modal-open');
+    }
+  }, [location]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768 && isMenuOpen) {
+        setIsMenuOpen(false);
+        document.body.classList.remove('modal-open');
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isMenuOpen]);
 
   return (
     <nav className={styles.navbar}>
-      <Link to="/" className={styles.logo}>
-        WallpaperIO
-      </Link>
+      <div className={styles.navbarContainer}>
+        <Link to="/" className={styles.logo}>
+          <img src="/logo.svg" alt="WallpaperIO" width="40" height="40" />
+        </Link>
 
-      <div className="row g-4 ">
-        <div className={styles.navLinks}>
-          <div className="col-auto align-items-center d-flex">
+        <button 
+          className={styles.hamburger}
+          onClick={toggleMenu}
+          aria-label="Toggle menu"
+        >
+          <FontAwesomeIcon 
+            icon={isMenuOpen ? faTimes : faBars} 
+            className={styles.hamburgerIcon}
+          />
+        </button>
+
+        <div className={`${styles.navContent} ${isMenuOpen ? styles.active : ''}`}>
+          <div className={styles.navLinks}>
             <Link to="/wallpapers">Wallpapers</Link>
-          </div>
-          <div className="col-auto align-items-center d-flex">
             <Link to="/categories">Categories</Link>
-          </div>
-          {user && RoleManager.canAccessAdminPanel(user.role) && (
-            <div className="col-auto align-items-center d-flex">
+            {user && RoleManager.canAccessAdminPanel(user.role) && (
               <Link to="/admin-panel">Admin Panel</Link>
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="row g-4">
-        <div className="col-auto align-items-center d-flex">
-          <button
-            onClick={handleThemeToggle}
-            className={styles.themeToggle}
-            aria-label={`Switch to ${
-              theme.mode === ThemeMode.Light ? "dark" : "light"
-            } theme`}
-          >
-            {theme.mode === ThemeMode.Light ? <FontAwesomeIcon icon={faMoon} color="var(--color-primary" /> : <FontAwesomeIcon icon={faSun} color="var(--color-primary" />}
-          </button>
-        </div>
-        <div className="col-auto align-items-center d-flex">
-          {loading ? (
-            <Loader size="small" />
-          ) : user ? (
-            <Link to="/profile">
-              <img
-                src={user.profile_pic_url || "/default-avatar.png"}
-                alt={user.name}
-                className={styles.avatar}
-              />
-            </Link>
-          ) : (
-            <Button variant="primary">
-              <Link to="/login">Sign In</Link>
-            </Button>
-          )}
+            )}
+          </div>
+
+          <div className={styles.navActions}>
+            <button
+              onClick={toggleTheme}
+              className={styles.themeToggle}
+              aria-label={`Switch to ${
+                theme.mode === ThemeMode.Light ? "dark" : "light"
+              } theme`}
+            >
+              {theme.mode === ThemeMode.Light ? (
+                <FontAwesomeIcon icon={faMoon} color="var(--color-primary)" />
+              ) : (
+                <FontAwesomeIcon icon={faSun} color="var(--color-primary)" />
+              )}
+            </button>
+
+            {loading ? (
+              <Loader size="small" />
+            ) : user ? (
+              <Link to="/profile">
+                <img
+                  src={user.profile_pic_url || "/default-avatar.png"}
+                  alt={user.name}
+                  className={styles.avatar}
+                />
+              </Link>
+            ) : (
+              <Button variant="primary">
+                <Link to="/login">Sign In</Link>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </nav>

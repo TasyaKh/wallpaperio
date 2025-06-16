@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '../../components/Button';
+import { Button } from '../../components/Buttons';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Profile.module.scss';
 

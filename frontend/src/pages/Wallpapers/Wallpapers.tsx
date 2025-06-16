@@ -166,7 +166,7 @@ export default function Wallpapers() {
 
   return (
     <div className={"container"}>
-      <h1>Wallpapers</h1>
+      <h1 className={"gradient-title"}>Wallpapers</h1>
       <CategoryFilter
         categories={categories}
         selectedCategory={selectedCategory}

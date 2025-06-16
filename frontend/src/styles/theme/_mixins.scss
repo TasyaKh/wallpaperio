@@ -1,15 +1,6 @@
 @use "sass:map";
 @use "sass:list";
 
-// // Theme Mixins
-// @mixin theme-aware($property, $light-value, $dark-value) {
-//   #{$property}: $light-value;
-  
-//   [data-theme="dark"] & {
-//     #{$property}: $dark-value;
-//   }
-// }
-
 // Color Mixins
 @mixin theme-color($category, $variant) {
   color: var(--theme-#{$category}-#{$variant});

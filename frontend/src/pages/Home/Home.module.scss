@@ -1,40 +1,20 @@
-@use '../../styles/theme/mixins' as *;
-
-.homePage {
-  @include spacing(padding, 'xl');
-}
 
 .welcomeSection {
-  @include spacing(margin-bottom, 'xl');
+  margin-bottom: var(--spacing-xl);
 
-  h1 {
-    @include theme-color('text', 'primary');
-    @include spacing(margin-bottom, 'md');
-  }
-}
-
-.actions {
-  display: flex;
-  gap: var(--spacing-md);
-}
-
-.themeButton {
-  @include button-base;
-  @include theme-background('background', 'secondary');
-  @include theme-color('text', 'primary');
-  @include spacing(padding, 'md');
-  @include border-radius('md');
-
-  &:hover {
-    @include theme-background('background', 'tertiary');
-  }
 }
 
 .logoutButton {
-  @include button-base;
-  @include theme-background('status', 'error');
-  @include theme-color('primary', 'contrast');
-  @include spacing(padding, 'md');
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  background: #fd8d8d;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: filter var(--transition-fast) ease;
 
   &:hover {
     filter: brightness(90%);

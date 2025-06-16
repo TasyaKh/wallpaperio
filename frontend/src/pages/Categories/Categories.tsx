@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getCategories } from '../../api/categories';
-import { Category } from '../../models/category';
-import styles from './Categories.module.scss';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getCategories } from "../../api/categories";
+import { Category } from "../../models/category";
+import styles from "./Categories.module.scss";
 
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -16,8 +16,8 @@ export default function Categories() {
         const data = await getCategories();
         setCategories(data);
       } catch (err) {
-        setError('Failed to load categories');
-        console.error('Error loading categories:', err);
+        setError("Failed to load categories");
+        console.error("Error loading categories:", err);
       } finally {
         setLoading(false);
       }
@@ -40,7 +40,8 @@ export default function Categories() {
 
   return (
     <div className={styles.categories}>
-      <h1>Categories</h1>
+      <div className="   "> </div>
+      <h1 className="gradient-title">Categories</h1>
       <div className={styles.grid}>
         {categories.map((category) => (
           <div
@@ -49,11 +50,13 @@ export default function Categories() {
             onClick={() => handleCategoryClick(category.name)}
           >
             <div className={styles.imageContainer}>
-              <img 
-                src={category.image_url} 
-                alt={category.name}
-                className={styles.categoryImage}
-              />
+              {category.image_url && (
+                <img
+                  src={category.image_url}
+                  alt={category.name}
+                  className={styles.categoryImage}
+                />
+              )}
             </div>
             <div className={styles.content}>
               <h2>{category.name}</h2>
@@ -64,4 +67,4 @@ export default function Categories() {
       </div>
     </div>
   );
-} 
+}

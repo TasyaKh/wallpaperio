@@ -58,13 +58,11 @@ func NewMilvusService() (*MilvusService, error) {
 }
 
 // StoreFeatures stores wallpaper features in Milvus and returns the feature ID
-func (s *MilvusService) StoreFeatures(wallpaperID uint, features []float32) (int64, error) {
+func (s *MilvusService) StoreFeatures(features []float32) (int64, error) {
 	// Ensure features match the dimension
 	if len(features) != schema.Dimension {
 		return 0, fmt.Errorf("features dimension mismatch: got %d, expected %d", len(features), schema.Dimension)
 	}
-
-	fmt.Printf("Storing features for wallpaper %d, features length: %d\n", wallpaperID, len(features))
 
 	data := []entity.Column{
 		entity.NewColumnFloatVector("features", schema.Dimension, [][]float32{features}),
@@ -88,7 +86,6 @@ func (s *MilvusService) StoreFeatures(wallpaperID uint, features []float32) (int
 	}
 
 	featureID := ids.Data()[0]
-	fmt.Printf("Successfully stored features for wallpaper %d with feature ID: %d\n", wallpaperID, featureID)
 	return featureID, nil
 }
 

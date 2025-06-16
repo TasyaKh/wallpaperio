@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { Button } from '../Button/Button';
+import { Button } from '../Buttons/BaseButton';
 import styles from './TagManager.module.scss';
 
 interface TagManagerProps {

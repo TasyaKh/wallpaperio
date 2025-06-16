@@ -1,14 +1,14 @@
-@use "../../styles/theme/mixins" as *;
 
 .categories {
-  padding: 2rem;
+  padding: var(--spacing-xl);
   max-width: 1200px;
   margin: 0 auto;
 
   h1 {
-    @include spacing(margin-bottom, "xl");
-    @include theme-color("text", "primary");
-    @include font-size("2xl");
+    margin-bottom: var(--spacing-xl);
+    color: var(--color-gradient-main-start);
+    font-size: var(--font-size-3xl);
+    font-family: var(--font-heading);
     text-align: center;
   }
 }
@@ -22,15 +22,15 @@
 .categoryCard {
   position: relative;
   background: var(--bg-secondary);
-  border-radius: 12px;
+  border-radius: var(--border-radius-xl);
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform var(--transition-fast) ease, box-shadow var(--transition-fast) ease;
   aspect-ratio: 16/9;
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-lg);
 
     .content {
       background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
@@ -47,7 +47,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-normal) ease;
 
   &:hover {
     transform: scale(1.05);
@@ -61,19 +61,18 @@
   right: 0;
   padding: var(--spacing-lg);
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
- 
-  transition: background 0.3s ease;
+  transition: background var(--transition-normal) ease;
 
   h2 {
     margin: 0 0 var(--spacing-xs);
-    @include font-size("lg");
-    font-weight: 600;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
     color: white;
   }
 
   p {
     margin: 0;
-    @include font-size("sm");
+    font-size: var(--font-size-sm);
     opacity: 0.9;
   }
 }
@@ -83,13 +82,13 @@
   justify-content: center;
   align-items: center;
   min-height: 200px;
-  @include font-size("lg");
-  @include theme-color("text", "secondary");
+  font-size: var(--font-size-lg);
+  color: var(--color-gradient-main-end);
 }
 
 .error {
   text-align: center;
   padding: var(--spacing-xl);
-  @include font-size("lg");
-  @include theme-color("text", "error");
+  font-size: var(--font-size-lg);
+  color: var(--color-gradient-main-end);
 } 

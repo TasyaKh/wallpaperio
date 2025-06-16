@@ -37,7 +37,6 @@ func (s *JWTService) ValidateToken(tokenString string) (*domain.Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &domain.Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return s.secret, nil
 	})
-
 	if err != nil {
 		return nil, err
 	}

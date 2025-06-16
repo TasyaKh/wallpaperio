@@ -16,6 +16,7 @@ interface GenerateImageRequest {
 interface GenerateImageResponse {
   status: string;
   task_id?: string;
+  error?: string
   saved_path_url?: string;
   server_path_url?: string;
 }

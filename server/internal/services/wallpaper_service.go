@@ -49,19 +49,25 @@ func (s *WallpaperService) CreateWallpaper(params dto.CreateWallpaper) (*models.
 		return nil, fmt.Errorf("failed to extract features: %w", err)
 	}
 
-	// Start a transaction
 	tx := s.db.Begin()
 	if tx.Error != nil {
 		return nil, fmt.Errorf("failed to start transaction: %w", tx.Error)
 	}
 
-	// Create wallpaper record
+	// Store features in Milvus and get feature ID
+	featureID, err := s.milvusSvc.StoreFeatures(features)
+	if err != nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("failed to store features in Milvus: %w", err)
+	}
+
 	wallpaper := &models.Wallpaper{
 		Title:       params.Title,
 		Description: params.Description,
 		ImageURL:    params.ImageURL,
 		CategoryID:  category.ID,
 		Tags:        tags,
+		FeatureID:   featureID,
 	}
 
 	if err := tx.Create(wallpaper).Error; err != nil {
@@ -69,21 +75,6 @@ func (s *WallpaperService) CreateWallpaper(params dto.CreateWallpaper) (*models.
 		return nil, fmt.Errorf("failed to create wallpaper record: %w", err)
 	}
 
-	// Store features in Milvus and get feature ID
-	featureID, err := s.milvusSvc.StoreFeatures(wallpaper.ID, features)
-	if err != nil {
-		tx.Rollback()
-		return nil, fmt.Errorf("failed to store features in Milvus: %w", err)
-	}
-
-	// Update wallpaper with feature ID
-	wallpaper.FeatureID = featureID
-	if err := tx.Save(wallpaper).Error; err != nil {
-		tx.Rollback()
-		return nil, fmt.Errorf("failed to update wallpaper with feature ID: %w", err)
-	}
-
-	// Commit transaction
 	if err := tx.Commit().Error; err != nil {
 		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
