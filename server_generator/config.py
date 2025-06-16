@@ -14,3 +14,6 @@ IMAGES_PATH = os.getenv("IMAGES_PATH")
 # fusion brain ai
 FUSION_BRAIN_AI_KEY = os.getenv("FUSION_BRAIN_AI_KEY", "")
 FUSION_BRAIN_AI_SECRET = os.getenv("FUSION_BRAIN_AI_SECRET", "")
+
+# pollinations
+POLLINATIONS_TOKEN = os.getenv("POLLINATIONS_TOKEN", "")

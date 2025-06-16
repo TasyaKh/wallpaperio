@@ -1,11 +1,16 @@
 from typing import Optional
+from config import POLLINATIONS_TOKEN
 from services.generators.image_generator import ImageData, ImageGenerator
 from g4f import Client
 
 
-class G4FGenerator(ImageGenerator):
+class G4FPollinationsGenerator(ImageGenerator):
+    """G4F implementation of image generator"""
+
     def __init__(self):
         self.client = Client()
+        if POLLINATIONS_TOKEN:
+            self.client.token = POLLINATIONS_TOKEN
 
     def gen_image(
         self,
@@ -15,10 +20,11 @@ class G4FGenerator(ImageGenerator):
         height: int = 512,
     ) -> ImageData:
         """
-        Generate image using g4f client with stable-diffusion provider
+        Generate image using g4f client
         Returns image URL
         """
         response = self.client.images.generate(
+            model="gpt4o",
             prompt=prompt,
             negative_prompt=negative_prompt,
             width=width,

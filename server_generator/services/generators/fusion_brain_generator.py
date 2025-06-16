@@ -15,7 +15,7 @@ class FusionBrainAIGenerator(ImageGenerator):
             "X-Secret": f"Secret {FUSION_BRAIN_AI_SECRET}",
         }
 
-    def generate_image(
+    def gen_image(
         self,
         prompt: str,
         negative_prompt: Optional[str] = None,
