@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional
+from services.images.image_features import ImageFeatures
 from services.generators.generator_factory import GeneratorFactory
-from services.image_service import ImageService
 from celery.result import AsyncResult
 from models.response_model import BaseResponse, FeatureExtractionResponse
 from celery_config import celery_app
@@ -10,7 +10,7 @@ from tasks.image_tasks import generate_image_task
 import numpy as np
 
 router = APIRouter(prefix="/images", tags=["images"])
-image_service = ImageService()
+image_features = ImageFeatures()
 
 class ImageRequest(BaseModel):
     prompt: str
@@ -54,7 +54,7 @@ async def get_generation_status(task_id: str):
     try:
         # Get task result
         task_result = AsyncResult(task_id, app=celery_app)
-        
+       
         if task_result.status == "PENDING":
             return BaseResponse(
                 task_id=task_id,
@@ -63,17 +63,11 @@ async def get_generation_status(task_id: str):
         elif task_result.status == "SUCCESS":
             result = task_result.result
             # Convert numpy array to list if features exist
-            features = result.get("features")
-            print("features", features)
-            if isinstance(features, np.ndarray):
-                features = features.tolist()
-                
             return BaseResponse(
                 task_id=task_id,
-                status=result["status"],
-                saved_path_url=result.get("saved_path_url"),
-                error=result.get("error"),
-                features=features
+                status="success",
+                url_path_thumb=result.get("url_path_thumb"),
+                url_path=result.get("url_path"),
             )
         elif task_result.status == "STARTED":
             return BaseResponse(
@@ -82,10 +76,11 @@ async def get_generation_status(task_id: str):
                 error=None
             )
         elif task_result.status == "FAILURE":
+           
             return BaseResponse(
                 task_id=task_id,
                 status="failed",
-                error=str(task_result.result)  # Celery stores error message in result for FAILURE
+                error=str(task_result.result)
             )
         else:
             return BaseResponse(
@@ -93,6 +88,7 @@ async def get_generation_status(task_id: str):
                 status="failed",
                 error=f"Task failed with status: {task_result.status}"
             )
+        
             
     except Exception as e:
         return BaseResponse(
@@ -108,7 +104,7 @@ async def extract_features(request: ImagePathRequest):
     """
     try:
         # Extract features
-        features = image_service.extract_features(request.image_path)
+        features = image_features.extract_features(request.image_path)
         
         return FeatureExtractionResponse(
             status="success",
@@ -125,4 +121,18 @@ async def extract_features(request: ImagePathRequest):
             feature_mean=0.0,
             feature_std=0.0,
             error_message=str(e)
-        ) 
+        )
+
+# @router.delete("", response_model=BaseResponse)
+# async def delete_image(request: ImagePathRequest):
+#     try:
+#         success = image_service.delete_image(request.image_path)
+#         return BaseResponse(
+#             status="success" if success else "failed",
+#             message="Image deleted successfully" if success else "Failed to delete image"
+#         )
+#     except Exception as e:
+#         return BaseResponse(
+#             status="failed",
+#             error=str(e)
+#         ) 

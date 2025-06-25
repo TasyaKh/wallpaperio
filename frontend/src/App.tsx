@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { Suspense } from 'react';
-import { Login, Home, Wallpapers, AuthGoogleCallback } from './pages';
+import { Login, Wallpapers, AuthGoogleCallback } from './pages';
 import { Navbar } from './components/Navbar/Navbar';
 import Categories from './pages/Categories/Categories';
 import Profile from './pages/Profile/Profile';
@@ -64,7 +64,7 @@ function App() {
                 path="/"
                 element={
                   <ProtectedRoute>
-                    <Home />
+                      <Wallpapers />
                   </ProtectedRoute>
                 }
               />

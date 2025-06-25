@@ -15,9 +15,10 @@ type GenerateRequest struct {
 	GeneratorType  *string `json:"generator_type,omitempty"`
 }
 
-type GenerateResponse struct {
+type TaskStatus struct {
 	TaskID       *string `json:"task_id,omitempty"`
-	SavedPathURL string  `json:"saved_path_url"`
+	UrlPathThumb string  `json:"url_path_thumb"`
+	UrlPath      string  `json:"url_path"`
 	Status       string  `json:"status"`
 	Error        *string `json:"error,omitempty"`
 }
@@ -38,7 +39,7 @@ func NewClient(baseURL string) *Client {
 	}
 }
 
-func (c *Client) GenerateImageAI(req *GenerateRequest) (*GenerateResponse, error) {
+func (c *Client) GenerateImageAI(req *GenerateRequest) (*TaskStatus, error) {
 	jsonData, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
@@ -54,7 +55,7 @@ func (c *Client) GenerateImageAI(req *GenerateRequest) (*GenerateResponse, error
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	var genResp GenerateResponse
+	var genResp TaskStatus
 	if err := json.NewDecoder(resp.Body).Decode(&genResp); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
@@ -62,7 +63,7 @@ func (c *Client) GenerateImageAI(req *GenerateRequest) (*GenerateResponse, error
 	return &genResp, nil
 }
 
-func (c *Client) GetTaskStatus(taskID string) (*GenerateResponse, error) {
+func (c *Client) GetTaskStatus(taskID string) (*TaskStatus, error) {
 	resp, err := c.httpClient.Get(fmt.Sprintf("%s/api/images/status/%s", c.baseURL, taskID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
@@ -73,7 +74,7 @@ func (c *Client) GetTaskStatus(taskID string) (*GenerateResponse, error) {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	var statusResp GenerateResponse
+	var statusResp TaskStatus
 	if err := json.NewDecoder(resp.Body).Decode(&statusResp); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}

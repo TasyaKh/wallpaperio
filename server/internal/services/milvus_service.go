@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -12,6 +13,8 @@ import (
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 )
+
+var ErrFeatureNotFound = errors.New("feature not found")
 
 type MilvusService struct {
 	client client.Client
@@ -157,9 +160,13 @@ func (s *MilvusService) GetFeaturesOneWallpaper(featureID uint) ([]float32, erro
 	defer cancel()
 
 	for attempt := 0; attempt < maxRetries; attempt++ {
-		features, err := s.queryFeatures(ctx, featureID)
+		features, err := s.getFeatures(ctx, featureID)
 		if err == nil {
 			return features, nil
+		}
+
+		if errors.Is(err, ErrFeatureNotFound) {
+			return nil, err
 		}
 
 		// Log attempt failure
@@ -174,8 +181,8 @@ func (s *MilvusService) GetFeaturesOneWallpaper(featureID uint) ([]float32, erro
 	return nil, fmt.Errorf("failed to get features after %d attempts", maxRetries)
 }
 
-// queryFeatures performs a single query attempt to get features
-func (s *MilvusService) queryFeatures(ctx context.Context, featureID uint) ([]float32, error) {
+// getFeatures performs a single query attempt to get features
+func (s *MilvusService) getFeatures(ctx context.Context, featureID uint) ([]float32, error) {
 	expr := fmt.Sprintf("id == %d", featureID)
 	outputFields := []string{"features"}
 
@@ -185,7 +192,7 @@ func (s *MilvusService) queryFeatures(ctx context.Context, featureID uint) ([]fl
 	}
 
 	if len(results) == 0 {
-		return nil, fmt.Errorf("no results found for feature ID %d", featureID)
+		return nil, ErrFeatureNotFound
 	}
 
 	featuresCol, ok := results[0].(*entity.ColumnFloatVector)
@@ -195,7 +202,7 @@ func (s *MilvusService) queryFeatures(ctx context.Context, featureID uint) ([]fl
 
 	data := featuresCol.Data()
 	if len(data) == 0 {
-		return nil, fmt.Errorf("empty feature vector for ID %d", featureID)
+		return nil, ErrFeatureNotFound
 	}
 
 	return data[0], nil

@@ -54,6 +54,7 @@ export const getSimilarWallpapers = async (
 
 export const createWallpaper = async (data: {
   image_url: string;
+  image_thumb_url?: string;
   category: string;
   tags: string[];
 }): Promise<Wallpaper> => {

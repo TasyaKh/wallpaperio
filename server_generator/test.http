@@ -11,7 +11,7 @@ Content-Type: application/json
 }
 
 ### Get task status by ID
-GET http://localhost:5001/api/images/status/4bd58e2e-8096-4067-bdc9-1bc67d49ea94
+GET http://localhost:5001/api/images/status/da82a177-b673-435f-98e0-5796410fdc3e
 Content-Type: application/json
 
 ### Test Feature Extraction

@@ -2,7 +2,6 @@ from typing import Optional
 from services.generators.image_generator import ImageData, ImageGenerator
 from g4f import Client
 
-
 class G4FGenerator(ImageGenerator):
     def __init__(self):
         self.client = Client()

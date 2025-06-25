@@ -5,11 +5,12 @@ import (
 )
 
 type CreateWallpaper struct {
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	ImageURL    string   `json:"image_url"`
-	Category    string   `json:"category"`
-	Tags        []string `json:"tags"`
+	Title         string   `json:"title"`
+	Description   string   `json:"description"`
+	ImageURL      string   `json:"image_url"`
+	ImageThumbUrl string   `json:"image_thumb_url"`
+	Category      string   `json:"category"`
+	Tags          []string `json:"tags"`
 }
 
 type WallpaperFilter struct {

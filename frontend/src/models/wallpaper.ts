@@ -9,6 +9,7 @@ export interface Wallpaper {
   id: number;
   title: string;
   image_url: string;
+  image_thumb_url: string;
   category: Category;
   tags: Tag[];
   created_at: string;

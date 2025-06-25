@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { SelectButton } from '../SelectButton/SelectButton';
-import styles from './SelectableList.module.scss';
+import styles from './SelectableBadges.module.scss';
 
-interface SelectableListProps {
+interface Props {
   items: string[];
   onSelect?: (item: string) => void;
 }
 
-export const SelectableList: React.FC<SelectableListProps> = ({ 
+export const SelectableBadges: React.FC<Props> = ({ 
   items,
   onSelect 
 }) => {

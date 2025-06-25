@@ -39,7 +39,7 @@ const WallpaperCard: React.FC<WallpaperCardProps> = ({ wallpaper, onClick, onDel
         width="100%"
         height="100%"
         className={styles.image}
-        placeholderSrc={`${wallpaper.image_url}?w=50`}
+        placeholderSrc={wallpaper.image_thumb_url}
         onError={handleImageError}
       />
       <div className={styles.overlay}>

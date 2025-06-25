@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Optional
-from pydantic import BaseModel
-from services.image_service import ImageData
+from services.images.image_service_base import ImageData
 
 class ImageGenerator(ABC):
     """base class for image generators"""

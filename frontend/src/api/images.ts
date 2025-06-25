@@ -1,25 +1,6 @@
+import { GeneratorsResponse, GenerateImageRequest, GenerateImageResponse } from "../models/images";
 import axios from "./axios";
 
-interface GeneratorsResponse {
-  generators: string[];
-}
-
-interface GenerateImageRequest {
-  prompt: string;
-  width: number;
-  height: number;
-  category: string;
-  tags: string[];
-  generator_type: string;
-}
-
-interface GenerateImageResponse {
-  status: string;
-  task_id?: string;
-  error?: string
-  saved_path_url?: string;
-  server_path_url?: string;
-}
 
 export interface ApiError {
   error: string;

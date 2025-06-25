@@ -30,7 +30,7 @@ services:
       - COMMON_METASTORETYPE=local
       - COMMON_METASTOREPATH=/var/lib/milvus/meta
     volumes:
-      - milvus_data:/var/lib/milvus
+      - ./data/milvus_data:/var/lib/milvus
     restart: unless-stopped
     init: true
     command: ["milvus", "run", "standalone"]

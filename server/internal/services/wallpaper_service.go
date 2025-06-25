@@ -62,12 +62,13 @@ func (s *WallpaperService) CreateWallpaper(params dto.CreateWallpaper) (*models.
 	}
 
 	wallpaper := &models.Wallpaper{
-		Title:       params.Title,
-		Description: params.Description,
-		ImageURL:    params.ImageURL,
-		CategoryID:  category.ID,
-		Tags:        tags,
-		FeatureID:   featureID,
+		Title:         params.Title,
+		Description:   params.Description,
+		ImageURL:      params.ImageURL,
+		ImageThumbURL: params.ImageThumbUrl,
+		CategoryID:    category.ID,
+		Tags:          tags,
+		FeatureID:     featureID,
 	}
 
 	if err := tx.Create(wallpaper).Error; err != nil {

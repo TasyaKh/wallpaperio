@@ -1,25 +1,33 @@
 .categories {
   display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
   flex-wrap: wrap;
 }
 
 .categoryButton {
-  padding: 8px 16px;
-  border-radius: 20px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-full);
+  border: 1px solid var(--theme-border-base);
+  background: var(--theme-background-secondary);
+  color: var(--theme-text-primary);
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 1rem;
+  transition: all var(--transition-fast) ease;
+  font-size: var(--font-size-base);
 
   &:hover {
-    background: var(--bg-hover);
+    background: var(--theme-background-hover);
   }
 
   &.active {
     color: var(--color-primary);
+    border-color: var(--color-primary);
   }
+}
+
+.icon {
+  font-size: var(--font-size-base);
 } 

@@ -8,7 +8,6 @@ import (
 	"wallpaperio/server/internal/domain/models"
 	"wallpaperio/server/internal/domain/models/dto"
 	"wallpaperio/server/internal/services"
-	"wallpaperio/server/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -18,13 +17,6 @@ type WallpaperHandler struct {
 	wallpaperSvc *services.WallpaperService
 	tagSvc       *services.TagService
 	db           *gorm.DB
-}
-
-type CreateWallpaperRequest struct {
-	Title    string   `json:"title"`
-	ImageURL string   `json:"image_url"`
-	Category string   `json:"category"`
-	Tags     []string `json:"tags"`
 }
 
 type SimilarWallpapersResponse struct {
@@ -67,12 +59,6 @@ func (h *WallpaperHandler) GetWallpapers(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch wallpapers"})
 		return
-	}
-
-	// Add host URL to image paths
-	for i := range result.Wallpapers {
-		imagePath := result.Wallpapers[i].ImageURL
-		result.Wallpapers[i].ImageURL = utils.GetImagePath(imagePath)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -118,8 +104,6 @@ func (h *WallpaperHandler) GetNextWallpaper(c *gin.Context) {
 		return
 	}
 
-	wallpaper.ImageURL = utils.GetImagePath(wallpaper.ImageURL)
-
 	c.JSON(http.StatusOK, wallpaper)
 }
 
@@ -144,8 +128,6 @@ func (h *WallpaperHandler) GetPreviousWallpaper(c *gin.Context) {
 		return
 	}
 
-	wallpaper.ImageURL = utils.GetImagePath(wallpaper.ImageURL)
-
 	c.JSON(http.StatusOK, wallpaper)
 }
 
@@ -169,36 +151,21 @@ func (h *WallpaperHandler) GetSimilarWallpapers(c *gin.Context) {
 		return
 	}
 
-	// Add host URL to image paths
-	for i := range wallpapers {
-		imagePath := wallpapers[i].ImageURL
-		wallpapers[i].ImageURL = utils.GetImagePath(imagePath)
-	}
-
 	c.JSON(http.StatusOK, wallpapers)
 }
 
 func (h *WallpaperHandler) CreateWallpaper(c *gin.Context) {
-	var req CreateWallpaperRequest
+	var req dto.CreateWallpaper
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
-
 	// Create wallpaper
-	wallpaper, err := h.wallpaperSvc.CreateWallpaper(dto.CreateWallpaper{
-		Title:    req.Title,
-		ImageURL: req.ImageURL,
-		Category: req.Category,
-		Tags:     req.Tags,
-	})
+	wallpaper, err := h.wallpaperSvc.CreateWallpaper(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create wallpaper: %v", err)})
 		return
 	}
-
-	// Add host URL to image path
-	wallpaper.ImageURL = utils.GetImagePath(wallpaper.ImageURL)
 
 	c.JSON(http.StatusCreated, wallpaper)
 }

@@ -1,12 +1,12 @@
 from celery import shared_task
+from services.images.image_service_base import ImageServiceBase
+from services.images.imgfoto_service import ImgFotoService
 from services.generators.generator_factory import GeneratorFactory
-from services.image_service import ImageService
 from services.generator_service import GeneratorService
-from models.response_model import CompletedResponse, FailedResponse
+from models.response_model import FailedResponse
 
-# Initialize service
-image_service = ImageService()
-# 24 hours max task to process
+image_service: ImageServiceBase = ImgFotoService()
+
 @shared_task(
     name="generate_image_task", 
     bind=True, 
@@ -32,9 +32,7 @@ def generate_image_task(self, request_data: dict) -> dict:
         # Save generated images
         try:
             paths = image_service.save_image(image_data)
-            return CompletedResponse(
-                saved_path_url=paths.file_path
-            ).model_dump()
+            return paths.model_dump()
         except Exception as e:
             err_msg = f"Failed to save image: {str(e)}"
             print(err_msg)

@@ -10,7 +10,6 @@ import (
 	"wallpaperio/server/internal/domain/models/dto"
 	"wallpaperio/server/internal/services"
 	"wallpaperio/server/pkg/image_generator"
-	"wallpaperio/server/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -80,16 +79,6 @@ func (h *ImageHandler) GenerateImage(c *gin.Context) {
 		return
 	}
 
-	// If we got a direct response with saved path, return the image URL
-	if genResp.SavedPathURL != "" {
-		imageURL := utils.GetImagePath(genResp.SavedPathURL)
-		c.JSON(http.StatusOK, dto.CompletedResponseImage{
-			Status:       "completed",
-			SavedPathURL: imageURL,
-		})
-		return
-	}
-
 	// If we got neither task ID nor saved path, return error
 	c.JSON(http.StatusBadRequest, dto.FailedResponseImageStatus{
 		Status: "failed",
@@ -109,7 +98,7 @@ func (h *ImageHandler) GetGenerationStatus(c *gin.Context) {
 		return
 	}
 
-	status, err := h.client.GetTaskStatus(taskID)
+	taskStatus, err := h.client.GetTaskStatus(taskID)
 	if err != nil {
 		log.Printf("Error getting task status: %v", err)
 		c.JSON(http.StatusInternalServerError, dto.FailedResponseImageStatus{
@@ -119,21 +108,18 @@ func (h *ImageHandler) GetGenerationStatus(c *gin.Context) {
 		return
 	}
 
-	// If the task is completed and we have a saved path, return the image URL
-	if status.Status == "completed" && status.SavedPathURL != "" {
-		imageServerURL := utils.GetImagePath(status.SavedPathURL)
-		log.Printf("Task completed, returning image URL: %s", status.SavedPathURL)
+	if taskStatus.Status == "completed" {
 		c.JSON(http.StatusOK, dto.CompletedResponseImage{
-			Status:        "completed",
-			SavedPathURL:  status.SavedPathURL,
-			ServerPathURL: imageServerURL,
+			Status:       "completed",
+			UrlPath:      taskStatus.UrlPath,
+			UrlPathThumb: taskStatus.UrlPathThumb,
 		})
 		return
 	}
 
 	// For pending or failed status, return as is
-	log.Printf("Task status: %s", status.Status)
-	c.JSON(http.StatusOK, status)
+	log.Printf("Task status: %s", taskStatus.Status)
+	c.JSON(http.StatusOK, taskStatus)
 }
 
 func (h *ImageHandler) GetAvailableGenerators(c *gin.Context) {

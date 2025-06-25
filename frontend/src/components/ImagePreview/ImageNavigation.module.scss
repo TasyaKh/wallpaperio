@@ -8,7 +8,7 @@
 .image {
   width: 100%;
   max-height: 80vh;
-    object-fit: contain;
+  object-fit: contain;
   transition: opacity 0.3s ease;
 
   &.loading {
@@ -52,3 +52,4 @@
     right: 20px;
   }
 } 
+
