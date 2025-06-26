@@ -16,6 +16,7 @@ export interface WallpaperCardProps {
 
 const WallpaperCard: React.FC<WallpaperCardProps> = ({ wallpaper, onClick, onDelete, isDeleting }) => {
   const [imgError, setImgError] = useState(false);
+  const [aspect, setAspect] = useState(1);
 
   const handleImageError = () => {
     setImgError(true);
@@ -30,8 +31,19 @@ const WallpaperCard: React.FC<WallpaperCardProps> = ({ wallpaper, onClick, onDel
     onDelete?.();
   };
 
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const { naturalWidth, naturalHeight } = e.currentTarget;
+    if (naturalWidth && naturalHeight) {
+      setAspect(naturalWidth / naturalHeight);
+    }
+  };
+
   return (
-    <div className={styles.wallpaperCard} onClick={onClick}>
+    <div
+      className={styles.wallpaperCard}
+      style={{ aspectRatio: aspect }}
+      onClick={onClick}
+    >
       <LazyLoadImage
         src={imgError ? defaultImage : wallpaper.image_url}
         alt={wallpaper.title}
@@ -41,15 +53,9 @@ const WallpaperCard: React.FC<WallpaperCardProps> = ({ wallpaper, onClick, onDel
         className={styles.image}
         placeholderSrc={wallpaper.image_thumb_url}
         onError={handleImageError}
+        onLoad={handleImageLoad}
       />
       <div className={styles.overlay}>
-        <div className={styles.tags}>
-          {wallpaper.tags.map((tag, index) => (
-            <div key={`tag ${tag.id} index ${index}`} className={styles.tag}>
-              {tag.name}
-            </div>
-          ))}
-        </div>
         {onDelete && (
           <button
             className={styles.deleteButton}

@@ -10,7 +10,8 @@ class G4FGeneratorText:
         category: str,
     ) -> str:
         generation_prompt = f"""
-            Generate a random, creative, and detailed prompt for an image generation AI.
+            Generate a random, creative, and detailed prompt for an image generation AI, include 
+            that image must be masterpiece and unreal modern style.
             The prompt should be in the category: '{category}'.
             Also, generate a list of relevant tags for the prompt.
 

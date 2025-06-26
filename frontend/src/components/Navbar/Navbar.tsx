@@ -1,4 +1,9 @@
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../hooks/useTheme";
 import { ThemeMode } from "../../styles/theme";
@@ -29,7 +34,7 @@ export const Navbar = () => {
       newParams.delete("search");
     }
 
-    if (location.pathname.startsWith('/categories')) {
+    if (location.pathname.startsWith("/categories")) {
       navigate(`/wallpapers?${newParams.toString()}`);
     } else {
       setSearchParams(newParams);
@@ -38,8 +43,8 @@ export const Navbar = () => {
 
   const toggleMenu = () => {
     const isOpen = !isMenuOpen;
-    if(isOpen) document.body.classList.add('modal-open');
-    else document.body.classList.remove('modal-open');
+    if (isOpen) document.body.classList.add("modal-open");
+    else document.body.classList.remove("modal-open");
     setIsMenuOpen(isOpen);
   };
 
@@ -47,7 +52,7 @@ export const Navbar = () => {
   useEffect(() => {
     if (isMenuOpen) {
       setIsMenuOpen(false);
-      document.body.classList.remove('modal-open');
+      document.body.classList.remove("modal-open");
     }
   }, [location]);
 
@@ -55,13 +60,17 @@ export const Navbar = () => {
     const handleResize = () => {
       if (window.innerWidth > 768 && isMenuOpen) {
         setIsMenuOpen(false);
-        document.body.classList.remove('modal-open');
+        document.body.classList.remove("modal-open");
       }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [isMenuOpen]);
+
+  const showSearch =
+    location.pathname.startsWith("/wallpapers") ||
+    location.pathname.startsWith("/categories");
 
   return (
     <nav className={styles.navbar}>
@@ -69,21 +78,28 @@ export const Navbar = () => {
         <Link to="/" className={styles.logo}>
           <img src="/logo.svg" alt="WallpaperIO" width="40" height="40" />
         </Link>
-
-        <button 
+        {showSearch && (
+          <div className={styles.searchWrapper}>
+            <Search
+              onSearch={handleSearch}
+              initialQuery={searchParams.get("search") ?? ""}
+            />
+          </div>
+        )}
+        <button
           className={styles.hamburger}
           onClick={toggleMenu}
           aria-label="Toggle menu"
         >
-          <FontAwesomeIcon 
-            icon={isMenuOpen ? faTimes : faBars} 
+          <FontAwesomeIcon
+            icon={isMenuOpen ? faTimes : faBars}
             className={styles.hamburgerIcon}
           />
         </button>
 
-        <div className={`${styles.navContent} ${isMenuOpen ? styles.active : ''}`}>
-        {(location.pathname.startsWith('/wallpapers') || location.pathname.startsWith('/categories')) && <Search onSearch={handleSearch} initialQuery={searchParams.get('search') ?? ''} />}
-
+        <div
+          className={`${styles.navContent} ${isMenuOpen ? styles.active : ""}`}
+        >
           <div className={styles.navLinks}>
             <Link to="/wallpapers">Wallpapers</Link>
             <Link to="/categories">Categories</Link>
@@ -91,7 +107,6 @@ export const Navbar = () => {
               <Link to="/admin-panel">Admin Panel</Link>
             )}
           </div>
-          
 
           <div className={styles.navActions}>
             <button

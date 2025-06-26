@@ -28,7 +28,7 @@
   border: none;
   cursor: pointer;
   padding: 0.5rem;
-  z-index: 10;
+  z-index: 200;
   color: var(--color-text);
   transition: color 0.2s ease;
 
@@ -101,6 +101,13 @@
   object-fit: cover;
 }
 
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  padding: 0 10px;
+}
+
 @media (max-width: 768px) {
   .hamburger {
     display: flex;
@@ -116,12 +123,25 @@
     flex-direction: column;
     padding: 6rem 2rem 2rem;
     transition: right 0.3s ease;
-    z-index: 5;
+    z-index: 100;
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
 
     &.active {
       right: 0;
+    }
+
+    .searchWrapper {
+      order: 2;
+      padding: 0;
+    }
+
+    .navLinks {
+      order: 1;
+    }
+
+    .navActions {
+      order: 3;
     }
   }
 
@@ -129,11 +149,16 @@
     flex-direction: column;
     width: 100%;
     text-align: center;
+    gap: 1.5rem;
   }
 
   .navActions {
     flex-direction: column;
     width: 100%;
     margin-top: 2rem;
+  }
+
+  .navbarContainer {
+    gap: 1rem;
   }
 }

@@ -51,8 +51,8 @@ def generate_wallpapers_job():
                     category=category.name,
                     tags=tags
                 )
-                created_wallpaper = wallpapers_service.create_wallpaper(wallpaper_data)
-                print(f"Successfully created wallpaper: {created_wallpaper.id}")
+                wallpapers_service.create_wallpaper(wallpaper_data)
+                print(f"Successfully created wallpaper")
 
             except Exception as e:
                 print(f"Error generating wallpaper for category {category.name}: {e}")

@@ -5,10 +5,9 @@
   cursor: pointer;
   transition: transform 0.2s ease;
   border: 1px solid var(--border-color);
-  aspect-ratio: 16/9;
 
   &:hover {
-    .image{
+    .image {
       transform: scale(1.2);
     }
     .overlay {
@@ -22,7 +21,6 @@
   height: 100%;
   object-fit: cover;
   transition: filter 0.3s ease;
-
 
   &.lazy-load-image-background.blur {
     filter: blur(15px);
@@ -44,26 +42,12 @@
   transition: opacity 0.2s ease;
 }
 
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.tag {
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-}
-
 .card {
   position: relative;
   border-radius: var(--border-radius-md);
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
-  aspect-ratio: 16/9;
 
   &:hover {
     transform: scale(1.02);
