@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../hooks/useTheme";
 import { ThemeMode } from "../../styles/theme";
@@ -11,12 +11,30 @@ import { faSun } from "@fortawesome/free-solid-svg-icons";
 import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { RoleManager } from "../../utils/roles";
 import { useEffect, useState } from "react";
+import Search from "../Search/Search";
 
 export const Navbar = () => {
   const { user, loading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handleSearch = (query: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (query) {
+      newParams.set("search", query);
+    } else {
+      newParams.delete("search");
+    }
+
+    if (location.pathname.startsWith('/categories')) {
+      navigate(`/wallpapers?${newParams.toString()}`);
+    } else {
+      setSearchParams(newParams);
+    }
+  };
 
   const toggleMenu = () => {
     const isOpen = !isMenuOpen;
@@ -64,6 +82,8 @@ export const Navbar = () => {
         </button>
 
         <div className={`${styles.navContent} ${isMenuOpen ? styles.active : ''}`}>
+        {(location.pathname.startsWith('/wallpapers') || location.pathname.startsWith('/categories')) && <Search onSearch={handleSearch} initialQuery={searchParams.get('search') ?? ''} />}
+
           <div className={styles.navLinks}>
             <Link to="/wallpapers">Wallpapers</Link>
             <Link to="/categories">Categories</Link>
@@ -71,6 +91,7 @@ export const Navbar = () => {
               <Link to="/admin-panel">Admin Panel</Link>
             )}
           </div>
+          
 
           <div className={styles.navActions}>
             <button

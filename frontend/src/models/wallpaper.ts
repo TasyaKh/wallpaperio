@@ -25,4 +25,5 @@ export interface WallpaperResponse {
 
 export interface NextPreviousWallpaperFilter {
   category?: string;
+  search?: string;
 }

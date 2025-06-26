@@ -3,15 +3,20 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
+import pluginReactConfig from 'eslint-plugin-react/configs/recommended.js'
+import prettierConfig from 'eslint-config-prettier'
 
-export default tseslint.config(
-  { ignores: ['dist'] },
+export default [
+  { languageOptions: { globals: globals.browser } },
+  ...tseslint.configs.recommended,
+  pluginReactConfig,
+  prettierConfig,
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    ignores: ['dist'],
+    extends: [js.configs.recommended],
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
     },
     plugins: {
       'react-hooks': reactHooks,
@@ -25,4 +30,4 @@ export default tseslint.config(
       ],
     },
   },
-)
+]

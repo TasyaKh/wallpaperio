@@ -38,48 +38,13 @@ export default function Wallpapers() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const selectedCategory = searchParams.get("category") ?? "";
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const data = await getCategories();
-        setCategories(data);
-      } catch (err) {
-        console.error("Error loading categories:", err);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    const fetchWallpapers = async () => {
-      try {
-        setLoading(true);
-        const response = await getWallpapers({
-          category: selectedCategory || undefined,
-          limit: ITEMS_PER_PAGE,
-          offset: 0,
-        });
-        setWallpapers(response.wallpapers);
-        setTotal(response.total);
-        setOffset(ITEMS_PER_PAGE);
-        setHasMore(response.wallpapers.length < response.total);
-      } catch (err) {
-        setError("Failed to load wallpapers");
-        console.error("Error loading wallpapers:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWallpapers();
-  }, [selectedCategory]);
+  const searchQuery = searchParams.get("search") ?? "";
 
   const loadMore = async () => {
     try {
       const response = await getWallpapers({
         category: selectedCategory || undefined,
+        search: searchQuery || undefined,
         limit: ITEMS_PER_PAGE,
         offset,
       });
@@ -107,6 +72,7 @@ export default function Wallpapers() {
       setIsNavigating(true);
       const prevWallpaper = await getNextWallpaper(selectedWallpaper.id, {
         category: selectedCategory,
+        search: searchQuery,
       });
       setSelectedWallpaper(prevWallpaper);
     } catch (err) {
@@ -123,6 +89,7 @@ export default function Wallpapers() {
       setIsNavigating(true);
       const nextWallpaper = await getPreviousWallpaper(selectedWallpaper.id, {
         category: selectedCategory,
+        search: searchQuery,
       });
       setSelectedWallpaper(nextWallpaper);
     } catch (err) {
@@ -155,6 +122,44 @@ export default function Wallpapers() {
       setIsDeleting(false);
     }
   };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data);
+      } catch (err) {
+        console.error("Error loading categories:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const fetchWallpapers = async () => {
+      try {
+        setLoading(true);
+        const response = await getWallpapers({
+          category: selectedCategory || undefined,
+          search: searchQuery || undefined,
+          limit: ITEMS_PER_PAGE,
+          offset: 0,
+        });
+        setWallpapers(response.wallpapers);
+        setTotal(response.total);
+        setOffset(ITEMS_PER_PAGE);
+        setHasMore(response.wallpapers.length < response.total);
+      } catch (err) {
+        setError("Failed to load wallpapers");
+        console.error("Error loading wallpapers:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWallpapers();
+  }, [selectedCategory, searchQuery]);
 
   if (loading && wallpapers.length === 0) {
     return <div className={styles.loading}>Loading wallpapers...</div>;

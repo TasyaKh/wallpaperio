@@ -7,6 +7,7 @@ import {
 
 interface GetWallpapersParams {
   category?: string;
+  search?: string;
   limit?: number;
   offset?: number;
 }

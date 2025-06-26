@@ -1,0 +1,45 @@
+
+.searchContainer {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  transition: width 0.4s ease-in-out;
+  border-radius: 20px;
+  background-color: var(--theme-background-tertiary);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+
+  &.expanded {
+    width: 200px;
+  }
+}
+
+.searchIcon {
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 10;
+  padding: 5px;
+  color: var(--theme-text-primary);
+}
+
+.searchInput {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  padding: 0 40px 0 15px;
+  background-color: transparent;
+  color: var(--theme-text-primary);
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s, opacity 0.4s ease-in-out;
+
+  &.visible {
+    visibility: visible;
+    opacity: 1;
+  }
+} 
