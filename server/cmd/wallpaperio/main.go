@@ -49,7 +49,7 @@ func main() {
 
 	// Initialize router
 	router := gin.Default()
-	appRouter := http.NewRouter(jwtService)
+	appRouter := http.NewRouter(jwtService, cfg.Server.APIKey)
 	appRouter.AddHandler("auth", authHandler)
 	appRouter.AddHandler("image", imageHandler)
 	appRouter.AddHandler("category", categoryHandler)

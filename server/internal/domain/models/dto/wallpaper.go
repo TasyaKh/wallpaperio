@@ -16,12 +16,14 @@ type CreateWallpaper struct {
 type WallpaperFilter struct {
 	Tags     []string
 	Category string
+	Search   string
 	Limit    int
 	Offset   int
 }
 
 type NextPreviousWallpaperFilter struct {
 	Category  string
+	Search    string
 	CurrentID uint64
 }
 

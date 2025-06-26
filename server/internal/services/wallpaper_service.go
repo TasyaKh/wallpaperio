@@ -122,25 +122,35 @@ func (s *WallpaperService) GetAllWallpapers() ([]models.Wallpaper, error) {
 func (s *WallpaperService) GetWallpapers(filter dto.WallpaperFilter) (*dto.WallpaperResult, error) {
 	query := s.db.Model(&models.Wallpaper{})
 
+	query = query.
+		Joins("LEFT JOIN categories ON categories.id = wallpapers.category_id").
+		Joins("LEFT JOIN wallpaper_tags ON wallpaper_tags.wallpaper_id = wallpapers.id").
+		Joins("LEFT JOIN tags ON tags.id = wallpaper_tags.tag_id")
+
+	if filter.Search != "" {
+		searchQuery := "%" + filter.Search + "%"
+		query = query.Where("categories.name ILIKE ? OR tags.name ILIKE ?",
+			searchQuery, searchQuery)
+	}
+
 	// Apply filters if provided
 	if len(filter.Tags) > 0 {
 		query = query.
-			Joins("JOIN wallpaper_tags ON wallpaper_tags.wallpaper_id = wallpapers.id").
-			Joins("JOIN tags ON tags.id = wallpaper_tags.tag_id").
 			Where("tags.name IN ?", filter.Tags).
-			Group("wallpapers.id").
 			Having("COUNT(DISTINCT tags.id) = ?", len(filter.Tags))
 	}
 
 	if filter.Category != "" {
-		query = query.
-			Joins("JOIN categories ON categories.id = wallpapers.category_id").
-			Where("categories.name = ?", filter.Category)
+		query = query.Where("categories.name = ?", filter.Category)
 	}
+
+	// Group by wallpaper ID to handle duplicates from joins.
+	query = query.Group("wallpapers.id")
 
 	// Get total count
 	var total int64
-	if err := query.Count(&total).Error; err != nil {
+	// We need to use a subquery to count the distinct grouped wallpapers.
+	if err := s.db.Model(&models.Wallpaper{}).Raw("SELECT COUNT(*) FROM (?) as count_query", query).Scan(&total).Error; err != nil {
 		return nil, err
 	}
 
@@ -210,6 +220,17 @@ func (s *WallpaperService) GetNextWallpaper(filter dto.NextPreviousWallpaperFilt
 		query = query.
 			Joins("JOIN categories ON categories.id = wallpapers.category_id").
 			Where("categories.name = ?", filter.Category)
+	}
+
+	if filter.Search != "" {
+		searchQuery := "%" + filter.Search + "%"
+		query = query.
+			Joins("LEFT JOIN categories ON categories.id = wallpapers.category_id").
+			Joins("LEFT JOIN wallpaper_tags ON wallpaper_tags.wallpaper_id = wallpapers.id").
+			Joins("LEFT JOIN tags ON tags.id = wallpaper_tags.tag_id").
+			Where("categories.name ILIKE ? OR tags.name ILIKE ?",
+				searchQuery, searchQuery).
+			Group("wallpapers.id")
 	}
 
 	var nextWallpaper models.Wallpaper

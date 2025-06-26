@@ -35,6 +35,7 @@ func NewWallpaperHandler(wallpaperSvc *services.WallpaperService, tagSvc *servic
 func (h *WallpaperHandler) GetWallpapers(c *gin.Context) {
 	tags := c.QueryArray("tags")
 	category := c.Query("category")
+	search := c.Query("search")
 
 	limit := 20
 	offset := 0
@@ -53,6 +54,7 @@ func (h *WallpaperHandler) GetWallpapers(c *gin.Context) {
 	result, err := h.wallpaperSvc.GetWallpapers(dto.WallpaperFilter{
 		Tags:     tags,
 		Category: category,
+		Search:   search,
 		Limit:    limit,
 		Offset:   offset,
 	})
@@ -92,9 +94,11 @@ func (h *WallpaperHandler) GetNextWallpaper(c *gin.Context) {
 	}
 
 	category := c.Query("category")
+	search := c.Query("search")
 
 	filter := dto.NextPreviousWallpaperFilter{
 		Category:  category,
+		Search:    search,
 		CurrentID: id,
 	}
 
@@ -114,11 +118,12 @@ func (h *WallpaperHandler) GetPreviousWallpaper(c *gin.Context) {
 		return
 	}
 
-	// Get category from query parameter
 	category := c.Query("category")
+	search := c.Query("search")
 
 	filter := dto.NextPreviousWallpaperFilter{
 		Category:  category,
+		Search:    search,
 		CurrentID: id,
 	}
 

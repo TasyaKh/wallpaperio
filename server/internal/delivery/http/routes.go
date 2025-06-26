@@ -12,13 +12,15 @@ import (
 type Router struct {
 	handlers   map[string]interface{}
 	jwtService *auth.JWTService
+	apiKey     string
 }
 
 // NewRouter creates a new Router instance
-func NewRouter(jwtService *auth.JWTService) *Router {
+func NewRouter(jwtService *auth.JWTService, apiKey string) *Router {
 	return &Router{
 		handlers:   make(map[string]interface{}),
 		jwtService: jwtService,
+		apiKey:     apiKey,
 	}
 }
 
@@ -74,7 +76,7 @@ func (r *Router) Setup(router *gin.Engine) {
 		wallpaper.GET("/:id/next", wallpaperHandler.GetNextWallpaper)
 		wallpaper.GET("/:id/previous", wallpaperHandler.GetPreviousWallpaper)
 		wallpaper.GET("/:id/similar", wallpaperHandler.GetSimilarWallpapers)
-		wallpaper.POST("", middleware.RequireAdmin(r.jwtService), wallpaperHandler.CreateWallpaper)
-		wallpaper.DELETE("/:id", middleware.RequireAdmin(r.jwtService), wallpaperHandler.DeleteWallpaper)
+		wallpaper.POST("", middleware.RequireAdminOrAPIKey(r.jwtService, r.apiKey), wallpaperHandler.CreateWallpaper)
+		wallpaper.DELETE("/:id", middleware.RequireAdminOrAPIKey(r.jwtService, r.apiKey), wallpaperHandler.DeleteWallpaper)
 	}
 }

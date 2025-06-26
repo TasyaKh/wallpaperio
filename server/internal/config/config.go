@@ -14,6 +14,7 @@ type Config struct {
 type ServerConfig struct {
 	Port                   string
 	GeneratorImagesHostURL string
+	APIKey                 string
 }
 
 type DatabaseConfig struct {
@@ -40,6 +41,7 @@ func LoadConfig() *Config {
 		Server: ServerConfig{
 			Port:                   getEnv("SERVER_PORT", "8080"),
 			GeneratorImagesHostURL: getEnv("SERVER_IMAGES_HOST_URL", ""),
+			APIKey:                 getEnv("API_KEY", ""),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
