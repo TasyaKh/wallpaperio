@@ -1,13 +1,28 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from apscheduler.schedulers.background import BackgroundScheduler
 from routes import image_routes
 from config import DEBUG, HOST, PORT
+from tasks.wallpaper_generation_task import generate_wallpapers_job
 
 # Load environment variables
 load_dotenv()
 
-app = FastAPI(title="Image Generator Service", debug=True)
+scheduler = BackgroundScheduler()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    scheduler.add_job(generate_wallpapers_job, 'interval', seconds=30, id='wallpaper_job')
+    scheduler.start()
+    print("Scheduler started...")
+    yield
+    # Shutdown
+    scheduler.shutdown()
+
+app = FastAPI(title="Image Generator Service", debug=True, lifespan=lifespan)
 
 # Configure CORS
 app.add_middleware(

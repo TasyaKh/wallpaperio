@@ -1,7 +1,8 @@
 from typing import Optional
 
-from services.generators.image_generator import ImageData, ImageGenerator
-from services.generators.g4f_pollinations_generator import G4FPollinationsGenerator
+from services.generators.image_generators.image_generator import ImageGenerator
+from services.images.image_service_base import ImageData
+
 
 class GeneratorService:
     """Service that manages different image generators"""

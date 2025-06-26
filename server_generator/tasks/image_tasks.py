@@ -1,8 +1,8 @@
 from celery import shared_task
+from services.generators.image_generators.generator_factory import GeneratorFactory
 from services.images.image_service_base import ImageServiceBase
 from services.images.imgfoto_service import ImgFotoService
-from services.generators.generator_factory import GeneratorFactory
-from services.generator_service import GeneratorService
+from services.generators.generator_service import GeneratorService
 from models.response_model import FailedResponse
 
 image_service: ImageServiceBase = ImgFotoService()

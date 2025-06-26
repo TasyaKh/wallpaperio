@@ -23,7 +23,7 @@ class ImgBBData(BaseModel):
     expiration: int
     image: ImgBBImageVersion
     thumb: ImgBBImageVersion
-    medium: Optional[ImgBBImageVersion]
+    medium: Optional[ImgBBImageVersion] = None
     delete_url: str
 
 

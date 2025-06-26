@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional
+from services.generators.image_generators.generator_factory import GeneratorFactory
 from services.images.image_features import ImageFeatures
-from services.generators.generator_factory import GeneratorFactory
 from celery.result import AsyncResult
 from models.response_model import BaseResponse, FeatureExtractionResponse
 from celery_config import celery_app

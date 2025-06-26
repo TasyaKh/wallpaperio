@@ -1,8 +1,5 @@
 import os
-from typing import Union
 import requests
-from pydantic import BaseModel
-from typing import Literal, Union
 from tensorflow.keras.applications import EfficientNetV2B0
 from tensorflow.keras.applications.efficientnet_v2 import preprocess_input
 from tensorflow.keras.preprocessing import image

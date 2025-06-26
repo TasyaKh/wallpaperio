@@ -1,8 +1,8 @@
 from typing import Dict, Type
-from services.generators.g4f_generator import G4FGenerator
-from services.generators.image_generator import ImageGenerator
-from services.generators.fusion_brain_generator import FusionBrainAIGenerator
-from services.generators.g4f_pollinations_generator import G4FPollinationsGenerator
+from services.generators.image_generators.image_generator import ImageGenerator
+from services.generators.image_generators.fusion_brain_generator import FusionBrainAIGenerator
+from services.generators.image_generators.g4f_generator import G4FGenerator
+from services.generators.image_generators.g4f_pollinations_generator import G4FPollinationsGenerator
 
 _generators: Dict[str, Type[ImageGenerator]] = {
     "fusion_brain": FusionBrainAIGenerator,

@@ -1,9 +1,11 @@
 import json
 from typing import Optional
 from config import FUSION_BRAIN_AI_KEY, FUSION_BRAIN_AI_SECRET
-from services.generators.image_generator import ImageData, ImageGenerator
 import requests
 import time
+
+from services.generators.image_generators.image_generator import ImageGenerator
+from services.images.image_service_base import ImageData
 
 
 class FusionBrainAIGenerator(ImageGenerator):
