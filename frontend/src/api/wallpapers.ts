@@ -12,6 +12,11 @@ interface GetWallpapersParams {
   offset?: number;
 }
 
+export interface PreviewWallpaperResponse {
+  wallpaper: Wallpaper;
+  is_favorite: boolean;
+}
+
 export const getWallpapers = async (
   params: GetWallpapersParams = {}
 ): Promise<WallpaperResponse> => {
@@ -21,23 +26,13 @@ export const getWallpapers = async (
   return response.data;
 };
 
-export const getNextWallpaper = async (
+export const getAdjacentWallpaper = async (
   wallpaperId: number,
+  direction: "next" | "previous",
   filter: NextPreviousWallpaperFilter
-): Promise<Wallpaper> => {
-  const response = await api.get<Wallpaper>(
-    `/api/wallpapers/${wallpaperId}/next`,
-    { params: filter }
-  );
-  return response.data;
-};
-
-export const getPreviousWallpaper = async (
-  wallpaperId: number,
-  filter: NextPreviousWallpaperFilter
-): Promise<Wallpaper> => {
-  const response = await api.get<Wallpaper>(
-    `/api/wallpapers/${wallpaperId}/previous`,
+): Promise<PreviewWallpaperResponse> => {
+  const response = await api.get<PreviewWallpaperResponse>(
+    `/api/wallpapers/${wallpaperId}/${direction}`,
     { params: filter }
   );
   return response.data;
@@ -65,4 +60,26 @@ export const createWallpaper = async (data: {
 
 export const deleteWallpaper = async (id: number): Promise<void> => {
   await api.delete(`/api/wallpapers/${id}`);
+};
+
+export const addFavorite = async (wallpaperId: number): Promise<void> => {
+  await api.post(`/api/wallpapers/${wallpaperId}/favorite`);
+};
+
+export const removeFavorite = async (wallpaperId: number): Promise<void> => {
+  await api.delete(`/api/wallpapers/${wallpaperId}/favorite`);
+};
+
+export const getFavorites = async (limit?: number, offset?: number): Promise<{ wallpapers: Wallpaper[]; total: number }> => {
+  const params: any = {};
+  if (limit !== undefined) params.limit = limit;
+  if (offset !== undefined) params.offset = offset;
+  
+  const response = await api.get<{ wallpapers: Wallpaper[]; total: number }>("/api/wallpapers/favorites", { params });
+  return response.data;
+};
+
+export const getWallpaperInfo = async (wallpaperId: number): Promise<PreviewWallpaperResponse> => {
+  const response = await api.get<PreviewWallpaperResponse>(`/api/wallpapers/${wallpaperId}/info`);
+  return response.data;
 };

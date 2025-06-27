@@ -1,22 +1,24 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import InfiniteScroll from "react-infinite-scroll-component";
 import {
   getWallpapers,
-  getNextWallpaper,
-  getPreviousWallpaper,
+  getAdjacentWallpaper,
+  getWallpaperInfo,
   deleteWallpaper,
+  addFavorite,
+  removeFavorite,
+  PreviewWallpaperResponse,
 } from "../../api/wallpapers";
 import { getCategories } from "../../api/categories";
 import styles from "./Wallpapers.module.scss";
 import { Wallpaper } from "../../models/wallpaper";
 import { Category } from "../../models/category";
-import WallpaperCard from "./components/WallpaperCard/WallpaperCard";
 import ImagePreview from "../../components/ImagePreview/ImagePreview";
 import CategoryFilter from "./components/CategoryFilter/CategoryFilter";
 import { useAuth } from "../../contexts/AuthContext";
 import { RoleManager } from "../../utils/roles";
 import { toast } from "react-toastify";
+import WallpapersGrid from "../../components/Wallpapers/WallpapersGrid/WallpapersGrid";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -30,12 +32,13 @@ export default function Wallpapers() {
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
   const [total, setTotal] = useState(0);
-  const [selectedWallpaper, setSelectedWallpaper] = useState<Wallpaper | null>(
+  const [selectedWallpaper, setSelectedWallpaper] = useState<PreviewWallpaperResponse | null>(
     null
   );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [lastMainWallpaperInfo, setLastMainWallpaperInfo] = useState<PreviewWallpaperResponse | null>(null);
 
   const selectedCategory = searchParams.get("category") ?? "";
   const searchQuery = searchParams.get("search") ?? "";
@@ -48,7 +51,16 @@ export default function Wallpapers() {
         limit: ITEMS_PER_PAGE,
         offset,
       });
-      setWallpapers((prev) => [...prev, ...response.wallpapers]);
+      
+      setWallpapers((prev) => {
+        const existingIds = new Set(prev.map(w => w.id));
+        
+        // Only add wallpapers that don't already exist
+        const newWallpapers = response.wallpapers.filter(w => !existingIds.has(w.id));
+        
+        return [...prev, ...newWallpapers];
+      });
+      
       setOffset((prev) => prev + ITEMS_PER_PAGE);
       setHasMore(wallpapers.length + response.wallpapers.length < total);
     } catch (err) {
@@ -60,23 +72,51 @@ export default function Wallpapers() {
     setSearchParams(categoryName ? { category: categoryName } : {});
   };
 
-  const handleWallpaperClick = (wallpaper: Wallpaper) => {
-    setSelectedWallpaper(wallpaper);
-    setIsPreviewOpen(true);
+  const handleWallpaperClick = async (wallpaper: Wallpaper) => {
+    try {
+      const wallpaperInfo = await getWallpaperInfo(wallpaper.id);
+      setSelectedWallpaper(wallpaperInfo);
+      setIsPreviewOpen(true);
+      setLastMainWallpaperInfo(wallpaperInfo);
+    } catch (err) {
+      console.error("Error fetching wallpaper info:", err);
+      const fallbackInfo = { wallpaper, is_favorite: false };
+      setSelectedWallpaper(fallbackInfo);
+      setIsPreviewOpen(true);
+      setLastMainWallpaperInfo(fallbackInfo);
+    }
+  };
+
+  const handleSimilarWallpaperClick = async (wallpaper: Wallpaper) => {
+    try {
+      const wallpaperInfo = await getWallpaperInfo(wallpaper.id);
+      setSelectedWallpaper(wallpaperInfo);
+      setIsPreviewOpen(true);
+    } catch (err) {
+      console.error("Error fetching wallpaper info:", err);
+      setSelectedWallpaper({ wallpaper, is_favorite: false });
+      setIsPreviewOpen(true);
+    }
   };
 
   const handleNextImage = async () => {
     if (!selectedWallpaper) return;
 
+    let baseWallpaperId = selectedWallpaper.wallpaper.id;
+    if (wallpapers.findIndex(w => w.id === baseWallpaperId) === -1 && lastMainWallpaperInfo) {
+      baseWallpaperId = lastMainWallpaperInfo.wallpaper.id;
+    }
+
     try {
       setIsNavigating(true);
-      const prevWallpaper = await getNextWallpaper(selectedWallpaper.id, {
+      const response = await getAdjacentWallpaper(baseWallpaperId, "next", {
         category: selectedCategory,
         search: searchQuery,
       });
-      setSelectedWallpaper(prevWallpaper);
+      setSelectedWallpaper(response);
+      setLastMainWallpaperInfo(response);
     } catch (err) {
-      console.error("Error fetching previous wallpaper:", err);
+      console.error("Error fetching next wallpaper:", err);
     } finally {
       setIsNavigating(false);
     }
@@ -85,22 +125,28 @@ export default function Wallpapers() {
   const handlePreviousImage = async () => {
     if (!selectedWallpaper) return;
 
+    let baseWallpaperId = selectedWallpaper.wallpaper.id;
+    if (wallpapers.findIndex(w => w.id === baseWallpaperId) === -1 && lastMainWallpaperInfo) {
+      baseWallpaperId = lastMainWallpaperInfo.wallpaper.id;
+    }
+
     try {
       setIsNavigating(true);
-      const nextWallpaper = await getPreviousWallpaper(selectedWallpaper.id, {
+      const response = await getAdjacentWallpaper(baseWallpaperId, "previous", {
         category: selectedCategory,
         search: searchQuery,
       });
-      setSelectedWallpaper(nextWallpaper);
+      setSelectedWallpaper(response);
+      setLastMainWallpaperInfo(response);
     } catch (err) {
-      console.error("Error fetching next wallpaper:", err);
+      console.error("Error fetching previous wallpaper:", err);
     } finally {
       setIsNavigating(false);
     }
   };
 
   const handleDeleteWallpaper = async (wallpaperId: number) => {
-    if (!user || !RoleManager.canManageContent(user.role)) {
+    if (!user || !RoleManager.canDeleteWallpapers(user.role)) {
       toast.error("You do not have permission to delete wallpapers");
       return;
     }
@@ -120,6 +166,28 @@ export default function Wallpapers() {
       toast.error("Failed to delete wallpaper");
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleToggleFavorite = async (wallpaperId: number, isFavorite: boolean) => {
+
+    try {
+      if (isFavorite) {
+        await addFavorite(wallpaperId);
+      } else {
+        await removeFavorite(wallpaperId);
+        toast.success("Removed from favorites");
+      }
+
+      if (selectedWallpaper && selectedWallpaper.wallpaper.id === wallpaperId) {
+        setSelectedWallpaper({
+          ...selectedWallpaper,
+          is_favorite: isFavorite,
+        });
+      }
+    } catch (err) {
+      console.error("Error toggling favorite:", err);
+      toast.error("Failed to update favorite status");
     }
   };
 
@@ -177,47 +245,27 @@ export default function Wallpapers() {
         selectedCategory={selectedCategory}
         onCategoryChange={handleCategoryChange}
       />
-      <InfiniteScroll
-        dataLength={wallpapers.length}
-        next={loadMore}
+      <WallpapersGrid
+        wallpapers={wallpapers}
         hasMore={hasMore}
-        loader={<div className={styles.loading}>Loading more...</div>}
-        endMessage={
-          <p className={styles.endMessage}>
-            {wallpapers.length > 0
-              ? "You've seen all wallpapers!"
-              : "No wallpapers found."}
-          </p>
-        }
-      >
-        <div className={styles.grid}>
-          {wallpapers.map((wallpaper) => (
-            <WallpaperCard
-              key={`wallpaper ${wallpaper.id}`}
-              wallpaper={wallpaper}
-              onClick={() => handleWallpaperClick(wallpaper)}
-              onDelete={
-                user && RoleManager.canManageContent(user.role)
-                  ? () => handleDeleteWallpaper(wallpaper.id)
-                  : undefined
-              }
-              isDeleting={isDeleting}
-            />
-          ))}
-        </div>
-      </InfiniteScroll>
+        loadMore={loadMore}
+        isDeleting={isDeleting}
+        onWallpaperClick={handleWallpaperClick}
+        onDelete={handleDeleteWallpaper}
+      />
 
       {selectedWallpaper && (
         <ImagePreview
           isOpen={isPreviewOpen}
           onClose={() => setIsPreviewOpen(false)}
-          imageUrl={selectedWallpaper.image_url}
-          title={selectedWallpaper.title}
+          imageUrl={selectedWallpaper.wallpaper.image_url}
+          title={selectedWallpaper.wallpaper.title}
           onNext={handleNextImage}
           onPrevious={handlePreviousImage}
           isLoading={isNavigating}
           currentWallpaper={selectedWallpaper}
-          onWallpaperClick={handleWallpaperClick}
+          onSimilarWallpaperClick={handleSimilarWallpaperClick}
+          onToggleFavorite={handleToggleFavorite}
         />
       )}
     </div>

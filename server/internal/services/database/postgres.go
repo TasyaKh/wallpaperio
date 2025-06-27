@@ -29,6 +29,7 @@ func NewPostgresDB(cfg *config.DatabaseConfig) (*PostgresDB, error) {
 		&models.User{},
 		&models.Wallpaper{},
 		&models.WallpaperTag{},
+		&models.WallpaperFavorite{},
 		&models.Category{},
 		&models.Tag{},
 	); err != nil {

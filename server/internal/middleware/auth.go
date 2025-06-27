@@ -61,3 +61,23 @@ func RequireAdminOrAPIKey(jwtService *auth.JWTService, apiKey string) gin.Handle
 		c.Abort()
 	}
 }
+
+func RequireAuth(jwtService *auth.JWTService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := c.GetHeader("Authorization")
+		if token == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+			c.Abort()
+			return
+		}
+		token = strings.TrimPrefix(token, "Bearer ")
+		claims, err := jwtService.ValidateToken(token)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+		c.Set("claims", claims)
+		c.Next()
+	}
+}

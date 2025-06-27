@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faChevronRight, faHeart, faHeartBroken } from '@fortawesome/free-solid-svg-icons';
 import styles from './ImageNavigation.module.scss';
 import defaultImage from '../../assets/not-found-image.svg';
+import { PreviewWallpaperResponse } from '../../api/wallpapers';
 
 interface ImageNavigationProps {
   imageUrl: string;
@@ -10,6 +11,8 @@ interface ImageNavigationProps {
   onNext: () => void;
   onPrevious: () => void;
   isLoading?: boolean;
+  wallpaper: PreviewWallpaperResponse;
+  onToggleFavorite: (wallpaperId: number, isFavorite: boolean) => void;
 }
 
 const ImageNavigation: React.FC<ImageNavigationProps> = ({
@@ -18,11 +21,17 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
   onNext,
   onPrevious,
   isLoading = false,
+  wallpaper,
+  onToggleFavorite,
 }) => {
   const [imgError, setImgError] = useState(false);
 
   const handleImageError = () => {
     setImgError(true);
+  };
+
+  const handleToggleFavorite = () => {
+    onToggleFavorite(wallpaper.wallpaper.id, !wallpaper.is_favorite);
   };
 
   useEffect(()=>{
@@ -52,6 +61,15 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
         disabled={isLoading}
       >
         <FontAwesomeIcon icon={faChevronRight} />
+      </button>
+
+      <button 
+        className={`${styles.favoriteButton} ${wallpaper.is_favorite ? styles.favorited : ''}`} 
+        onClick={handleToggleFavorite}
+        disabled={isLoading}
+        title={wallpaper.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+      >
+        <FontAwesomeIcon icon={wallpaper.is_favorite ? faHeart : faHeartBroken} />
       </button>
     </div>
   );

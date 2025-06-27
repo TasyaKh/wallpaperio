@@ -73,10 +73,14 @@ func (r *Router) Setup(router *gin.Engine) {
 	{
 		wallpaperHandler := r.handlers["wallpaper"].(*handlers.WallpaperHandler)
 		wallpaper.GET("", wallpaperHandler.GetWallpapers)
-		wallpaper.GET("/:id/next", wallpaperHandler.GetNextWallpaper)
-		wallpaper.GET("/:id/previous", wallpaperHandler.GetPreviousWallpaper)
+		wallpaper.GET("/:id/:direction", middleware.RequireAuth(r.jwtService), wallpaperHandler.GetAdjacentWallpaper)
 		wallpaper.GET("/:id/similar", wallpaperHandler.GetSimilarWallpapers)
+		wallpaper.GET("/:id/info", middleware.RequireAuth(r.jwtService), wallpaperHandler.GetWallpaperInfo)
 		wallpaper.POST("", middleware.RequireAdminOrAPIKey(r.jwtService, r.apiKey), wallpaperHandler.CreateWallpaper)
 		wallpaper.DELETE("/:id", middleware.RequireAdminOrAPIKey(r.jwtService, r.apiKey), wallpaperHandler.DeleteWallpaper)
+		// favorite
+		wallpaper.POST("/:id/favorite", middleware.RequireAuth(r.jwtService), wallpaperHandler.AddFavorite)
+		wallpaper.DELETE("/:id/favorite", middleware.RequireAuth(r.jwtService), wallpaperHandler.RemoveFavorite)
+		wallpaper.GET("/favorites", middleware.RequireAuth(r.jwtService), wallpaperHandler.GetFavorites)
 	}
 }

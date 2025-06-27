@@ -9,6 +9,7 @@ import Profile from './pages/Profile/Profile';
 import AdminPanel from './pages/AdminPanel/AdminPanel';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Favorites from './pages/Favorites/Favorites';
 
 // Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -83,6 +84,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <AdminPanel />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/favorites"
+                element={
+                  <ProtectedRoute>
+                    <Favorites />
                   </ProtectedRoute>
                 }
               />

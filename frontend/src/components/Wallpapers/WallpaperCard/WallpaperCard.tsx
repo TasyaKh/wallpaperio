@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import styles from './WallpaperCard.module.scss';
-import { Wallpaper } from '../../../../models/wallpaper';
-import defaultImage from '../../../../assets/not-found-image.svg';
+import { Wallpaper } from '../../../models/wallpaper';
+import defaultImage from '@/assets/not-found-image.svg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
@@ -43,6 +43,7 @@ const WallpaperCard: React.FC<WallpaperCardProps> = ({ wallpaper, onClick, onDel
       className={styles.wallpaperCard}
       style={{ aspectRatio: aspect }}
       onClick={onClick}
+      id={`wallpaper-${wallpaper.id}`}
     >
       <LazyLoadImage
         src={imgError ? defaultImage : wallpaper.image_url}

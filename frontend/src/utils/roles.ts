@@ -4,6 +4,7 @@ export interface RolePermissions {
   canAccessAdminPanel: boolean;
   canManageUsers: boolean;
   canManageContent: boolean;
+  canDeleteWallpapers: boolean;
   // Add more permissions as needed
 }
 
@@ -12,11 +13,13 @@ const rolePermissions: Record<UserRole, RolePermissions> = {
     canAccessAdminPanel: false,
     canManageUsers: false,
     canManageContent: false,
+    canDeleteWallpapers: false,
   },
   admin: {
     canAccessAdminPanel: true,
     canManageUsers: true,
     canManageContent: true,
+    canDeleteWallpapers: true,
   },
 };
 
@@ -35,5 +38,9 @@ export class RoleManager {
 
   static canManageContent(role: UserRole): boolean {
     return this.hasPermission(role, 'canManageContent');
+  }
+
+  static canDeleteWallpapers(role: UserRole): boolean {
+    return this.hasPermission(role, 'canDeleteWallpapers');
   }
 } 

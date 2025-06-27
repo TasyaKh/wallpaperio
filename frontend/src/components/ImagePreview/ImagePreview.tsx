@@ -4,6 +4,7 @@ import styles from "./ImagePreview.module.scss";
 import ImageNavigation from "./ImageNavigation";
 import SimilarWallpapers from "../SimilarWallpapers/SimilarWallpapers";
 import { Wallpaper } from "../../models/wallpaper";
+import { PreviewWallpaperResponse } from "../../api/wallpapers";
 
 interface ImagePreviewProps {
   isOpen: boolean;
@@ -13,8 +14,9 @@ interface ImagePreviewProps {
   onNext: () => void;
   onPrevious: () => void;
   isLoading?: boolean;
-  currentWallpaper: Wallpaper;
-  onWallpaperClick: (wallpaper: Wallpaper) => void;
+  currentWallpaper: PreviewWallpaperResponse;
+  onSimilarWallpaperClick: (wallpaper: Wallpaper) => void;
+  onToggleFavorite: (wallpaperId: number, isFavorite: boolean) => void;
 }
 
 const ImagePreview: React.FC<ImagePreviewProps> = ({
@@ -26,11 +28,12 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
   onPrevious,
   isLoading = false,
   currentWallpaper,
-  onWallpaperClick,
+  onSimilarWallpaperClick,
+  onToggleFavorite,
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div id="previewContainer" className={styles.previewContainer}>
+      <div className={styles.previewContainer}>
         <div>
           <ImageNavigation
             imageUrl={imageUrl}
@@ -38,14 +41,16 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
             onNext={onNext}
             onPrevious={onPrevious}
             isLoading={isLoading}
+            wallpaper={currentWallpaper}
+            onToggleFavorite={onToggleFavorite}
           />
         </div>
 
         <div className={styles.similarContainer}>
           <h3>Similar Wallpapers</h3>
           <SimilarWallpapers
-            currentWallpaperId={currentWallpaper.id}
-            onWallpaperClick={onWallpaperClick}
+            currentWallpaperId={currentWallpaper.wallpaper.id}
+            onWallpaperClick={onSimilarWallpaperClick}
           />
         </div>
       </div>

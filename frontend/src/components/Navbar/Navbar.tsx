@@ -103,6 +103,7 @@ export const Navbar = () => {
           <div className={styles.navLinks}>
             <Link to="/wallpapers">Wallpapers</Link>
             <Link to="/categories">Categories</Link>
+            <Link to="/favorites">Favorites</Link>
             {user && RoleManager.canAccessAdminPanel(user.role) && (
               <Link to="/admin-panel">Admin Panel</Link>
             )}

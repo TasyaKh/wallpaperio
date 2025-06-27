@@ -16,6 +16,15 @@ type WallpaperService struct {
 	milvusSvc  *MilvusService
 }
 
+func (s *WallpaperService) GetWallpaperByID(id uint) (*models.Wallpaper, error) {
+	var wallpaper models.Wallpaper
+	err := s.db.Preload("Tags").Preload("Category").First(&wallpaper, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &wallpaper, nil
+}
+
 func NewWallpaperService(db *gorm.DB, tagSvc *TagService, featureSvc *FeatureService) (*WallpaperService, error) {
 	milvusSvc, err := NewMilvusService()
 	if err != nil {
@@ -207,14 +216,22 @@ func (s *WallpaperService) DeleteWallpaper(id uint) error {
 	return nil
 }
 
-func (s *WallpaperService) GetNextWallpaper(filter dto.NextPreviousWallpaperFilter) (*models.Wallpaper, error) {
+func (s *WallpaperService) GetAdjacentWallpaper(filter dto.NextPreviousWallpaperFilter, direction dto.Direction) (*models.Wallpaper, error) {
 	var currentWallpaper models.Wallpaper
 	if err := s.db.First(&currentWallpaper, filter.CurrentID).Error; err != nil {
 		return nil, fmt.Errorf("current wallpaper not found: %w", err)
 	}
 
-	query := s.db.Model(&models.Wallpaper{}).
-		Where("wallpapers.id < ?", filter.CurrentID)
+	query := s.db.Model(&models.Wallpaper{})
+
+	// Direction logic
+	if direction == dto.DirectionNext {
+		query = query.Where("wallpapers.id < ?", filter.CurrentID)
+	} else if direction == dto.DirectionPrevious {
+		query = query.Where("wallpapers.id > ?", filter.CurrentID)
+	} else {
+		return nil, fmt.Errorf("invalid direction")
+	}
 
 	if filter.Category != "" {
 		query = query.
@@ -228,46 +245,23 @@ func (s *WallpaperService) GetNextWallpaper(filter dto.NextPreviousWallpaperFilt
 			Joins("LEFT JOIN categories ON categories.id = wallpapers.category_id").
 			Joins("LEFT JOIN wallpaper_tags ON wallpaper_tags.wallpaper_id = wallpapers.id").
 			Joins("LEFT JOIN tags ON tags.id = wallpaper_tags.tag_id").
-			Where("categories.name ILIKE ? OR tags.name ILIKE ?",
-				searchQuery, searchQuery).
+			Where("categories.name ILIKE ? OR tags.name ILIKE ?", searchQuery, searchQuery).
 			Group("wallpapers.id")
 	}
 
-	var nextWallpaper models.Wallpaper
+	var wallpaper models.Wallpaper
+	order := "wallpapers.id DESC"
+	if direction == dto.DirectionPrevious {
+		order = "wallpapers.id ASC"
+	}
 	err := query.
-		Order("wallpapers.id DESC").
+		Order(order).
 		Preload("Category").
-		First(&nextWallpaper).Error
+		First(&wallpaper).Error
 	if err != nil {
-		return nil, fmt.Errorf("no next wallpaper found: %w", err)
+		return nil, fmt.Errorf("no %s wallpaper found: %w", direction, err)
 	}
-	return &nextWallpaper, nil
-}
-
-func (s *WallpaperService) GetPreviousWallpaper(filter dto.NextPreviousWallpaperFilter) (*models.Wallpaper, error) {
-	var currentWallpaper models.Wallpaper
-	if err := s.db.First(&currentWallpaper, filter.CurrentID).Error; err != nil {
-		return nil, fmt.Errorf("current wallpaper not found: %w", err)
-	}
-
-	query := s.db.Model(&models.Wallpaper{}).
-		Where("wallpapers.id > ?", filter.CurrentID)
-
-	if filter.Category != "" {
-		query = query.
-			Joins("JOIN categories ON categories.id = wallpapers.category_id").
-			Where("categories.name = ?", filter.Category)
-	}
-
-	var prevWallpaper models.Wallpaper
-	err := query.
-		Order("wallpapers.id ASC").
-		Preload("Category").
-		First(&prevWallpaper).Error
-	if err != nil {
-		return nil, fmt.Errorf("no previous wallpaper found: %w", err)
-	}
-	return &prevWallpaper, nil
+	return &wallpaper, nil
 }
 
 func (s *WallpaperService) GetSimilarWallpapers(currWalppaperId uint, limit int) ([]models.Wallpaper, error) {

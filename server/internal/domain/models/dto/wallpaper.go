@@ -4,6 +4,13 @@ import (
 	"wallpaperio/server/internal/domain/models"
 )
 
+type Direction string
+
+const (
+	DirectionNext     Direction = "next"
+	DirectionPrevious Direction = "previous"
+)
+
 type CreateWallpaper struct {
 	Title         string   `json:"title"`
 	Description   string   `json:"description"`

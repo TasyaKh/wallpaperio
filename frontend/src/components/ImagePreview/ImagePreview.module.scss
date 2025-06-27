@@ -9,18 +9,6 @@
   flex-direction: column;
 }
 
-.loading {
-  text-align: center;
-  padding: 1rem;
-  color: var(--text-secondary);
-}
-
-.error {
-  text-align: center;
-  padding: 1rem;
-  color: var(--error);
-}
-
 .similarContainer {
   padding: var(--spacing-md);
   flex: 1;
