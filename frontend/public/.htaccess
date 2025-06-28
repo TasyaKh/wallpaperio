@@ -1,0 +1,9 @@
+# Включение переписывания URL
+RewriteEngine On
+
+# Если файл или папка существуют, отдаем их напрямую
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Перенаправление всех запросов на index.html
+RewriteRule ^ /index.html [L]

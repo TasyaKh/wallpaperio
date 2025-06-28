@@ -8,6 +8,8 @@ PORT = int(os.getenv("PORT"))
 HOST = os.getenv("HOST", "0.0.0.0")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
+AUTOGENERATE_IMAGES_TIMER_SEC = int(os.getenv("AUTOGENERATE_IMAGES_TIMER_SEC"))
+
 # fusion brain ai
 FUSION_BRAIN_AI_KEY = os.getenv("FUSION_BRAIN_AI_KEY", "")
 FUSION_BRAIN_AI_SECRET = os.getenv("FUSION_BRAIN_AI_SECRET", "")

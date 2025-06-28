@@ -9,8 +9,11 @@ import {
   faGamepad, 
   faPaw, 
   faSeedling, 
-  faWandMagicSparkles,
-  IconDefinition 
+  faSmile,
+  faCat,
+  faPerson,
+  IconDefinition,
+  faPeopleGroup
 } from '@fortawesome/free-solid-svg-icons';
 
 export const categoryIcons: { [key: string]: IconDefinition } = {
@@ -21,8 +24,11 @@ export const categoryIcons: { [key: string]: IconDefinition } = {
   'abstract': faShapes,
   'fantasy': faDragon,
   'woman': faPersonDress,
+  'man': faPerson,
   'anime': faGamepad,
   'animals': faPaw,
   'flowers': faSeedling,
-  'generated': faWandMagicSparkles
+  'cute': faCat,
+  'meme': faSmile,
+  'politic': faPeopleGroup,
 }; 

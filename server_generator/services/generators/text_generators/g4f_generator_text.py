@@ -10,8 +10,9 @@ class G4FGeneratorText:
         category: str,
     ) -> str:
         generation_prompt = f"""
-            Generate a random, creative, and detailed prompt for an image generation AI, include 
-            that image must be masterpiece and unreal modern style.
+            Generate a random short prompt for an image generation AI, include 
+            that image must be in some style, also add specific description for category
+            (for example if it is an animal then mark which type animal it must be, if it is an anime also mention this anime name (naruto, etc.)).
             The prompt should be in the category: '{category}'.
             Also, generate a list of relevant tags for the prompt.
 
@@ -20,6 +21,7 @@ class G4FGeneratorText:
             """
         try:
             response = self.client.chat.completions.create(
+                model="gpt-4o",
                 messages=[{"role": "user", "content": generation_prompt}],
             )
             generated_text = response.choices[0].message.content

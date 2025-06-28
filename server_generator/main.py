@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from apscheduler.schedulers.background import BackgroundScheduler
 from routes import image_routes
-from config import DEBUG, HOST, PORT
+from config import DEBUG, HOST, PORT, AUTOGENERATE_IMAGES_TIMER_SEC
 from tasks.wallpaper_generation_task import generate_wallpapers_job
 
 # Load environment variables
@@ -15,7 +15,7 @@ scheduler = BackgroundScheduler()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    scheduler.add_job(generate_wallpapers_job, 'interval', seconds=30, id='wallpaper_job')
+    scheduler.add_job(generate_wallpapers_job, 'interval', seconds=AUTOGENERATE_IMAGES_TIMER_SEC, id='wallpaper_job')
     scheduler.start()
     print("Scheduler started...")
     yield

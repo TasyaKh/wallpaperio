@@ -23,19 +23,21 @@ type MilvusService struct {
 
 func NewMilvusService() (*MilvusService, error) {
 	cfg := database.NewMilvusConfig()
-
 	// Connect to Milvus
-	milvusClient, err := client.NewGrpcClient(context.Background(), cfg.GetAddress())
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	milvusClient, err := client.NewGrpcClient(ctx, cfg.GetAddress())
 	if err != nil {
+		log.Printf("Failed to connect to Milvus: %v\n", err)
 		return nil, fmt.Errorf("failed to connect to Milvus: %w", err)
 	}
+	log.Println("Connected to Milvus successfully")
 
 	// Create collection if it doesn't exist
 	hasCollection, err := milvusClient.HasCollection(context.Background(), schema.CollectionName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check collection: %w", err)
 	}
-
 	if !hasCollection {
 		// Create collection
 		err = milvusClient.CreateCollection(context.Background(), schema.GetWallpaperSchema(), 2) // 2 shards

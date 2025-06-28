@@ -28,6 +28,7 @@ func (s *WallpaperService) GetWallpaperByID(id uint) (*models.Wallpaper, error) 
 func NewWallpaperService(db *gorm.DB, tagSvc *TagService, featureSvc *FeatureService) (*WallpaperService, error) {
 	milvusSvc, err := NewMilvusService()
 	if err != nil {
+		println("Failed to create Milvus service:", err.Error())
 		return nil, fmt.Errorf("failed to create Milvus service: %w", err)
 	}
 
