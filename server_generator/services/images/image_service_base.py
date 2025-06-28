@@ -24,6 +24,7 @@ class ImageServiceBase(ABC):
         response = requests.get(image_url, timeout=30)
         response.raise_for_status()
         if not response.content:
+            print("Empty response content received")
             raise ValueError("Empty image content")
 
         return response.content

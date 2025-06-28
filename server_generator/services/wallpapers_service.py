@@ -16,12 +16,20 @@ class WallpapersService:
         return [Category(**category) for category in response.json()]
 
     def create_wallpaper(self, wallpaper: WallpaperCreate):
+        wallpaper_data = wallpaper.model_dump()
+        print(f"Sending wallpaper data: {wallpaper_data}")
+        print(f"Headers: {self.headers}")
+        
         response = requests.post(
             f"{self.base_url}/api/wallpapers",
-            json=wallpaper.model_dump(),
+            json=wallpaper_data,
             headers=self.headers,
         )
-        response.raise_for_status()
+        
+        if response.status_code >= 400:
+            print(f"API Error: {response.status_code} - {response.text}")
+            response.raise_for_status()
+            
         return response
 
   

@@ -8,26 +8,27 @@ class ImgBBImageVersion(BaseModel):
     mime: str
     extension: str
     url: str
+    size: Optional[int] = None
 
 
 class ImgBBData(BaseModel):
-    id: str
-    title: str
-    url_viewer: str
+    id_encoded: str
+    filename: str
+    mime: str
     url: str
     display_url: str
     width: int
     height: int
     size: int
-    time: int
-    expiration: int
-    image: ImgBBImageVersion
+    title: str
+    url_viewer: str
+    delete_url: str
     thumb: ImgBBImageVersion
     medium: Optional[ImgBBImageVersion] = None
-    delete_url: str
 
 
 class ImgFotoApiResponse(BaseModel):
-    data: Optional[ImgBBData]
-    success: bool
-    status: int
+    status_code: int
+    status_txt: str
+    success: dict
+    image: ImgBBData
