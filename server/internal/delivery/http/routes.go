@@ -46,7 +46,7 @@ func (r *Router) Setup(router *gin.Engine) {
 	router.Static("/static", "./static")
 
 	// Auth routes
-	auth := router.Group("/auth")
+	auth := router.Group("/api/auth")
 	{
 		authHandler := r.handlers["auth"].(*handlers.GoogleAuthHandler)
 		auth.GET("/google", authHandler.InitiateGoogleAuth)

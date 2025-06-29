@@ -3,7 +3,7 @@ import type { AuthGoogleResponse } from "../models/authGoogle";
 
 export const googleAuthApi = {
   getGoogleAuthUrl: async () => {
-    const response = await api.get<{ auth_url: string }>("/auth/google");
+    const response = await api.get<{ auth_url: string }>("/api/auth/google");
     return response.data.auth_url;
   },
 
@@ -11,7 +11,7 @@ export const googleAuthApi = {
     code: string,
     state: string
   ): Promise<AuthGoogleResponse> => {
-    const response = await api.get<AuthGoogleResponse>(`/auth/google/callback?code=${code}&state=${state}`);
+    const response = await api.get<AuthGoogleResponse>(`/api/auth/google/callback?code=${code}&state=${state}`);
     return response.data;
   },
 };
