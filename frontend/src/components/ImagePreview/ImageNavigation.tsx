@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight, faHeart, faHeartBroken } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
 import styles from './ImageNavigation.module.scss';
 import defaultImage from '../../assets/not-found-image.svg';
 import { PreviewWallpaperResponse } from '../../api/wallpapers';
 import { LazyImage } from '../LazyImage/LazyImage';
+import { useAuth } from '../../contexts/AuthContext';
+import { toast } from 'react-toastify';
 
 interface ImageNavigationProps {
   onNext: () => void;
@@ -22,6 +25,7 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
   onToggleFavorite,
 }) => {
   const [imgError, setImgError] = useState(false);
+  const { user } = useAuth();
 
   const handleImageError = () => {
     setImgError(true);
@@ -32,6 +36,10 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
   };
 
   const handleToggleFavorite = () => {
+    if (!user) {
+      toast.info('Please sign in to add wallpapers to favorites');
+      return
+    }
     onToggleFavorite(wallpaperData.wallpaper.id, !wallpaperData.is_favorite);
   };
 
@@ -74,7 +82,7 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
         className={`${styles.favoriteButton} ${wallpaperData.is_favorite ? styles.favorited : ''}`} 
         onClick={handleToggleFavorite}
         disabled={isLoading}
-        title={wallpaperData.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+        title={user ? (wallpaperData.is_favorite ? 'Remove from favorites' : 'Add to favorites') : 'Sign in to add to favorites'}
       >
         <FontAwesomeIcon icon={wallpaperData.is_favorite ? faHeart : faHeartBroken} />
       </button>

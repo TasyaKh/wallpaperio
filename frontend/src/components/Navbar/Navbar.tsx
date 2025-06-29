@@ -17,6 +17,7 @@ import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { RoleManager } from "../../utils/roles";
 import { useEffect, useState } from "react";
 import Search from "../Search/Search";
+import { toast } from "react-toastify";
 
 export const Navbar = () => {
   const { user, loading } = useAuth();
@@ -38,6 +39,13 @@ export const Navbar = () => {
       navigate(`/wallpapers?${newParams.toString()}`);
     } else {
       setSearchParams(newParams);
+    }
+  };
+
+  const handleFavoritesClick = (e: React.MouseEvent) => {
+    if (!user) {
+      e.preventDefault();
+      navigate('/login');
     }
   };
 
@@ -103,7 +111,13 @@ export const Navbar = () => {
           <div className={styles.navLinks}>
             <Link to="/wallpapers">Wallpapers</Link>
             <Link to="/categories">Categories</Link>
-            <Link to="/favorites">Favorites</Link>
+            <Link 
+              to="/favorites" 
+              onClick={handleFavoritesClick}
+              title={user ? "Your favorite wallpapers" : "Sign in to view favorites"}
+            >
+              Favorites
+            </Link>
             {user && RoleManager.canAccessAdminPanel(user.role) && (
               <Link to="/admin-panel">Admin Panel</Link>
             )}

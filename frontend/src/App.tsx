@@ -37,7 +37,7 @@ const ThemedToastContainer = () => {
   const { theme } = useTheme();
   return (
     <ToastContainer
-      position="top-right"
+      position="bottom-right"
       autoClose={3000}
       hideProgressBar={false}
       newestOnTop
@@ -61,24 +61,21 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/auth/google/callback" element={<AuthGoogleCallback />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                      <Wallpapers />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/wallpapers"
-                element={
-                  <ProtectedRoute>
-                    <Wallpapers />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/profile" element={<Profile />} />
+              
+              {/* Public routes - no authentication required */}
+              <Route path="/" element={<Wallpapers />} />
+              <Route path="/wallpapers" element={<Wallpapers />} />
               <Route path="/categories" element={<Categories />} />
+              
+              {/* Protected routes - authentication required */}
+              <Route
+                path="/favorites"
+                element={
+                  <ProtectedRoute>
+                    <Favorites />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/admin-panel"
                 element={
@@ -88,10 +85,10 @@ function App() {
                 }
               />
               <Route
-                path="/favorites"
+                path="/profile"
                 element={
                   <ProtectedRoute>
-                    <Favorites />
+                    <Profile />
                   </ProtectedRoute>
                 }
               />
