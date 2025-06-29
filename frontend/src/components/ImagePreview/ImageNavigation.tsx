@@ -6,8 +6,6 @@ import defaultImage from '../../assets/not-found-image.svg';
 import { PreviewWallpaperResponse } from '../../api/wallpapers';
 
 interface ImageNavigationProps {
-  imageUrl: string;
-  title?: string;
   onNext: () => void;
   onPrevious: () => void;
   isLoading?: boolean;
@@ -16,12 +14,10 @@ interface ImageNavigationProps {
 }
 
 const ImageNavigation: React.FC<ImageNavigationProps> = ({
-  imageUrl,
-  title,
   onNext,
   onPrevious,
   isLoading = false,
-  wallpaper,
+  wallpaper: wallpaperData,
   onToggleFavorite,
 }) => {
   const [imgError, setImgError] = useState(false);
@@ -30,21 +26,28 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
     setImgError(true);
   };
 
-  const handleToggleFavorite = () => {
-    onToggleFavorite(wallpaper.wallpaper.id, !wallpaper.is_favorite);
+  const handleImageLoad = () => {
+    setImgError(false);
   };
 
-  useEffect(()=>{
-    setImgError(false)
-  }, [imageUrl])
+  const handleToggleFavorite = () => {
+    onToggleFavorite(wallpaperData.wallpaper.id, !wallpaperData.is_favorite);
+  };
+
+  useEffect(() => {
+    setImgError(false);
+  }, [wallpaperData.wallpaper.image_url, wallpaperData.wallpaper.image_medium_url]);
+
+  const displayImage = imgError ? defaultImage : wallpaperData.wallpaper.image_url;
 
   return (
     <div className={styles.imageContainer}>
       <img 
-        src={imgError ? defaultImage : imageUrl} 
-        alt={title || 'Preview'} 
+        src={displayImage} 
+        alt={'Preview'} 
         className={`${styles.image} ${isLoading ? styles.loading : ''}`}
         onError={handleImageError}
+        onLoad={handleImageLoad}
       />
       
       <button 
@@ -64,12 +67,12 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
       </button>
 
       <button 
-        className={`${styles.favoriteButton} ${wallpaper.is_favorite ? styles.favorited : ''}`} 
+        className={`${styles.favoriteButton} ${wallpaperData.is_favorite ? styles.favorited : ''}`} 
         onClick={handleToggleFavorite}
         disabled={isLoading}
-        title={wallpaper.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+        title={wallpaperData.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
       >
-        <FontAwesomeIcon icon={wallpaper.is_favorite ? faHeart : faHeartBroken} />
+        <FontAwesomeIcon icon={wallpaperData.is_favorite ? faHeart : faHeartBroken} />
       </button>
     </div>
   );

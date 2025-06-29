@@ -16,5 +16,6 @@ export interface GenerateImageResponse {
   task_id?: string;
   error?: string;
   url_path_thumb?: string;
+  url_path_medium?: string;
   url_path?: string;
 }

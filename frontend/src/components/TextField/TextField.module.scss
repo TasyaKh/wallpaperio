@@ -11,7 +11,7 @@
 
 .label {
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: var(--theme-text-secondary);
 }
 
 .textField {
@@ -20,8 +20,8 @@
   border-radius: var(--border-radius-sm);
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
-  background-color: var(--background-secondary);
-  color: var(--text-primary);
+  background-color: var(--theme-background-secondary);
+  color: var(--theme-text-primary);
   resize: vertical;
   min-height: 100px;
   font-family: inherit;

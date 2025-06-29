@@ -46,8 +46,8 @@ const WallpaperCard: React.FC<WallpaperCardProps> = ({ wallpaper, onClick, onDel
       id={`wallpaper-${wallpaper.id}`}
     >
       <LazyLoadImage
-        src={imgError ? defaultImage : wallpaper.image_url}
-        alt={wallpaper.title}
+        src={imgError ? defaultImage : (wallpaper.image_medium_url ?? wallpaper.image_url)}
+        alt={`Wallpaper ${wallpaper.id}`}
         effect="blur"
         width="100%"
         height="100%"

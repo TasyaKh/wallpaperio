@@ -166,8 +166,6 @@ const Favorites = () => {
         <ImagePreview
           isOpen={isPreviewOpen}
           onClose={() => setIsPreviewOpen(false)}
-          imageUrl={selectedWallpaper.wallpaper.image_url}
-          title={selectedWallpaper.wallpaper.title}
           onNext={() => navigateToWallpaper('next')}
           onPrevious={() => navigateToWallpaper('previous')}
           isLoading={isNavigating}

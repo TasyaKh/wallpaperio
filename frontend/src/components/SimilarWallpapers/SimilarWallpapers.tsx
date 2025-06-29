@@ -98,10 +98,10 @@ const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
           >
             <LazyLoadImage
               src={imageErrors[wallpaper.id] ? defaultImage : wallpaper.image_url}
-              alt={wallpaper.title}
+              alt={`Similar wallpaper ${wallpaper.id}`}
               effect="blur"
-              height={"100%"}
-              width={"100%"}
+              width="100%"
+              height="100%"
               className={styles.image}
               placeholderSrc={`${wallpaper.image_url}?w=50`}
               onError={() => handleImageError(wallpaper.id)}

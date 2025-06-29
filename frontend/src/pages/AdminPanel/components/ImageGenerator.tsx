@@ -9,7 +9,7 @@ import {
 import { getCategories } from "../../../api/categories";
 import { createWallpaper } from "../../../api/wallpapers";
 import { Category } from "../../../models/category";
-import { SelectableBadges } from "../../../components/SelectableBadges/SelectableBadges";
+import { SelectableBadges } from "../../../components/Badges/SelectableBadges/SelectableBadges";
 import { Button } from "../../../components/Buttons/BaseButton";
 import { Loader } from "../../../components/Loader/Loader";
 import { Alert } from "../../../components/Alert/Alert";
@@ -77,6 +77,7 @@ export const ImageGenerator: React.FC = () => {
           await createWallpaper({
             image_url: responseStatus.url_path,
             image_thumb_url: responseStatus.url_path_thumb,
+            ...(responseStatus.url_path_medium && { image_medium_url: responseStatus.url_path_medium }),
             category: selectedCategory,
             tags: tags,
           });
@@ -163,6 +164,7 @@ export const ImageGenerator: React.FC = () => {
       await createWallpaper({
         image_url: generationStatus?.url_path,
         image_thumb_url: generationStatus?.url_path_thumb,
+        ...(generationStatus?.url_path_medium && { image_medium_url: generationStatus?.url_path_medium }),
         category: selectedCategory,
         tags: tags,
       });

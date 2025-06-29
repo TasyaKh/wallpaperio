@@ -40,7 +40,6 @@ export default function Categories() {
 
   return (
     <div className={styles.categories}>
-      <div className="   "> </div>
       <h1 className="gradient-title">Categories</h1>
       <div className={styles.grid}>
         {categories.map((category) => (

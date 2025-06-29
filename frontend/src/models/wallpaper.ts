@@ -7,11 +7,11 @@ export interface Tag {
 
 export interface Wallpaper {
   id: number;
-  title: string;
   image_url: string;
   image_thumb_url: string;
+  image_medium_url?: string;
   category: Category;
-  tags: Tag[];
+  tags?: Tag[];
   created_at: string;
   updated_at: string;
 }

@@ -1,14 +1,14 @@
 
 .loginContainer {
-  background-color: var(--background-secondary);
+  background-color: var(--theme-background-secondary);
   border-radius: 8px;
   padding: 2rem;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--theme-shadow-base);
 
   h2 {
     margin-bottom: 2rem;
-    color: var(--text-primary);
+    color: var(--theme-text-primary);
   }
 }
 

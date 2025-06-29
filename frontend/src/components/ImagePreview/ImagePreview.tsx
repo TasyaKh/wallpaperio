@@ -5,12 +5,11 @@ import ImageNavigation from "./ImageNavigation";
 import SimilarWallpapers from "../SimilarWallpapers/SimilarWallpapers";
 import { Wallpaper } from "../../models/wallpaper";
 import { PreviewWallpaperResponse } from "../../api/wallpapers";
+import { TagsDisplay } from "../TagsDisplay/TagsDisplay";
 
 interface ImagePreviewProps {
   isOpen: boolean;
   onClose: () => void;
-  imageUrl: string;
-  title?: string;
   onNext: () => void;
   onPrevious: () => void;
   isLoading?: boolean;
@@ -22,8 +21,6 @@ interface ImagePreviewProps {
 const ImagePreview: React.FC<ImagePreviewProps> = ({
   isOpen,
   onClose,
-  imageUrl,
-  title,
   onNext,
   onPrevious,
   isLoading = false,
@@ -36,8 +33,6 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
       <div className={styles.previewContainer}>
         <div>
           <ImageNavigation
-            imageUrl={imageUrl}
-            title={title}
             onNext={onNext}
             onPrevious={onPrevious}
             isLoading={isLoading}
@@ -46,8 +41,12 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
           />
         </div>
 
+        {currentWallpaper.wallpaper.tags && (
+          <TagsDisplay tags={currentWallpaper.wallpaper.tags} />
+        )}
+
         <div className={styles.similarContainer}>
-          <h3>Similar Wallpapers</h3>
+          <h3>Similar</h3>
           <SimilarWallpapers
             currentWallpaperId={currentWallpaper.wallpaper.id}
             onWallpaperClick={onSimilarWallpaperClick}
