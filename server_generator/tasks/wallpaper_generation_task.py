@@ -48,6 +48,7 @@ def generate_wallpapers_job():
                 wallpaper_data = WallpaperCreate(
                     image_url=saved_paths.url_path,
                     image_thumb_url=saved_paths.url_path_thumb,
+                    image_medium_url=saved_paths.url_path_medium if saved_paths.url_path_medium else None,
                     category=category.name,
                     tags=tags
                 )

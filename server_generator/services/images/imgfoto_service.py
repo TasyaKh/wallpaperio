@@ -34,10 +34,12 @@ class ImgFotoService(ImageServiceBase):
             api_response = ImgFotoApiResponse(**response_json)
             image_info = api_response.image
             url_path = image_info.url if image_info else ""
+            url_path_medium = image_info.medium.url if image_info and image_info.medium else ""
             url_path_thumb = image_info.thumb.url if image_info and image_info.thumb else ""
             return SavedImagePaths(
                 url_path=url_path,
-                url_path_thumb=url_path_thumb
+                url_path_medium=url_path_medium,
+                url_path_thumb=url_path_thumb,
             )
         except Exception as e:
             raise ValueError(f"{str(e)}")
