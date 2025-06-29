@@ -39,30 +39,32 @@ export default function Categories() {
   }
 
   return (
-    <div className={styles.categories}>
-      <h1 className="gradient-title">Categories</h1>
-      <div className={styles.grid}>
-        {categories.map((category) => (
-          <div
-            key={category.id}
-            className={styles.categoryCard}
-            onClick={() => handleCategoryClick(category.name)}
-          >
-            <div className={styles.imageContainer}>
-              {category.image_url && (
-                <img
-                  src={category.image_url}
-                  alt={category.name}
-                  className={styles.categoryImage}
-                />
-              )}
+    <div className="container">
+      <div className={styles.categories}>
+        <h1 className="gradient-title">Categories</h1>
+        <div className={styles.grid}>
+          {categories.map((category) => (
+            <div
+              key={category.id}
+              className={styles.categoryCard}
+              onClick={() => handleCategoryClick(category.name)}
+            >
+              <div className={styles.imageContainer}>
+                {category.image_url && (
+                  <img
+                    src={category.image_url}
+                    alt={category.name}
+                    className={styles.categoryImage}
+                  />
+                )}
+              </div>
+              <div className={styles.content}>
+                <h2>{category.name}</h2>
+                <p>{category.description}</p>
+              </div>
             </div>
-            <div className={styles.content}>
-              <h2>{category.name}</h2>
-              <p>{category.description}</p>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

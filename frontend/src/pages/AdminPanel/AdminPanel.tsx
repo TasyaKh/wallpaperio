@@ -4,9 +4,11 @@ import styles from './AdminPanel.module.scss';
 
 const AdminPanel: React.FC = () => {
   return (
-    <div className={styles.adminPanel}>
-      <h1>Admin Panel</h1>
-      <ImageGenerator />
+    <div className="container">
+      <div className={styles.adminPanel}>
+        <h1>Admin Panel</h1>
+        <ImageGenerator />
+      </div>
     </div>
   );
 };
