@@ -8,10 +8,11 @@ type BaseResponseImage struct {
 }
 
 type CompletedResponseImage struct {
-	Status       string  `json:"status"`
-	UrlPathThumb string  `json:"url_path_thumb"`
-	UrlPath      string  `json:"url_path"`
-	Error        *string `json:"error,omitempty"`
+	Status        string  `json:"status"`
+	UrlPathThumb  string  `json:"url_path_thumb"`
+	UrlPathMedium *string `json:"url_path_medium,omitempty"`
+	UrlPath       string  `json:"url_path"`
+	Error         *string `json:"error,omitempty"`
 }
 
 type FailedResponseImageStatus struct {

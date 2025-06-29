@@ -72,13 +72,12 @@ func (s *WallpaperService) CreateWallpaper(params dto.CreateWallpaper) (*models.
 	}
 
 	wallpaper := &models.Wallpaper{
-		Title:         params.Title,
-		Description:   params.Description,
-		ImageURL:      params.ImageURL,
-		ImageThumbURL: params.ImageThumbUrl,
-		CategoryID:    category.ID,
-		Tags:          tags,
-		FeatureID:     featureID,
+		ImageURL:       params.ImageURL,
+		ImageThumbURL:  params.ImageThumbUrl,
+		ImageMediumURL: params.ImageMediumUrl,
+		CategoryID:     category.ID,
+		Tags:           tags,
+		FeatureID:      featureID,
 	}
 
 	if err := tx.Create(wallpaper).Error; err != nil {
@@ -223,7 +222,10 @@ func (s *WallpaperService) GetAdjacentWallpaper(filter dto.NextPreviousWallpaper
 		return nil, fmt.Errorf("current wallpaper not found: %w", err)
 	}
 
-	query := s.db.Model(&models.Wallpaper{})
+	query := s.db.Model(&models.Wallpaper{}).
+		Joins("LEFT JOIN wallpaper_tags ON wallpaper_tags.wallpaper_id = wallpapers.id").
+		Joins("LEFT JOIN tags ON tags.id = wallpaper_tags.tag_id").
+		Joins("JOIN categories ON categories.id = wallpapers.category_id")
 
 	// Direction logic
 	if direction == dto.DirectionNext {
@@ -236,16 +238,12 @@ func (s *WallpaperService) GetAdjacentWallpaper(filter dto.NextPreviousWallpaper
 
 	if filter.Category != "" {
 		query = query.
-			Joins("JOIN categories ON categories.id = wallpapers.category_id").
 			Where("categories.name = ?", filter.Category)
 	}
 
 	if filter.Search != "" {
 		searchQuery := "%" + filter.Search + "%"
 		query = query.
-			Joins("LEFT JOIN categories ON categories.id = wallpapers.category_id").
-			Joins("LEFT JOIN wallpaper_tags ON wallpaper_tags.wallpaper_id = wallpapers.id").
-			Joins("LEFT JOIN tags ON tags.id = wallpaper_tags.tag_id").
 			Where("categories.name ILIKE ? OR tags.name ILIKE ?", searchQuery, searchQuery).
 			Group("wallpapers.id")
 	}
@@ -257,6 +255,7 @@ func (s *WallpaperService) GetAdjacentWallpaper(filter dto.NextPreviousWallpaper
 	}
 	err := query.
 		Order(order).
+		Preload("Tags").
 		Preload("Category").
 		First(&wallpaper).Error
 	if err != nil {

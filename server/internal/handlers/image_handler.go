@@ -110,9 +110,10 @@ func (h *ImageHandler) GetGenerationStatus(c *gin.Context) {
 
 	if taskStatus.Status == "completed" {
 		c.JSON(http.StatusOK, dto.CompletedResponseImage{
-			Status:       "completed",
-			UrlPath:      taskStatus.UrlPath,
-			UrlPathThumb: taskStatus.UrlPathThumb,
+			Status:        "completed",
+			UrlPath:       taskStatus.UrlPath,
+			UrlPathThumb:  taskStatus.UrlPathThumb,
+			UrlPathMedium: taskStatus.UrlPathMedium,
 		})
 		return
 	}
