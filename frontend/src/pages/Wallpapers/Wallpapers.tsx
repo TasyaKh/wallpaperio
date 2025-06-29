@@ -32,13 +32,13 @@ export default function Wallpapers() {
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
   const [total, setTotal] = useState(0);
-  const [selectedWallpaper, setSelectedWallpaper] = useState<PreviewWallpaperResponse | null>(
-    null
-  );
+  const [selectedWallpaper, setSelectedWallpaper] =
+    useState<PreviewWallpaperResponse | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [lastMainWallpaperInfo, setLastMainWallpaperInfo] = useState<PreviewWallpaperResponse | null>(null);
+  const [lastSelectedWallpaperBack, setLastSelectedWallpaperBack] =
+    useState<PreviewWallpaperResponse | null>(null);
 
   const selectedCategory = searchParams.get("category") ?? "";
   const searchQuery = searchParams.get("search") ?? "";
@@ -51,16 +51,18 @@ export default function Wallpapers() {
         limit: ITEMS_PER_PAGE,
         offset,
       });
-      
+
       setWallpapers((prev) => {
-        const existingIds = new Set(prev.map(w => w.id));
-        
+        const existingIds = new Set(prev.map((w) => w.id));
+
         // Only add wallpapers that don't already exist
-        const newWallpapers = response.wallpapers.filter(w => !existingIds.has(w.id));
-        
+        const newWallpapers = response.wallpapers.filter(
+          (w) => !existingIds.has(w.id)
+        );
+
         return [...prev, ...newWallpapers];
       });
-      
+
       setOffset((prev) => prev + ITEMS_PER_PAGE);
       setHasMore(wallpapers.length + response.wallpapers.length < total);
     } catch (err) {
@@ -77,13 +79,13 @@ export default function Wallpapers() {
       const wallpaperInfo = await getWallpaperInfo(wallpaper.id);
       setSelectedWallpaper(wallpaperInfo);
       setIsPreviewOpen(true);
-      setLastMainWallpaperInfo(wallpaperInfo);
+      setLastSelectedWallpaperBack(wallpaperInfo);
     } catch (err) {
       console.error("Error fetching wallpaper info:", err);
       const fallbackInfo = { wallpaper, is_favorite: false };
       setSelectedWallpaper(fallbackInfo);
       setIsPreviewOpen(true);
-      setLastMainWallpaperInfo(fallbackInfo);
+      setLastSelectedWallpaperBack(fallbackInfo);
     }
   };
 
@@ -100,21 +102,20 @@ export default function Wallpapers() {
   };
 
   const handleNextImage = async () => {
-    if (!selectedWallpaper) return;
-
-    let baseWallpaperId = selectedWallpaper.wallpaper.id;
-    if (wallpapers.findIndex(w => w.id === baseWallpaperId) === -1 && lastMainWallpaperInfo) {
-      baseWallpaperId = lastMainWallpaperInfo.wallpaper.id;
-    }
+    if (!lastSelectedWallpaperBack) return;
 
     try {
       setIsNavigating(true);
-      const response = await getAdjacentWallpaper(baseWallpaperId, "next", {
-        category: selectedCategory,
-        search: searchQuery,
-      });
+      const response = await getAdjacentWallpaper(
+        lastSelectedWallpaperBack.wallpaper.id,
+        "next",
+        {
+          category: selectedCategory,
+          search: searchQuery,
+        }
+      );
       setSelectedWallpaper(response);
-      setLastMainWallpaperInfo(response);
+      setLastSelectedWallpaperBack(response);
     } catch (err) {
       console.error("Error fetching next wallpaper:", err);
     } finally {
@@ -123,21 +124,20 @@ export default function Wallpapers() {
   };
 
   const handlePreviousImage = async () => {
-    if (!selectedWallpaper) return;
-
-    let baseWallpaperId = selectedWallpaper.wallpaper.id;
-    if (wallpapers.findIndex(w => w.id === baseWallpaperId) === -1 && lastMainWallpaperInfo) {
-      baseWallpaperId = lastMainWallpaperInfo.wallpaper.id;
-    }
+    if (!lastSelectedWallpaperBack) return;
 
     try {
       setIsNavigating(true);
-      const response = await getAdjacentWallpaper(baseWallpaperId, "previous", {
-        category: selectedCategory,
-        search: searchQuery,
-      });
+      const response = await getAdjacentWallpaper(
+        lastSelectedWallpaperBack.wallpaper.id,
+        "previous",
+        {
+          category: selectedCategory,
+          search: searchQuery,
+        }
+      );
       setSelectedWallpaper(response);
-      setLastMainWallpaperInfo(response);
+      setLastSelectedWallpaperBack(response);
     } catch (err) {
       console.error("Error fetching previous wallpaper:", err);
     } finally {
@@ -169,8 +169,10 @@ export default function Wallpapers() {
     }
   };
 
-  const handleToggleFavorite = async (wallpaperId: number, isFavorite: boolean) => {
-
+  const handleToggleFavorite = async (
+    wallpaperId: number,
+    isFavorite: boolean
+  ) => {
     try {
       if (isFavorite) {
         await addFavorite(wallpaperId);

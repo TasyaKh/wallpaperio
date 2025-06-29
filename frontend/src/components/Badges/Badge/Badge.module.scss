@@ -2,10 +2,10 @@
   display: inline-block;
   padding: var(--spacing-xs) var(--spacing-sm);
   background: var(--theme-background-secondary);
-  border: 1px solid var(--color-primary);
-  border-radius: var(--border-radius-xl);
+  border: 1px solid var(--theme-border-light);
+  border-radius: var(--border-radius-full);
   font-size: var(--font-size-xs);
   color: var(--theme-text-primary);
   white-space: nowrap;
   cursor: default;
-} 
+}

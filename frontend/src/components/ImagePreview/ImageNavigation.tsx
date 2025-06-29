@@ -4,6 +4,7 @@ import { faChevronLeft, faChevronRight, faHeart, faHeartBroken } from '@fortawes
 import styles from './ImageNavigation.module.scss';
 import defaultImage from '../../assets/not-found-image.svg';
 import { PreviewWallpaperResponse } from '../../api/wallpapers';
+import { LazyImage } from '../LazyImage/LazyImage';
 
 interface ImageNavigationProps {
   onNext: () => void;
@@ -42,12 +43,15 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
 
   return (
     <div className={styles.imageContainer}>
-      <img 
-        src={displayImage} 
-        alt={'Preview'} 
-        className={`${styles.image} ${isLoading ? styles.loading : ''}`}
-        onError={handleImageError}
+      <LazyImage
+        key={wallpaperData.wallpaper.id}
+        src={displayImage}
+        alt={'Preview'}
+        placeholderSrc={wallpaperData.wallpaper.image_thumb_url}
+        fallbackSrc={defaultImage}
+        objectFit="contain"
         onLoad={handleImageLoad}
+        onError={handleImageError}
       />
       
       <button 

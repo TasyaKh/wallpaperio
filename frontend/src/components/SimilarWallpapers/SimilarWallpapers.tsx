@@ -2,8 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Wallpaper } from "../../models/wallpaper";
 import { getSimilarWallpapers } from "../../api/wallpapers";
 import styles from "./SimilarWallpapers.module.scss";
-import { LazyLoadImage } from "react-lazy-load-image-component";
-import "react-lazy-load-image-component/src/effects/blur.css";
+import { LazyImage } from "../LazyImage/LazyImage";
 import defaultImage from "../../assets/not-found-image.svg";
 import InfiniteScroll from "react-infinite-scroll-component";
 
@@ -96,14 +95,12 @@ const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
             className={styles.wallpaperItem}
             onClick={() => onWallpaperClick(wallpaper)}
           >
-            <LazyLoadImage
+            <LazyImage
               src={imageErrors[wallpaper.id] ? defaultImage : wallpaper.image_url}
               alt={`Similar wallpaper ${wallpaper.id}`}
-              effect="blur"
-              width="100%"
-              height="100%"
-              className={styles.image}
-              placeholderSrc={`${wallpaper.image_url}?w=50`}
+              placeholderSrc={wallpaper.image_thumb_url}
+              fallbackSrc={defaultImage}
+              objectFit="cover"
               onError={() => handleImageError(wallpaper.id)}
             />
           </div>

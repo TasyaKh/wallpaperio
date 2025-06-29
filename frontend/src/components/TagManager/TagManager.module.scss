@@ -16,7 +16,7 @@
   input {
     flex: 1;
     padding: var(--spacing-sm);
-    border: 1px solid var(--theme-border);
+    border: 1px solid var(--theme-border-light);
     border-radius: var(--border-radius-md);
     background: var(--theme-background-primary);
     color: var(--theme-text-primary);
@@ -45,7 +45,7 @@
   gap: var(--spacing-xs);
   padding: var(--spacing-xs) var(--spacing-sm);
   background: var(--theme-background-secondary);
-  border: 1px solid var(--theme-border);
+  border: 1px solid var(--theme-border-light);
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-sm);
   color: var(--theme-text-primary);
