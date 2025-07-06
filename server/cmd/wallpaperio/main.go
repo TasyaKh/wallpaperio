@@ -49,6 +49,10 @@ func main() {
 
 	// Initialize router
 	router := gin.Default()
+	// wallpaperio.online
+	// if err := router.SetTrustedProxies([]string{"127.0.0.1", "148.253.208.178"}); err != nil {
+	// 	log.Printf("Failed to set trusted proxies: %v", err)
+	// }
 	appRouter := http.NewRouter(jwtService, cfg.Server.APIKey)
 	appRouter.AddHandler("auth", authHandler)
 	appRouter.AddHandler("image", imageHandler)

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SelectButton } from '../SelectButton/SelectButton';
+import { SelectButton } from '../../SelectButton/SelectButton';
 import styles from './SelectableBadges.module.scss';
 
 interface Props {

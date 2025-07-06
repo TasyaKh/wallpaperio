@@ -6,6 +6,7 @@ import requests
 
 class SavedImagePaths(BaseModel):
     url_path_thumb: str
+    url_path_medium: str
     url_path: str
 
 class ImageData(BaseModel):

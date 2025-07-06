@@ -22,5 +22,6 @@
   
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.scss"],
+  "exclude": ["node_modules", "dist", "build", "coverage", "cypress", "e2e", "scripts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

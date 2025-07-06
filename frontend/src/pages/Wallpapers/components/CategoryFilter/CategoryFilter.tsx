@@ -1,8 +1,8 @@
-import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import styles from './CategoryFilter.module.scss';
-import { Category } from '../../../../models/category';
-import { categoryIcons } from '../../../../constants/categoryIcons';
+import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import styles from "./CategoryFilter.module.scss";
+import { Category } from "../../../../models/category";
+import { categoryIcons } from "../../../../constants/categoryIcons";
 
 interface CategoryFilterProps {
   categories: Category[];
@@ -18,10 +18,10 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
   return (
     <div className={styles.categories}>
       <button
-        className={`${styles.categoryButton} ${!selectedCategory ? styles.active : ''}`}
+        className={`${styles.categoryButton} ${!selectedCategory ? styles.active : ""}`}
         onClick={() => onCategoryChange(null)}
       >
-        <FontAwesomeIcon icon={categoryIcons['all']} className={styles.icon} />
+        <FontAwesomeIcon icon={categoryIcons["all"]} className={styles.icon} />
         All
       </button>
       {categories.map((category) => {
@@ -29,10 +29,12 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
         return (
           <button
             key={category.id}
-            className={`${styles.categoryButton} ${selectedCategory === category.name ? styles.active : ''}`}
+            className={`${styles.categoryButton} ${selectedCategory === category.name ? styles.active : ""}`}
             onClick={() => onCategoryChange(category.name)}
           >
-            {categoryIcon && <FontAwesomeIcon icon={categoryIcon} className={styles.icon} />}
+            {categoryIcon && (
+              <FontAwesomeIcon icon={categoryIcon} className={styles.icon} />
+            )}
             {category.name}
           </button>
         );
@@ -41,4 +43,4 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
   );
 };
 
-export default CategoryFilter; 
+export default CategoryFilter;

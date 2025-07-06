@@ -33,7 +33,6 @@ const Favorites = () => {
 
   useEffect(() => {
     const fetchFavorites = async () => {
-        console.log("Fetching favorites with limit:", ITEMS_PER_PAGE, "and offset:", 0);
       try {
         setLoading(true);
         const response = await getFavorites(ITEMS_PER_PAGE, 0);
@@ -166,8 +165,6 @@ const Favorites = () => {
         <ImagePreview
           isOpen={isPreviewOpen}
           onClose={() => setIsPreviewOpen(false)}
-          imageUrl={selectedWallpaper.wallpaper.image_url}
-          title={selectedWallpaper.wallpaper.title}
           onNext={() => navigateToWallpaper('next')}
           onPrevious={() => navigateToWallpaper('previous')}
           isLoading={isNavigating}

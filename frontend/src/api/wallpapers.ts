@@ -51,6 +51,7 @@ export const getSimilarWallpapers = async (
 export const createWallpaper = async (data: {
   image_url: string;
   image_thumb_url?: string;
+  image_medium_url?: string;
   category: string;
   tags: string[];
 }): Promise<Wallpaper> => {
@@ -82,4 +83,11 @@ export const getFavorites = async (limit?: number, offset?: number): Promise<{ w
 export const getWallpaperInfo = async (wallpaperId: number): Promise<PreviewWallpaperResponse> => {
   const response = await api.get<PreviewWallpaperResponse>(`/api/wallpapers/${wallpaperId}/info`);
   return response.data;
+};
+
+export const installWallpaper = async (wallpaperId: number): Promise<Blob> => {
+  const response = await api.get(`/api/wallpapers/${wallpaperId}/install`, {
+    responseType: 'blob',
+  });
+  return response.data as Blob;
 };

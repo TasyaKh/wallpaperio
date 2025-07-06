@@ -16,11 +16,12 @@ type GenerateRequest struct {
 }
 
 type TaskStatus struct {
-	TaskID       *string `json:"task_id,omitempty"`
-	UrlPathThumb string  `json:"url_path_thumb"`
-	UrlPath      string  `json:"url_path"`
-	Status       string  `json:"status"`
-	Error        *string `json:"error,omitempty"`
+	TaskID        *string `json:"task_id,omitempty"`
+	UrlPathThumb  string  `json:"url_path_thumb"`
+	UrlPathMedium *string `json:"url_path_medium,omitempty"`
+	UrlPath       string  `json:"url_path"`
+	Status        string  `json:"status"`
+	Error         *string `json:"error,omitempty"`
 }
 
 type Client struct {

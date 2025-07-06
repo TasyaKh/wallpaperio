@@ -3,16 +3,19 @@ import styles from "./Login.module.scss";
 
 const Login = () => {
   return (
-    <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center">
-      <div className="row w-100 justify-content-center">
-        <div className={styles.loginContainer}>
-          <h2 className="gradient-title">Sign in to WallpaperIO</h2>
-          <div className={styles.googleButtonContainer}>
-            <GoogleLoginButton />
+    <>
+      <div className={styles.fullBackground}></div>
+      <div className={`container ${styles.container}`}>
+        <div className={styles.centerWrap}>
+          <div className={styles.loginContainer}>
+            <h2 className="gradient-title">Sign in to WallpaperIO</h2>
+            <div className={styles.googleButtonContainer}>
+              <GoogleLoginButton />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

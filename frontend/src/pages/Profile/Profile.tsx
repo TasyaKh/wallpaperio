@@ -32,18 +32,20 @@ export default function Profile() {
   }
 
   return (
-    <div className={styles.profile}>
-      <div className={styles.content}>
-        <h1>Profile</h1>
-        <div className={styles.userInfo}>
-          <img src={user.profile_pic_url || "/default-avatar.png"} alt={user.name} className={styles.avatar} />
-          <h2>{user.name}</h2>
-          <p>{user.email}</p>
-        </div>
-        <div className={styles.actions}>
-          <Button variant="secondary" onClick={handleLogout} disabled={loading}>
-            {loading ? 'Logging out...' : 'Logout'}
-          </Button>
+    <div className="container">
+      <div className={styles.profile}>
+        <div className={styles.content}>
+          <h1>Profile</h1>
+          <div className={styles.userInfo}>
+            <img src={user.profile_pic_url || "/default-avatar.png"} alt={user.name} className={styles.avatar} />
+            <h2>{user.name}</h2>
+            <p>{user.email}</p>
+          </div>
+          <div className={styles.actions}>
+            <Button variant="secondary" onClick={handleLogout} disabled={loading}>
+              {loading ? 'Logging out...' : 'Logout'}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

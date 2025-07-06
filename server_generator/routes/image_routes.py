@@ -67,6 +67,7 @@ async def get_generation_status(task_id: str):
                 task_id=task_id,
                 status="success",
                 url_path_thumb=result.get("url_path_thumb"),
+                url_path_medium=result.get("url_path_medium"),
                 url_path=result.get("url_path"),
             )
         elif task_result.status == "STARTED":

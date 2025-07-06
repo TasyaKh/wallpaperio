@@ -1,18 +1,49 @@
+.fullBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-image: url('@/assets/live-circles.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 
 .loginContainer {
-  background-color: var(--background-secondary);
-  border-radius: 8px;
-  padding: 2rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: var(--border-radius-xl);
+  padding: 2rem 1rem;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px 0 var(--theme-shadow-base), 0 1.5px 6px 0 var(--theme-shadow-dark);
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
 
   h2 {
     margin-bottom: 2rem;
-    color: var(--text-primary);
+    color: var(--theme-text-primary);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
   }
 }
 
 .googleButtonContainer {
   display: flex;
   justify-content: center;
+  width: 100%;
+}
+
+.centerWrap {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
 }

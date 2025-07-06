@@ -6,6 +6,7 @@ class BaseResponse(BaseModel):
     error: Optional[str] = None
     task_id: Optional[str] = None
     url_path_thumb: Optional[str] = None
+    url_path_medium: Optional[str] = None
     url_path: Optional[str] = None
 
 class FailedResponse(BaseResponse):
