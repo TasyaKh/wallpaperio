@@ -17,7 +17,6 @@ import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { RoleManager } from "../../utils/roles";
 import { useEffect, useState } from "react";
 import Search from "../Search/Search";
-import { toast } from "react-toastify";
 
 export const Navbar = () => {
   const { user, loading } = useAuth();

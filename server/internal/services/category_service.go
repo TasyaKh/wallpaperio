@@ -1,8 +1,6 @@
 package services
 
 import (
-	"fmt"
-
 	"wallpaperio/server/internal/domain/models"
 
 	"gorm.io/gorm"
@@ -26,13 +24,5 @@ func (s *CategoryService) GetAllCategories() ([]models.Category, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// Add base URL to image paths
-	for i := range categories {
-		if categories[i].ImageURL != "" {
-			categories[i].ImageURL = fmt.Sprintf("%s/%s", s.baseURL, categories[i].ImageURL)
-		}
-	}
-
 	return categories, nil
 }

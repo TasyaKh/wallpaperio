@@ -11,7 +11,7 @@ interface SimilarWallpapersProps {
   onWallpaperClick: (wallpaper: Wallpaper) => void;
 }
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 20;
 
 const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
   currentWallpaperId,

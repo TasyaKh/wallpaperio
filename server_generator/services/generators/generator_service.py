@@ -1,6 +1,7 @@
 from typing import Optional
 
 from services.generators.image_generators.image_generator import ImageGenerator
+from services.generators.image_generators.g4f_pollinations_generator import G4FPollinationsGenerator
 from services.images.image_service_base import ImageData
 
 

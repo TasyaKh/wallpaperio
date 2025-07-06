@@ -1,0 +1,8 @@
+celery==5.5.3
+redis==6.2.0
+requests==2.32.3
+python-dotenv==1.0.1
+pydantic==2.6.1
+Pillow==11.2.1
+numpy==1.26.4
+g4f==0.5.3.2 
