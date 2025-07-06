@@ -5,7 +5,7 @@ const Login = () => {
   return (
     <>
       <div className={styles.fullBackground}></div>
-      <div className={`container ${styles.container}`}>
+      <div className={`container`}>
         <div className={styles.centerWrap}>
           <div className={styles.loginContainer}>
             <h2 className="gradient-title">Sign in to WallpaperIO</h2>
