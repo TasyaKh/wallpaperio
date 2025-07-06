@@ -30,7 +30,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className={styles.previewContainer}>
+      <div id="previewContainer" className={styles.previewContainer}>
         <div>
           <ImageNavigation
             onNext={onNext}
