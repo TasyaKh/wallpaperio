@@ -75,7 +75,7 @@ func (r *Router) Setup(router *gin.Engine) {
 		wallpaper.GET("", wallpaperHandler.GetWallpapers)
 		wallpaper.GET("/:id/:direction", wallpaperHandler.GetAdjacentWallpaper)
 		wallpaper.GET("/:id/similar", wallpaperHandler.GetSimilarWallpapers)
-		wallpaper.GET("/:id/info", wallpaperHandler.GetWallpaperInfo)
+		wallpaper.GET("/:id/info", middleware.OptionalAuth(r.jwtService), wallpaperHandler.GetWallpaperInfo)
 		wallpaper.GET("/:id/install", wallpaperHandler.InstallWallpaper)
 		wallpaper.POST("", middleware.RequireAdminOrAPIKey(r.jwtService, r.apiKey), wallpaperHandler.CreateWallpaper)
 		wallpaper.DELETE("/:id", middleware.RequireAdminOrAPIKey(r.jwtService, r.apiKey), wallpaperHandler.DeleteWallpaper)

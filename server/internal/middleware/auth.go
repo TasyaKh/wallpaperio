@@ -81,3 +81,17 @@ func RequireAuth(jwtService *auth.JWTService) gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func OptionalAuth(jwtService *auth.JWTService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := c.GetHeader("Authorization")
+		if token != "" {
+			token = strings.TrimPrefix(token, "Bearer ")
+			claims, err := jwtService.ValidateToken(token)
+			if err == nil {
+				c.Set("claims", claims)
+			}
+		}
+		c.Next()
+	}
+}
