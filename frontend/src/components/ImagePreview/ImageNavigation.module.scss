@@ -8,16 +8,11 @@
   align-items: center;
   justify-content: center;
   background: var(--theme-background-secondary);
-  border-radius: var(--border-radius-lg);
 }
 
 .navButton {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  transition: all var(--transition-normal) ease;
-  background: var(--theme-overlay-dark);
   border: none;
   color: var(--color-primary);
   width: 48px;
@@ -25,20 +20,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-size-lg);
   z-index: var(--z-index-fixed);
-
-  &:hover {
-    background: var(--theme-shadow-dark);
-    transform: translateY(-50%) scale(1.1);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: translateY(-50%) scale(1);
-  }
 
   &.prevButton {
     left: var(--spacing-lg);
@@ -53,30 +35,7 @@
   position: absolute;
   top: var(--spacing-md);
   left: var(--spacing-lg);
-  cursor: pointer;
-  transition: all var(--transition-normal) ease;
-  background: var(--theme-overlay-dark);
-  border: none;
-  color: var(--theme-text-secondary);
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-size-lg);
   z-index: var(--z-index-fixed);
-
-  &:hover {
-    background: var(--theme-shadow-dark);
-    transform: scale(1.1);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: scale(1);
-  }
 
   &.favorited {
     color: var(--theme-status-error);
@@ -86,4 +45,11 @@
       background: rgba(248, 113, 113, 0.3);
     }
   }
+}
+
+.installButton {
+  position: absolute;
+  top: 10px;
+  right: 70px;
+  z-index: var(--z-index-fixed);
 }

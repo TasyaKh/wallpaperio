@@ -287,3 +287,8 @@ func (s *WallpaperService) GetSimilarWallpapers(currWalppaperId uint, limit int)
 
 	return similarWallpapers, nil
 }
+
+// IncrementDownloads increments the download count for a wallpaper
+func (s *WallpaperService) IncrementDownloads(id uint) error {
+	return s.db.Model(&models.Wallpaper{}).Where("id = ?", id).UpdateColumn("downloads", gorm.Expr("downloads + 1")).Error
+}

@@ -9,7 +9,6 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: 20px;
 }
 
 .modalContent {
@@ -42,4 +41,13 @@
   &:hover {
     background-color: rgba(0, 0, 0, 0.3);
   }
-} 
+}
+
+@media (max-width: 600px) {
+  .modalContent {
+    border-radius: 0;
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+  }
+}

@@ -1,13 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight, faHeart, faHeartBroken } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
-import styles from './ImageNavigation.module.scss';
-import defaultImage from '../../assets/not-found-image.svg';
-import { PreviewWallpaperResponse } from '../../api/wallpapers';
-import { LazyImage } from '../LazyImage/LazyImage';
-import { useAuth } from '../../contexts/AuthContext';
-import { toast } from 'react-toastify';
+import React, { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChevronLeft,
+  faChevronRight,
+  faHeart,
+  faHeartBroken,
+  faDownload,
+} from "@fortawesome/free-solid-svg-icons";
+import styles from "./ImageNavigation.module.scss";
+import defaultImage from "../../assets/not-found-image.svg";
+import { PreviewWallpaperResponse } from "../../api/wallpapers";
+import { LazyImage } from "../LazyImage/LazyImage";
+import { useAuth } from "../../contexts/AuthContext";
+import { toast } from "react-toastify";
+import { saveAs } from "file-saver";
+import { installWallpaper } from "../../api/wallpapers";
+import IconButton from "../Buttons/IconButton/IconButton";
 
 interface ImageNavigationProps {
   onNext: () => void;
@@ -25,6 +33,8 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
   onToggleFavorite,
 }) => {
   const [imgError, setImgError] = useState(false);
+  const [isInstalling, setIsInstalling] = useState(false);
+  const [isFavoriting, setIsFavoriting] = useState(false);
   const { user } = useAuth();
 
   const handleImageError = () => {
@@ -35,59 +45,100 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
     setImgError(false);
   };
 
-  const handleToggleFavorite = () => {
+  const handleToggleFavorite = async () => {
     if (!user) {
-      toast.info('Please sign in to add wallpapers to favorites');
-      return
+      toast.info("Please sign in to add wallpapers to favorites");
+      return;
     }
-    onToggleFavorite(wallpaperData.wallpaper.id, !wallpaperData.is_favorite);
+
+    if (isFavoriting) return;
+
+    setIsFavoriting(true);
+    try {
+      await onToggleFavorite(
+        wallpaperData.wallpaper.id,
+        !wallpaperData.is_favorite
+      );
+    } catch (err) {
+      console.error("Failed to toggle favorite:", err);
+    } finally {
+      setIsFavoriting(false);
+    }
+  };
+
+  const installWallpaperHandler = async () => {
+    if (isInstalling) return;
+
+    setIsInstalling(true);
+    try {
+      const blob = await installWallpaper(wallpaperData.wallpaper.id);
+      const filename =
+        wallpaperData.wallpaper.image_url.split("/").pop() || "wallpaper.jpg";
+      saveAs(blob, filename);
+    } catch (err) {
+      console.error("Install failed:", err);
+    } finally {
+      setIsInstalling(false);
+    }
   };
 
   useEffect(() => {
     setImgError(false);
-  }, [wallpaperData.wallpaper.image_url, wallpaperData.wallpaper.image_medium_url]);
+  }, [
+    wallpaperData.wallpaper.image_url,
+    wallpaperData.wallpaper.image_medium_url,
+  ]);
 
-  const displayImage = imgError ? defaultImage : wallpaperData.wallpaper.image_url;
+  const displayImage = imgError
+    ? defaultImage
+    : wallpaperData.wallpaper.image_url;
 
   return (
     <div className={styles.imageContainer}>
       <LazyImage
         key={wallpaperData.wallpaper.id}
         src={displayImage}
-        alt={'Preview'}
+        alt={"Preview"}
         placeholderSrc={wallpaperData.wallpaper.image_thumb_url}
         fallbackSrc={defaultImage}
         objectFit="contain"
         onLoad={handleImageLoad}
         onError={handleImageError}
       />
-      
-      <button 
-        className={`${styles.navButton} ${styles.prevButton}`} 
+
+      <IconButton
+        icon={faChevronLeft}
         onClick={onPrevious}
         disabled={isLoading}
-      >
-        <FontAwesomeIcon icon={faChevronLeft} />
-      </button>
-      
-      <button 
-        className={`${styles.navButton} ${styles.nextButton}`} 
+        className={`${styles.navButton} ${styles.prevButton}`}
+      />
+
+      <IconButton
+        icon={faChevronRight}
         onClick={onNext}
         disabled={isLoading}
-      >
-        <FontAwesomeIcon icon={faChevronRight} />
-      </button>
+        className={`${styles.navButton} ${styles.nextButton}`}
+      />
 
-      <button 
-        className={`${styles.favoriteButton} ${wallpaperData.is_favorite ? styles.favorited : ''}`} 
+      <IconButton
+        icon={wallpaperData.is_favorite ? faHeart : faHeartBroken}
         onClick={handleToggleFavorite}
-        disabled={isLoading}
-        title={user ? (wallpaperData.is_favorite ? 'Remove from favorites' : 'Add to favorites') : 'Sign in to add to favorites'}
-      >
-        <FontAwesomeIcon icon={wallpaperData.is_favorite ? faHeart : faHeartBroken} />
-      </button>
+        disabled={isFavoriting || isLoading}
+        loading={isFavoriting}
+        title={"Add to favorites"}
+        className={`${styles.favoriteButton} ${wallpaperData.is_favorite ? styles.favorited : ""}`}
+      />
+
+      <IconButton
+        icon={faDownload}
+        onClick={installWallpaperHandler}
+        disabled={isInstalling || isLoading}
+        loading={isInstalling}
+        title={isInstalling ? "Installing..." : "Install this wallpaper"}
+        className={styles.installButton}
+      />
     </div>
   );
 };
 
-export default ImageNavigation; 
+export default ImageNavigation;

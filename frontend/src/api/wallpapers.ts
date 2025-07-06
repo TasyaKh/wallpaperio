@@ -84,3 +84,10 @@ export const getWallpaperInfo = async (wallpaperId: number): Promise<PreviewWall
   const response = await api.get<PreviewWallpaperResponse>(`/api/wallpapers/${wallpaperId}/info`);
   return response.data;
 };
+
+export const installWallpaper = async (wallpaperId: number): Promise<Blob> => {
+  const response = await api.get(`/api/wallpapers/${wallpaperId}/install`, {
+    responseType: 'blob',
+  });
+  return response.data as Blob;
+};

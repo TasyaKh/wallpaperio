@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	"wallpaperio/server/internal/domain/models"
@@ -267,4 +268,38 @@ func (h *WallpaperHandler) GetWallpaperInfo(c *gin.Context) {
 		"wallpaper":   wallpaper,
 		"is_favorite": isFavorite,
 	})
+}
+
+func (h *WallpaperHandler) InstallWallpaper(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid wallpaper ID"})
+		return
+	}
+
+	w, err := h.wallpaperSvc.GetWallpaperByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Wallpaper not found"})
+		return
+	}
+
+	go func() {
+		if err2 := h.wallpaperSvc.IncrementDownloads(uint(id)); err2 != nil {
+			fmt.Printf("failed to increment downloads: %v", err2)
+		}
+	}()
+	resp, err := http.Get(w.ImageURL)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch image"})
+		return
+	}
+	defer resp.Body.Close()
+
+	name := filepath.Base(w.ImageURL)
+	if name == "" {
+		name = "wallpaper.jpg"
+	}
+
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", name))
+	c.DataFromReader(http.StatusOK, resp.ContentLength, resp.Header.Get("Content-Type"), resp.Body, nil)
 }

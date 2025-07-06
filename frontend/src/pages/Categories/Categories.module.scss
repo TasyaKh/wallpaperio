@@ -1,19 +1,14 @@
 
 .categories {
-  padding: var(--spacing-xl);
 
   h1 {
     margin-bottom: var(--spacing-xl);
-    color: var(--color-gradient-main-start);
-    font-size: var(--font-size-3xl);
-    font-family: var(--font-heading);
-    text-align: center;
   }
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: var(--spacing-lg);
 }
 
