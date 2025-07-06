@@ -14,4 +14,11 @@
   &.large {
     font-size: 3rem;
   }
+}
+
+.text {
+  margin-left: 0.5em;
+  font-size: var(--font-size-sm);
+  color: inherit;
+  opacity: 0.8;
 } 

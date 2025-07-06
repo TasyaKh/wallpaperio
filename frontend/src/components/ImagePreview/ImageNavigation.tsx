@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import { saveAs } from "file-saver";
 import { installWallpaper } from "../../api/wallpapers";
 import IconButton from "../Buttons/IconButton/IconButton";
+import { useSwipeable } from 'react-swipeable';
 
 interface ImageNavigationProps {
   onNext: () => void;
@@ -92,8 +93,14 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
     ? defaultImage
     : wallpaperData.wallpaper.image_url;
 
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => onNext(),
+    onSwipedRight: () => onPrevious(),
+    trackMouse: true, // allows swipe with mouse drag on desktop
+  });
+
   return (
-    <div className={styles.imageContainer}>
+    <div className={styles.imageContainer} {...swipeHandlers}>
       <LazyImage
         key={wallpaperData.wallpaper.id}
         src={displayImage}
@@ -104,7 +111,7 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
         onLoad={handleImageLoad}
         onError={handleImageError}
       />
-
+      {/* nav buttons  */}
       <IconButton
         icon={faChevronLeft}
         onClick={onPrevious}

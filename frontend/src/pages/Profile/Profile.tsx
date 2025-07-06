@@ -35,7 +35,7 @@ export default function Profile() {
     <div className="container">
       <div className={styles.profile}>
         <div className={styles.content}>
-          <h1>Profile</h1>
+          <h2 >Profile</h2>
           <div className={styles.userInfo}>
             <img src={user.profile_pic_url || "/default-avatar.png"} alt={user.name} className={styles.avatar} />
             <h2>{user.name}</h2>

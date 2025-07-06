@@ -6,7 +6,7 @@ const AdminPanel: React.FC = () => {
   return (
     <div className="container">
       <div className={styles.adminPanel}>
-        <h1>Admin Panel</h1>
+        <h2>Admin Panel</h2>
         <ImageGenerator />
       </div>
     </div>

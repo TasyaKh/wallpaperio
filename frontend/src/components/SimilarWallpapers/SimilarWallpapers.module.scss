@@ -35,3 +35,14 @@
   padding: 1rem;
   color: var(--error);
 } 
+
+@media (max-width: 600px) {
+  .grid {
+    gap: var(--spacing-sm);
+  }
+
+  .wallpaperItem {
+    aspect-ratio: 4/3;
+  }
+  
+}

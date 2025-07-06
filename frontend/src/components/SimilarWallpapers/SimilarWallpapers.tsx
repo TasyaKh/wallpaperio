@@ -5,6 +5,7 @@ import styles from "./SimilarWallpapers.module.scss";
 import { LazyImage } from "../LazyImage/LazyImage";
 import defaultImage from "../../assets/not-found-image.svg";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { Loader } from "../Loader/Loader";
 
 interface SimilarWallpapersProps {
   currentWallpaperId: number;
@@ -64,7 +65,7 @@ const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
   };
 
   if (loading) {
-    return <div className={styles.loading}>Loading similar wallpapers...</div>;
+    return <Loader text="Loading similar wallpapers..." />;
   }
 
   if (error) {

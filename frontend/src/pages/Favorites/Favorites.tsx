@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
-import { Wallpaper } from "../../models/wallpaper";
+import { Wallpaper } from "@/models/wallpaper";
 import { PreviewWallpaperResponse, getFavorites, getWallpaperInfo, addFavorite, removeFavorite } from "../../api/wallpapers";
-import WallpapersGrid from "../../components/Wallpapers/WallpapersGrid/WallpapersGrid";
-import ImagePreview from "../../components/ImagePreview/ImagePreview";
+import WallpapersGrid from "@/components/Wallpapers/WallpapersGrid/WallpapersGrid";
+import ImagePreview from "@/components/ImagePreview/ImagePreview";
 import { toast } from "react-toastify";
+import { Loader } from "@/components/Loader/Loader";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -139,7 +140,7 @@ const Favorites = () => {
   );
 
   if (loading && wallpapers.length === 0) {
-    return <div style={{ textAlign: "center", marginTop: "2rem" }}>Loading favorites...</div>;
+    return <Loader text="Loading your favorites..." />;
   }
 
   if (error && wallpapers.length === 0) {
@@ -148,7 +149,7 @@ const Favorites = () => {
 
   return (
     <div className="container">
-      <h1 className="gradient-title">Favorite Wallpapers</h1>
+      <h2 className="gradient-title">Favorites</h2>
       {total > 0 && (
         <p style={{ textAlign: "center", marginBottom: "1rem", color: "var(--color-text-secondary)" }}>
           {total} favorite{total !== 1 ? 's' : ''}

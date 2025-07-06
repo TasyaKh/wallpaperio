@@ -19,6 +19,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { RoleManager } from "../../utils/roles";
 import { toast } from "react-toastify";
 import WallpapersGrid from "../../components/Wallpapers/WallpapersGrid/WallpapersGrid";
+import { Loader } from "@/components/Loader/Loader";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -231,30 +232,31 @@ export default function Wallpapers() {
     fetchWallpapers();
   }, [selectedCategory, searchQuery]);
 
-  if (loading && wallpapers.length === 0) {
-    return <div className={styles.loading}>Loading wallpapers...</div>;
-  }
-
-  if (error && wallpapers.length === 0) {
-    return <div className={styles.error}>{error}</div>;
-  }
-
   return (
     <div className={"container"}>
-      <h1 className={"gradient-title"}>Wallpapers</h1>
+      <h2 className={"gradient-title"}>Wallpapers</h2>
       <CategoryFilter
         categories={categories}
         selectedCategory={selectedCategory}
         onCategoryChange={handleCategoryChange}
       />
-      <WallpapersGrid
-        wallpapers={wallpapers}
-        hasMore={hasMore}
-        loadMore={loadMore}
-        isDeleting={isDeleting}
-        onWallpaperClick={handleWallpaperClick}
-        onDelete={handleDeleteWallpaper}
-      />
+
+      {error && wallpapers.length === 0 && (
+        <div className={styles.error}>{error}</div>
+      )}
+
+      {loading && wallpapers.length === 0 ? (
+        <Loader text="Loading wallpapers..." />
+      ) : (
+        <WallpapersGrid
+          wallpapers={wallpapers}
+          hasMore={hasMore}
+          loadMore={loadMore}
+          isDeleting={isDeleting}
+          onWallpaperClick={handleWallpaperClick}
+          onDelete={handleDeleteWallpaper}
+        />
+      )}
 
       {selectedWallpaper && (
         <ImagePreview

@@ -6,9 +6,10 @@ interface LoaderProps {
   size?: 'small' | 'medium' | 'large';
   color?: string;
   className?: string;
+  text?: string;
 }
 
-export const Loader = ({ size = 'medium', color, className }: LoaderProps) => {
+export const Loader = ({ size = 'medium', color, className, text }: LoaderProps) => {
   const loaderColor = color || 'var(--color-primary)';
 
   return (
@@ -18,6 +19,7 @@ export const Loader = ({ size = 'medium', color, className }: LoaderProps) => {
         spin 
         style={{ color: loaderColor }} 
       />
+      {text && <span className={styles.text}>{text}</span>}
     </div>
   );
 }; 

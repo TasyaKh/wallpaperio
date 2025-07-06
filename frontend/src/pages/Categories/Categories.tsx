@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCategories } from "../../api/categories";
-import { Category } from "../../models/category";
+import { getCategories } from "@/api/categories";
+import { Category } from "@/models/category";
 import styles from "./Categories.module.scss";
+import { Loader } from "@/components/Loader/Loader";
 
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -31,7 +32,7 @@ export default function Categories() {
   };
 
   if (loading) {
-    return <div className={styles.loading}>Loading categories...</div>;
+    return <Loader text="Loading categories..." />;
   }
 
   if (error) {
@@ -41,7 +42,7 @@ export default function Categories() {
   return (
     <div className="container">
       <div className={styles.categories}>
-        <h1 className="gradient-title">Categories</h1>
+        <h2 className="gradient-title">Categories</h2>
         <div className={styles.grid}>
           {categories.map((category) => (
             <div

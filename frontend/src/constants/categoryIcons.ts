@@ -13,7 +13,9 @@ import {
   faCat,
   faPerson,
   IconDefinition,
-  faPeopleGroup
+  faPeopleGroup,
+  faSquare,
+  faCoffee
 } from '@fortawesome/free-solid-svg-icons';
 
 export const categoryIcons: { [key: string]: IconDefinition } = {
@@ -31,4 +33,6 @@ export const categoryIcons: { [key: string]: IconDefinition } = {
   'cute': faCat,
   'meme': faSmile,
   'politic': faPeopleGroup,
+  'pixel art': faSquare,
+  'calm': faCoffee
 }; 
