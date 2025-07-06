@@ -45,7 +45,7 @@ export const Navbar = () => {
   const handleFavoritesClick = (e: React.MouseEvent) => {
     if (!user) {
       e.preventDefault();
-      navigate('/login');
+      navigate("/login");
     }
   };
 
@@ -111,10 +111,12 @@ export const Navbar = () => {
           <div className={styles.navLinks}>
             <Link to="/wallpapers">Wallpapers</Link>
             <Link to="/categories">Categories</Link>
-            <Link 
-              to="/favorites" 
+            <Link
+              to="/favorites"
               onClick={handleFavoritesClick}
-              title={user ? "Your favorite wallpapers" : "Sign in to view favorites"}
+              title={
+                user ? "Your favorite wallpapers" : "Sign in to view favorites"
+              }
             >
               Favorites
             </Link>
