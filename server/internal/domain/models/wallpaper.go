@@ -11,6 +11,7 @@ type Wallpaper struct {
 	ImageMediumURL *string   `json:"image_medium_url,omitempty"`
 	CategoryID     uint      `json:"category_id"`
 	FeatureID      int64     `json:"feature_id" gorm:"index"`
+	Prompt         string    `json:"prompt" gorm:"type:text"`
 	Category       Category  `json:"category" gorm:"foreignKey:CategoryID"`
 	Tags           []Tag     `json:"tags" gorm:"many2many:wallpaper_tags;"`
 	Downloads      int       `json:"downloads"`

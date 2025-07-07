@@ -78,6 +78,7 @@ func (s *WallpaperService) CreateWallpaper(params dto.CreateWallpaper) (*models.
 		CategoryID:     category.ID,
 		Tags:           tags,
 		FeatureID:      featureID,
+		Prompt:         params.Prompt,
 	}
 
 	if err := tx.Create(wallpaper).Error; err != nil {

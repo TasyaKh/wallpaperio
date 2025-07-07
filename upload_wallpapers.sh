@@ -19,7 +19,6 @@ for IMAGE_PATH in "${IMAGE_NAMES[@]}"; do
     JSON_PAYLOAD=$(cat <<EOF
 {
     "image_url": "${IMAGE_URL}",
-    "title": "Generated Wallpaper - ${IMAGE_NAME}",
     "category": "generated",
     "tags": ["generated", "script"]
 }

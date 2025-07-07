@@ -17,6 +17,7 @@ type CreateWallpaper struct {
 	ImageMediumUrl *string  `json:"image_medium_url,omitempty"`
 	Category       string   `json:"category"`
 	Tags           []string `json:"tags"`
+	Prompt         string   `json:"prompt"`
 }
 
 type WallpaperFilter struct {

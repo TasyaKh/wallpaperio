@@ -50,7 +50,8 @@ def generate_wallpapers_job():
                     image_thumb_url=saved_paths.url_path_thumb,
                     image_medium_url=saved_paths.url_path_medium if saved_paths.url_path_medium else None,
                     category=category.name,
-                    tags=tags
+                    tags=tags,
+                    prompt=prompt
                 )
                 wallpapers_service.create_wallpaper(wallpaper_data)
                 print(f"Successfully created wallpaper")
