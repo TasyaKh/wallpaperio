@@ -80,6 +80,7 @@ export const ImageGenerator: React.FC = () => {
             ...(responseStatus.url_path_medium && { image_medium_url: responseStatus.url_path_medium }),
             category: selectedCategory,
             tags: tags,
+            prompt: generatePrompt(selectedCategory, tags),
           });
           toast.success("Wallpaper saved successfully!");
         } catch (err) {
@@ -167,6 +168,7 @@ export const ImageGenerator: React.FC = () => {
         ...(generationStatus?.url_path_medium && { image_medium_url: generationStatus?.url_path_medium }),
         category: selectedCategory,
         tags: tags,
+        prompt: generatePrompt(selectedCategory, tags),
       });
       toast.success("Wallpaper created successfully!");
     } catch (err) {

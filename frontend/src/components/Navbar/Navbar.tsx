@@ -12,11 +12,12 @@ import styles from "./Navbar.module.scss";
 import { Button } from "../Buttons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon } from "@fortawesome/free-regular-svg-icons/faMoon";
-import { faSun } from "@fortawesome/free-solid-svg-icons";
+import { faBarsProgress, faBarsStaggered, faSun } from "@fortawesome/free-solid-svg-icons";
 import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { RoleManager } from "../../utils/roles";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Search from "../Search/Search";
+import { StickyNavLinks } from "./StickyNavLinks/StickyNavLinks";
 
 export const Navbar = () => {
   const { user, loading } = useAuth();
@@ -25,6 +26,8 @@ export const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navbarRef = useRef<HTMLDivElement>(null);
+  const [showStickyLinks, setShowStickyLinks] = useState(false);
 
   const handleSearch = (query: string) => {
     const newParams = new URLSearchParams(searchParams);
@@ -75,88 +78,107 @@ export const Navbar = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, [isMenuOpen]);
 
+  useEffect(() => {
+    const observer = new window.IntersectionObserver(
+      ([entry]) => {
+        setShowStickyLinks(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+    if (navbarRef.current) {
+      observer.observe(navbarRef.current);
+    }
+    return () => {
+      if (navbarRef.current) observer.unobserve(navbarRef.current);
+    };
+  }, []);
+
   const showSearch =
     location.pathname.startsWith("/wallpapers") ||
     location.pathname.startsWith("/categories");
 
   return (
-    <nav className={styles.navbar}>
-      <div className={styles.navbarContainer}>
-        <Link to="/" className={styles.logo}>
-          <img src="/logo.svg" alt="WallpaperIO" width="40" height="40" />
-        </Link>
-        {showSearch && (
-          <div className={styles.searchWrapper}>
-            <Search
-              onSearch={handleSearch}
-              initialQuery={searchParams.get("search") ?? ""}
+    <>
+      <nav ref={navbarRef} className={styles.navbar}>
+        <div className={styles.navbarContainer}>
+          <Link to="/" className={styles.logo}>
+            <img src="/logo.svg" alt="WallpaperIO" width="40" height="40" />
+          </Link>
+          {showSearch && (
+            <div className={styles.searchWrapper}>
+              <Search
+                onSearch={handleSearch}
+                initialQuery={searchParams.get("search") ?? ""}
+              />
+            </div>
+          )}
+          <button
+            className={styles.hamburger}
+            onClick={toggleMenu}
+            aria-label="Toggle menu"
+          >
+            <FontAwesomeIcon
+              icon={isMenuOpen ? faTimes : faBarsStaggered}
+              className={styles.hamburgerIcon}
             />
-          </div>
-        )}
-        <button
-          className={styles.hamburger}
-          onClick={toggleMenu}
-          aria-label="Toggle menu"
-        >
-          <FontAwesomeIcon
-            icon={isMenuOpen ? faTimes : faBars}
-            className={styles.hamburgerIcon}
-          />
-        </button>
+          </button>
 
-        <div
-          className={`${styles.navContent} ${isMenuOpen ? styles.active : ""}`}
-        >
-          <div className={styles.navLinks}>
-            <Link to="/wallpapers">Wallpapers</Link>
-            <Link to="/categories">Categories</Link>
-            <Link
-              to="/favorites"
-              onClick={handleFavoritesClick}
-              title={
-                user ? "Your favorite wallpapers" : "Sign in to view favorites"
-              }
-            >
-              Favorites
-            </Link>
-            {user && RoleManager.canAccessAdminPanel(user.role) && (
-              <Link to="/admin-panel">Admin Panel</Link>
-            )}
-          </div>
-
-          <div className={styles.navActions}>
-            <button
-              onClick={toggleTheme}
-              className={styles.themeToggle}
-              aria-label={`Switch to ${
-                theme.mode === ThemeMode.Light ? "dark" : "light"
-              } theme`}
-            >
-              {theme.mode === ThemeMode.Light ? (
-                <FontAwesomeIcon icon={faMoon} color="var(--color-primary)" />
-              ) : (
-                <FontAwesomeIcon icon={faSun} color="var(--color-primary)" />
-              )}
-            </button>
-
-            {loading ? (
-              <Loader size="small" />
-            ) : user ? (
-              <Link to="/profile">
-                <img
-                  src={user.profile_pic_url || "/default-avatar.png"}
-                  alt={user.name}
-                  className={styles.avatar}
-                />
+          <div
+            className={`${styles.navContent} ${isMenuOpen ? styles.active : ""}`}
+          >
+            <div className={styles.navLinks}>
+              <Link to="/wallpapers">Wallpapers</Link>
+              <Link to="/categories">Categories</Link>
+              <Link
+                to="/favorites"
+                onClick={handleFavoritesClick}
+                title={
+                  user ? "Your favorite wallpapers" : "Sign in to view favorites"
+                }
+              >
+                Favorites
               </Link>
-            ) : (
-              <Button variant="primary">
-                <Link to="/login">Sign In</Link>
-              </Button>
-            )}
+              {user && RoleManager.canAccessAdminPanel(user.role) && (
+                <Link to="/admin-panel">Admin Panel</Link>
+              )}
+            </div>
+
+            <div className={styles.navActions}>
+              <button
+                onClick={toggleTheme}
+                className={styles.themeToggle}
+                aria-label={`Switch to ${
+                  theme.mode === ThemeMode.Light ? "dark" : "light"
+                } theme`}
+              >
+                {theme.mode === ThemeMode.Light ? (
+                  <FontAwesomeIcon icon={faMoon} color="var(--color-primary)" />
+                ) : (
+                  <FontAwesomeIcon icon={faSun} color="var(--color-primary)" />
+                )}
+              </button>
+
+              {loading ? (
+                <Loader size="small" />
+              ) : user ? (
+                <Link to="/profile">
+                  <img
+                    src={user.profile_pic_url || "/default-avatar.png"}
+                    alt={user.name}
+                    className={styles.avatar}
+                  />
+                </Link>
+              ) : (
+                <Button variant="primary">
+                  <Link to="/login">Sign In</Link>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {showStickyLinks && <StickyNavLinks />}
+    </>
   );
 };

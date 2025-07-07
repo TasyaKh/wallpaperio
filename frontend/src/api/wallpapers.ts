@@ -54,6 +54,7 @@ export const createWallpaper = async (data: {
   image_medium_url?: string;
   category: string;
   tags: string[];
+  prompt: string;
 }): Promise<Wallpaper> => {
   const response = await api.post<Wallpaper>("/api/wallpapers", data);
   return response.data;
