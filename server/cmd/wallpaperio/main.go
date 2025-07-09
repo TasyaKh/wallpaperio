@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/joho/godotenv"
 
@@ -35,7 +36,8 @@ func main() {
 	categorySvc := services.NewCategoryService(db.DB, cfg.Server.GeneratorImagesHostURL)
 	tagSvc := services.NewTagService(db.DB)
 	featureSvc := services.NewFeatureService()
-	wallpaperSvc, err := services.NewWallpaperService(db.DB, tagSvc, featureSvc)
+	redisClient := database.NewRedisClient()
+	wallpaperSvc, err := services.NewWallpaperService(db.DB, tagSvc, featureSvc, redisClient)
 	if err != nil {
 		log.Fatalf("Failed to initialize wallpaper service: %v", err)
 	}
@@ -45,7 +47,7 @@ func main() {
 	imageCfg := config.LoadImageGeneratorConfig()
 	imageHandler := handlers.NewImageHandler(imageCfg, db.DB)
 	categoryHandler := handlers.NewCategoryHandler(categorySvc)
-	wallpaperHandler := handlers.NewWallpaperHandler(wallpaperSvc, tagSvc, db.DB)
+	wallpaperHandler := handlers.NewWallpaperHandler(wallpaperSvc, featureSvc, tagSvc, db.DB)
 
 	// Initialize router
 	router := gin.Default()
@@ -59,6 +61,12 @@ func main() {
 	appRouter.AddHandler("category", categoryHandler)
 	appRouter.AddHandler("wallpaper", wallpaperHandler)
 	appRouter.Setup(router)
+
+	if _, err := os.Stat("static"); os.IsNotExist(err) {
+		if err := os.Mkdir("static", 0o755); err != nil {
+			log.Fatalf("Failed to create static directory: %v", err)
+		}
+	}
 
 	// Start server
 	log.Printf("Server starting on port %s", cfg.Server.Port)

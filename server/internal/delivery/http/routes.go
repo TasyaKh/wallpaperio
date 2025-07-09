@@ -71,10 +71,12 @@ func (r *Router) Setup(router *gin.Engine) {
 	// Wallpaper routes
 	wallpaper := router.Group("/api/wallpapers")
 	{
+
 		wallpaperHandler := r.handlers["wallpaper"].(*handlers.WallpaperHandler)
 		wallpaper.GET("", wallpaperHandler.GetWallpapers)
-		wallpaper.GET("/:id/:direction", wallpaperHandler.GetAdjacentWallpaper)
-		wallpaper.GET("/:id/similar", wallpaperHandler.GetSimilarWallpapers)
+		wallpaper.POST("/similar/init", wallpaperHandler.InitSimilarSearch)
+		wallpaper.GET("/similar", wallpaperHandler.GetSimilarWallpapersByUserImg)
+		wallpaper.GET("/:id/similar", wallpaperHandler.GetSimilarWallpapersByCurrId)
 		wallpaper.GET("/:id/info", middleware.OptionalAuth(r.jwtService), wallpaperHandler.GetWallpaperInfo)
 		wallpaper.GET("/:id/install", wallpaperHandler.InstallWallpaper)
 		wallpaper.POST("", middleware.RequireAdminOrAPIKey(r.jwtService, r.apiKey), wallpaperHandler.CreateWallpaper)

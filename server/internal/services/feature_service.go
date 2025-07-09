@@ -23,17 +23,16 @@ func NewFeatureService() *FeatureService {
 	}
 }
 
-// ExtractFeatures calls the Python service to extract features from an image
 func (s *FeatureService) ExtractFeatures(imageURL string) ([]float32, error) {
 	if s.generatorURL == "" {
 		return nil, fmt.Errorf("GENERATOR_URL environment variable not set")
 	}
 
-	// Make request to feature extractor
+	body := fmt.Sprintf(`{"image_path": "%s"}`, imageURL)
 	resp, err := http.Post(
 		fmt.Sprintf("%s/api/images/extract-features", s.generatorURL),
 		"application/json",
-		strings.NewReader(fmt.Sprintf(`{"image_path": "%s"}`, imageURL)),
+		strings.NewReader(body),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call feature extractor: %w", err)

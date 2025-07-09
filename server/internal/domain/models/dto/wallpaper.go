@@ -18,6 +18,8 @@ type CreateWallpaper struct {
 	Category       string   `json:"category"`
 	Tags           []string `json:"tags"`
 	Prompt         string   `json:"prompt"`
+	Width          int      `json:"width"`
+	Height         int      `json:"height"`
 }
 
 type WallpaperFilter struct {
@@ -37,4 +39,17 @@ type NextPreviousWallpaperFilter struct {
 type WallpaperResult struct {
 	Wallpapers []models.Wallpaper
 	Total      int64
+}
+
+type FindSimilarWallpapers struct {
+	Features  []float32
+	Limit     int
+	Offset    *int64
+	ExcludeID *uint
+}
+
+type GetSimilarWallpapersRequest struct {
+	Key    string `json:"key" form:"key" binding:"required"`
+	Limit  int    `json:"limit" form:"limit"`
+	Offset int    `json:"offset" form:"offset"`
 }

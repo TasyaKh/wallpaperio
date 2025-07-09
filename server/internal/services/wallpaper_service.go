@@ -1,19 +1,26 @@
 package services
 
 import (
+	"crypto/sha256"
+	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"wallpaperio/server/internal/domain/models"
 	"wallpaperio/server/internal/domain/models/dto"
 
+	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
 type WallpaperService struct {
-	db         *gorm.DB
-	tagSvc     *TagService
-	featureSvc *FeatureService
-	milvusSvc  *MilvusService
+	db          *gorm.DB
+	tagSvc      *TagService
+	featureSvc  *FeatureService
+	milvusSvc   *MilvusService
+	redisClient *redis.Client
 }
 
 func (s *WallpaperService) GetWallpaperByID(id uint) (*models.Wallpaper, error) {
@@ -25,7 +32,7 @@ func (s *WallpaperService) GetWallpaperByID(id uint) (*models.Wallpaper, error) 
 	return &wallpaper, nil
 }
 
-func NewWallpaperService(db *gorm.DB, tagSvc *TagService, featureSvc *FeatureService) (*WallpaperService, error) {
+func NewWallpaperService(db *gorm.DB, tagSvc *TagService, featureSvc *FeatureService, redisClient *redis.Client) (*WallpaperService, error) {
 	milvusSvc, err := NewMilvusService()
 	if err != nil {
 		println("Failed to create Milvus service:", err.Error())
@@ -33,10 +40,11 @@ func NewWallpaperService(db *gorm.DB, tagSvc *TagService, featureSvc *FeatureSer
 	}
 
 	return &WallpaperService{
-		db:         db,
-		tagSvc:     tagSvc,
-		featureSvc: featureSvc,
-		milvusSvc:  milvusSvc,
+		db:          db,
+		tagSvc:      tagSvc,
+		featureSvc:  featureSvc,
+		milvusSvc:   milvusSvc,
+		redisClient: redisClient,
 	}, nil
 }
 
@@ -217,55 +225,7 @@ func (s *WallpaperService) DeleteWallpaper(id uint) error {
 	return nil
 }
 
-func (s *WallpaperService) GetAdjacentWallpaper(filter dto.NextPreviousWallpaperFilter, direction dto.Direction) (*models.Wallpaper, error) {
-	var currentWallpaper models.Wallpaper
-	if err := s.db.First(&currentWallpaper, filter.CurrentID).Error; err != nil {
-		return nil, fmt.Errorf("current wallpaper not found: %w", err)
-	}
-
-	query := s.db.Model(&models.Wallpaper{}).
-		Joins("LEFT JOIN wallpaper_tags ON wallpaper_tags.wallpaper_id = wallpapers.id").
-		Joins("LEFT JOIN tags ON tags.id = wallpaper_tags.tag_id").
-		Joins("JOIN categories ON categories.id = wallpapers.category_id")
-
-	// Direction logic
-	if direction == dto.DirectionNext {
-		query = query.Where("wallpapers.id < ?", filter.CurrentID)
-	} else if direction == dto.DirectionPrevious {
-		query = query.Where("wallpapers.id > ?", filter.CurrentID)
-	} else {
-		return nil, fmt.Errorf("invalid direction")
-	}
-
-	if filter.Category != "" {
-		query = query.
-			Where("categories.name = ?", filter.Category)
-	}
-
-	if filter.Search != "" {
-		searchQuery := "%" + filter.Search + "%"
-		query = query.
-			Where("categories.name ILIKE ? OR tags.name ILIKE ?", searchQuery, searchQuery).
-			Group("wallpapers.id")
-	}
-
-	var wallpaper models.Wallpaper
-	order := "wallpapers.id DESC"
-	if direction == dto.DirectionPrevious {
-		order = "wallpapers.id ASC"
-	}
-	err := query.
-		Order(order).
-		Preload("Tags").
-		Preload("Category").
-		First(&wallpaper).Error
-	if err != nil {
-		return nil, fmt.Errorf("no %s wallpaper found: %w", direction, err)
-	}
-	return &wallpaper, nil
-}
-
-func (s *WallpaperService) GetSimilarWallpapers(currWalppaperId uint, limit int) ([]models.Wallpaper, error) {
+func (s *WallpaperService) GetSimilarWallpapersByCurrId(currWalppaperId uint, limit int) ([]models.Wallpaper, error) {
 	var currentWallpaper models.Wallpaper
 	if err := s.db.First(&currentWallpaper, currWalppaperId).Error; err != nil {
 		return nil, fmt.Errorf("failed to find wallpaper: %w", err)
@@ -276,7 +236,26 @@ func (s *WallpaperService) GetSimilarWallpapers(currWalppaperId uint, limit int)
 		return nil, fmt.Errorf("failed to get features: %w", err)
 	}
 
-	similarIDs, err := s.milvusSvc.FindSimilar(features, limit, uint64(currentWallpaper.FeatureID))
+	excludeID := uint(currentWallpaper.FeatureID)
+	similarIDs, err := s.milvusSvc.FindSimilar(&dto.FindSimilarWallpapers{
+		Features:  features,
+		Limit:     limit,
+		ExcludeID: &excludeID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to find similar wallpapers: %w", err)
+	}
+
+	var similarWallpapers []models.Wallpaper
+	if err := s.db.Where("feature_id IN ?", similarIDs).Find(&similarWallpapers).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch similar wallpapers: %w", err)
+	}
+
+	return similarWallpapers, nil
+}
+
+func (s *WallpaperService) GetSimilarWallpapers(params *dto.FindSimilarWallpapers) ([]models.Wallpaper, error) {
+	similarIDs, err := s.milvusSvc.FindSimilar(params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find similar wallpapers: %w", err)
 	}
@@ -292,4 +271,49 @@ func (s *WallpaperService) GetSimilarWallpapers(currWalppaperId uint, limit int)
 // IncrementDownloads increments the download count for a wallpaper
 func (s *WallpaperService) IncrementDownloads(id uint) error {
 	return s.db.Model(&models.Wallpaper{}).Where("id = ?", id).UpdateColumn("downloads", gorm.Expr("downloads + 1")).Error
+}
+
+func (s *WallpaperService) InitSimilarSearch(fileBytes []byte, c *gin.Context) (string, error) {
+	hash := fmt.Sprintf("%x", sha256.Sum256(fileBytes))
+	redisKey := "features:" + hash
+
+	// Save file to static/ (for feature extraction)
+	dstPath := filepath.Join("static", hash)
+	if err := os.WriteFile(dstPath, fileBytes, 0o644); err != nil {
+		return "", fmt.Errorf("failed to save temp file: %w", err)
+	}
+
+	defer os.Remove(dstPath)
+
+	// Build URL
+	scheme := "http"
+	if c.Request.TLS != nil {
+		scheme = "https"
+	}
+	host := c.Request.Host
+	fileURL := fmt.Sprintf("%s://%s/static/%s", scheme, host, hash)
+
+	// Extract features
+	features, err := s.featureSvc.ExtractFeatures(fileURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to extract features: %w", err)
+	}
+	// Cache in Redis
+	if featJSON, err := json.Marshal(features); err == nil {
+		_ = s.redisClient.Set(c, redisKey, featJSON, 0).Err()
+	}
+
+	return redisKey, nil
+}
+
+func (s *WallpaperService) FindCachedFeatures(redisKey string, c *gin.Context) ([]float32, error) {
+	cached, err := s.redisClient.Get(c, redisKey).Result()
+	if err != nil {
+		return nil, err
+	}
+	var features []float32
+	if err := json.Unmarshal([]byte(cached), &features); err != nil {
+		return nil, err
+	}
+	return features, nil
 }

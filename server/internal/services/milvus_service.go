@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"wallpaperio/server/internal/domain/models/dto"
 	schema "wallpaperio/server/internal/schema/milvus"
 	"wallpaperio/server/internal/services/database"
 
@@ -95,31 +96,35 @@ func (s *MilvusService) StoreFeatures(features []float32) (int64, error) {
 }
 
 // FindSimilar finds similar wallpapers based on features
-func (s *MilvusService) FindSimilar(features []float32, limit int, excludeID uint64) ([]uint64, error) {
+func (s *MilvusService) FindSimilar(params *dto.FindSimilarWallpapers) ([]uint64, error) {
 	searchParams, err := entity.NewIndexIvfFlatSearchParam(1024)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create search parameters: %w", err)
 	}
 
 	expr := ""
-	if excludeID > 0 {
-		expr = fmt.Sprintf("id != %d", excludeID)
+	if params.ExcludeID != nil {
+		expr = fmt.Sprintf("id != %d", *params.ExcludeID)
 	}
 
 	similarityThreshold := float32(0.5)
+	var offset int64 = 0
+	if params.Offset != nil {
+		offset = *params.Offset
+	}
 
 	results, err := s.client.Search(
 		context.Background(),
-		schema.CollectionName, // Collection name
-		[]string{},            // Partition list (empty for all partitions)
-		expr,                  // Boolean expression to exclude current ID
-		[]string{"id"},        // Output fields
-		[]entity.Vector{entity.FloatVector(features)}, // Query vectors
-		"features",           // Vector field name
-		entity.COSINE,        // Use cosine similarity
-		limit,                // TopK
-		searchParams,         // Search parameters
-		client.WithOffset(0), // Set offset to 0
+		schema.CollectionName,
+		[]string{},
+		expr,
+		[]string{"id"},
+		[]entity.Vector{entity.FloatVector(params.Features)},
+		"features",
+		entity.COSINE,
+		params.Limit,
+		searchParams,
+		client.WithOffset(offset),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to search similar wallpapers: %w", err)

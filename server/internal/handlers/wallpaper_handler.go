@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -17,6 +18,7 @@ import (
 
 type WallpaperHandler struct {
 	wallpaperSvc *services.WallpaperService
+	featuresSvc  *services.FeatureService
 	tagSvc       *services.TagService
 	db           *gorm.DB
 	favoriteSvc  *services.WallpaperFavoriteService
@@ -27,10 +29,11 @@ type SimilarWallpapersResponse struct {
 	TotalCount int64              `json:"total_count"`
 }
 
-func NewWallpaperHandler(wallpaperSvc *services.WallpaperService, tagSvc *services.TagService, db *gorm.DB) *WallpaperHandler {
+func NewWallpaperHandler(wallpaperSvc *services.WallpaperService, featuresSvc *services.FeatureService, tagSvc *services.TagService, db *gorm.DB) *WallpaperHandler {
 	favoriteSvc := services.NewWallpaperFavoriteService(db)
 	return &WallpaperHandler{
 		wallpaperSvc: wallpaperSvc,
+		featuresSvc:  featuresSvc,
 		tagSvc:       tagSvc,
 		db:           db,
 		favoriteSvc:  favoriteSvc,
@@ -91,57 +94,68 @@ func (h *WallpaperHandler) DeleteWallpaper(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-func (h *WallpaperHandler) GetAdjacentWallpaper(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+func (h *WallpaperHandler) InitSimilarSearch(c *gin.Context) {
+	file, err := c.FormFile("image")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid wallpaper ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Image file is required (field: image)"})
 		return
 	}
 
-	direction := c.Param("direction")
-	var dir dto.Direction
-	switch direction {
-	case "next":
-		dir = dto.DirectionNext
-	case "previous":
-		dir = dto.DirectionPrevious
-	default:
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid direction. Use 'next' or 'previous'"})
-		return
-	}
-
-	category := c.Query("category")
-	search := c.Query("search")
-
-	filter := dto.NextPreviousWallpaperFilter{
-		Category:  category,
-		Search:    search,
-		CurrentID: id,
-	}
-
-	wallpaper, err := h.wallpaperSvc.GetAdjacentWallpaper(filter, dir)
+	src, err := file.Open()
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("No %s wallpaper found", direction)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to open uploaded file"})
+		return
+	}
+	defer src.Close()
+
+	fileBytes, err := io.ReadAll(src)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read uploaded file"})
 		return
 	}
 
-	// Get favorite status for the user
-	user := utils.CurrentUser(c)
-	isFavorite := false
-	if user != nil {
-		var fav models.WallpaperFavorite
-		if err := h.db.Where("user_id = ? AND wallpaper_id = ?", user.UserID, wallpaper.ID).First(&fav).Error; err == nil {
-			isFavorite = true
-		}
+	// Extract features, find similar, save in Redis, get key
+	key, err := h.wallpaperSvc.InitSimilarSearch(fileBytes, c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"wallpaper":   wallpaper,
-		"is_favorite": isFavorite,
-	})
+	c.JSON(http.StatusOK, key)
 }
 
-func (h *WallpaperHandler) GetSimilarWallpapers(c *gin.Context) {
+func (h *WallpaperHandler) GetSimilarWallpapersByUserImg(c *gin.Context) {
+	var req dto.GetSimilarWallpapersRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request parameters"})
+		return
+	}
+	if req.Key == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Key redis is required"})
+		return
+	}
+	offset64 := int64(req.Offset)
+
+	cachedFeatures, err := h.wallpaperSvc.FindCachedFeatures(req.Key, c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	wallpapers, err := h.wallpaperSvc.GetSimilarWallpapers(&dto.FindSimilarWallpapers{
+		Features: cachedFeatures,
+		Limit:    req.Limit,
+		Offset:   &offset64,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, wallpapers)
+}
+
+func (h *WallpaperHandler) GetSimilarWallpapersByCurrId(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid wallpaper ID"})
@@ -155,7 +169,7 @@ func (h *WallpaperHandler) GetSimilarWallpapers(c *gin.Context) {
 		}
 	}
 
-	wallpapers, err := h.wallpaperSvc.GetSimilarWallpapers(uint(id), limit)
+	wallpapers, err := h.wallpaperSvc.GetSimilarWallpapersByCurrId(uint(id), limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to fetch similar wallpapers: %v", err)})
 		return

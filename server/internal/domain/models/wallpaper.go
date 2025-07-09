@@ -17,4 +17,6 @@ type Wallpaper struct {
 	Downloads      int       `json:"downloads"`
 	CreatedAt      time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt      time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	Width          int       `json:"width"`
+	Height         int       `json:"height"`
 }
