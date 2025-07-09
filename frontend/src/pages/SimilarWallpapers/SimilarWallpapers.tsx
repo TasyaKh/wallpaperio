@@ -5,11 +5,12 @@ import ImagePreview from "@/components/ImagePreview/ImagePreview";
 import { searchSimilarWByImg, getWallpaperInfo, addFavorite, removeFavorite } from "@/api/wallpapers";
 import { toast } from "react-toastify";
 import type { Wallpaper } from "@/models/wallpaper";
+import ImagePreviewCard from "./components/ImagePreviewCard/ImagePreviewCard";
 
 const LIMIT = 20;
 
 const SimilarWallpapers = () => {
-  const key = useSimilarSearchStore((s) => s.targetImageSearchKey);
+  const similarSearchStore = useSimilarSearchStore();
 
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [offset, setOffset] = useState(0);
@@ -22,12 +23,12 @@ const SimilarWallpapers = () => {
   } | null>(null);
 
   const fetchWallpapers = useCallback(async (reset = false) => {
-    if (!key) return;
+    if (!similarSearchStore.targetImageSearchKey) return;
     setLoading(true);
     const start = reset ? 0 : offset;
 
     try {
-      const results = await searchSimilarWByImg({ key, offset: start, limit: LIMIT });
+      const results = await searchSimilarWByImg({ key: similarSearchStore.targetImageSearchKey, offset: start, limit: LIMIT });
       setWallpapers((prev) => (reset ? results : [...prev, ...results]));
       setOffset(start + results.length);
       setHasMore(results.length === LIMIT);
@@ -37,7 +38,7 @@ const SimilarWallpapers = () => {
     } finally {
       setLoading(false);
     }
-  }, [key, offset]);
+  }, [similarSearchStore.targetImageSearchKey, offset]);
 
   const loadWallpaperInfo = async (id: number) => {
     try {
@@ -99,17 +100,19 @@ const SimilarWallpapers = () => {
   }
 
   useEffect(() => {
-    if (!key) return;
+    if (!similarSearchStore.targetImageSearchKey) return;
     setWallpapers([]);
     setOffset(0);
     setHasMore(true);
     fetchWallpapers(true);
-  }, [key]);
+  }, [similarSearchStore.targetImageSearchKey]);
 
   return (
     <div className="container">
       <h2 className="gradient-title">Similar Wallpapers</h2>
    
+      <ImagePreviewCard img={similarSearchStore.targetImg}/>
+      
       <WallpapersGrid
         wallpapers={wallpapers}
         hasMore={hasMore}

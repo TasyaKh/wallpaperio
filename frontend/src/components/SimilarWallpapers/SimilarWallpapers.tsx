@@ -2,38 +2,37 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Wallpaper } from "@/models/wallpaper";
 import { getSimilarWallpapers } from "../../api/wallpapers";
 import styles from "./SimilarWallpapers.module.scss";
-import { LazyImage } from "../LazyImage/LazyImage";
-import defaultImage from "@/assets/not-found-image.svg";
-import InfiniteScroll from "react-infinite-scroll-component";
 import { Loader } from "../Loader/Loader";
+import WallpapersGrid from "../Wallpapers/WallpapersGrid/WallpapersGrid";
 
 interface SimilarWallpapersProps {
-  currentWallpaperId: number;
+  currentWallpaper: Wallpaper;
   onWallpaperClick: (wallpaper: Wallpaper) => void;
 }
 
 const ITEMS_PER_PAGE = 20;
 
 const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
-  currentWallpaperId,
+  currentWallpaper,
   onWallpaperClick,
 }) => {
   const [allWallpapers, setAllWallpapers] = useState<Wallpaper[]>([]);
-  const [displayedWallpapers, setDisplayedWallpapers] = useState<Wallpaper[]>([]);
+  const [displayedWallpapers, setDisplayedWallpapers] = useState<Wallpaper[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
+
   const [hasMore, setHasMore] = useState(true);
 
   const fetchSimilarWallpapers = useCallback(async () => {
     setError("");
     try {
       setLoading(true);
-      const similar = await getSimilarWallpapers(currentWallpaperId);
+      const similar = await getSimilarWallpapers(currentWallpaper.id);
       setAllWallpapers(similar);
       setDisplayedWallpapers(similar.slice(0, ITEMS_PER_PAGE));
       setHasMore(similar.length > ITEMS_PER_PAGE);
-      setImageErrors({});
     } catch (err) {
       setError("Failed to load similar wallpapers");
       setAllWallpapers([]);
@@ -42,7 +41,7 @@ const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [currentWallpaperId]);
+  }, [currentWallpaper.id]);
 
   useEffect(() => {
     fetchSimilarWallpapers();
@@ -53,15 +52,10 @@ const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
       displayedWallpapers.length,
       displayedWallpapers.length + ITEMS_PER_PAGE
     );
-    setDisplayedWallpapers(prev => [...prev, ...nextItems]);
-    setHasMore(displayedWallpapers.length + nextItems.length < allWallpapers.length);
-  };
-
-  const handleImageError = (wallpaperId: number) => {
-    setImageErrors((prev) => ({
-      ...prev,
-      [wallpaperId]: true,
-    }));
+    setDisplayedWallpapers((prev) => [...prev, ...nextItems]);
+    setHasMore(
+      displayedWallpapers.length + nextItems.length < allWallpapers.length
+    );
   };
 
   if (loading) {
@@ -77,37 +71,16 @@ const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
   }
 
   return (
-    <InfiniteScroll
-      dataLength={displayedWallpapers.length}
-      next={loadMore}
-      hasMore={hasMore}
-      loader={<div className={styles.loading}>Loading more wallpapers...</div>}
-      endMessage={
-        <p style={{ textAlign: 'center' }}>
-          <b>No more wallpapers to load</b>
-        </p>
-      }
-      scrollableTarget="previewContainer"
-    >
-      <div className={styles.grid}>
-        {displayedWallpapers.map((wallpaper) => (
-          <div
-            key={`similar wallpaper ${wallpaper.id}`}
-            className={styles.wallpaperItem}
-            onClick={() => onWallpaperClick(wallpaper)}
-          >
-            <LazyImage
-              src={imageErrors[wallpaper.id] ? defaultImage : (wallpaper.image_medium_url ?? wallpaper.image_url)}
-              alt={`Similar wallpaper ${wallpaper.id}`}
-              placeholderSrc={wallpaper.image_medium_url}
-              fallbackSrc={defaultImage}
-              objectFit="cover"
-              onError={() => handleImageError(wallpaper.id)}
-            />
-          </div>
-        ))}
-      </div>
-    </InfiniteScroll>
+    <div>
+      <WallpapersGrid
+        wallpapers={displayedWallpapers}
+        hasMore={hasMore}
+        loadMore={loadMore}
+        isDeleting={false}
+        onWallpaperClick={onWallpaperClick}
+        onDelete={undefined}
+      />
+    </div>
   );
 };
 

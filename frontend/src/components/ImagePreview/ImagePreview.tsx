@@ -48,7 +48,7 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
         <div className={styles.similarContainer}>
           <h4>Similar</h4>
           <SimilarWallpapers
-            currentWallpaperId={currentWallpaper.wallpaper.id}
+            currentWallpaper={currentWallpaper.wallpaper}
             onWallpaperClick={onSimilarWallpaperClick}
           />
         </div>

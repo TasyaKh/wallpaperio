@@ -20,7 +20,7 @@ const SimilarSearchModal: React.FC<SimilarSearchModalProps> = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const setTargetImageSearchKey = useSimilarSearchStore((s) => s.setTargetImageSearchKey);
+  const similarSearchStore = useSimilarSearchStore();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -32,7 +32,8 @@ const SimilarSearchModal: React.FC<SimilarSearchModalProps> = ({
     try {
       // Upload image and get key
       const key = await initSimilarSearch(file);
-      setTargetImageSearchKey(key);
+      similarSearchStore.setTargetImageSearchKey(key);
+      similarSearchStore.setTargetImg(file);
       onClose();
       navigate("/similar-wallpapers");
     } catch (err: any) {

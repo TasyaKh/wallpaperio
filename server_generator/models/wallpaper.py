@@ -8,3 +8,5 @@ class WallpaperCreate(BaseModel):
     category: str
     tags: List[str]
     prompt: str 
+    width: int
+    height: int

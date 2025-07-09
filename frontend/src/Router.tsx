@@ -7,7 +7,7 @@ import AdminPanel from './pages/AdminPanel/AdminPanel';
 import Favorites from './pages/Favorites/Favorites';
 import NotFound from './pages/NotFound/NotFound';
 import { useAuth } from './contexts/AuthContext';
-import SimilarWallpapers from './pages/Wallpapers/SimilarWallpapers';
+import SimilarWallpapers from './pages/SimilarWallpapers/SimilarWallpapers';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();

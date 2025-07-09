@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"wallpaperio/server/internal/domain/models"
 	"wallpaperio/server/internal/domain/models/dto"
@@ -83,6 +84,8 @@ func (s *WallpaperService) CreateWallpaper(params dto.CreateWallpaper) (*models.
 		ImageURL:       params.ImageURL,
 		ImageThumbURL:  params.ImageThumbUrl,
 		ImageMediumURL: params.ImageMediumUrl,
+		Width:          params.Width,
+		Height:         params.Height,
 		CategoryID:     category.ID,
 		Tags:           tags,
 		FeatureID:      featureID,
@@ -300,7 +303,7 @@ func (s *WallpaperService) InitSimilarSearch(fileBytes []byte, c *gin.Context) (
 	}
 	// Cache in Redis
 	if featJSON, err := json.Marshal(features); err == nil {
-		_ = s.redisClient.Set(c, redisKey, featJSON, 0).Err()
+		_ = s.redisClient.Set(c, redisKey, featJSON, 24*time.Hour).Err()
 	}
 
 	return redisKey, nil

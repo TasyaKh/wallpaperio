@@ -12,7 +12,7 @@ import styles from "./Navbar.module.scss";
 import { Button } from "../Buttons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon } from "@fortawesome/free-regular-svg-icons/faMoon";
-import { faBarsStaggered, faFileImage, faSun, faUsersViewfinder } from "@fortawesome/free-solid-svg-icons";
+import { faBarsStaggered, faSun, faUsersViewfinder } from "@fortawesome/free-solid-svg-icons";
 import {  faTimes } from "@fortawesome/free-solid-svg-icons";
 import { RoleManager } from "../../utils/roles";
 import { useEffect, useState, useRef } from "react";

@@ -16,7 +16,7 @@ export const PromptPreviewButton: React.FC<PromptPreviewButtonProps> = ({
   disabled = false,
   className = "",
 }) => (
-  <div className={`${styles.promptPreviewContainer} ${className}`}>
+  <div className={`${className}`}>
     <IconButton
       icon={active ? faEye : faFileAlt}
       onClick={onClick}

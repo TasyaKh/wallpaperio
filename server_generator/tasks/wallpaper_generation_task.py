@@ -38,10 +38,9 @@ def generate_wallpapers_job():
                 if not prompt:
                     print(f"Could not generate prompt for category {category.name}")
                     continue
-                width, height = 1080, 2340
 
                 # Generate image phone resolution
-                image_data = image_generator.gen_image(prompt, width, height)
+                image_data = image_generator.gen_image(prompt=prompt,width=1080,height=2340)
 
                 # Save image
                 saved_data = image_service.save_image(image_data)
