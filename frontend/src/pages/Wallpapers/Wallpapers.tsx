@@ -18,6 +18,7 @@ import { RoleManager } from "../../utils/roles";
 import { toast } from "react-toastify";
 import WallpapersGrid from "../../components/Wallpapers/WallpapersGrid/WallpapersGrid";
 import { Loader } from "@/components/Loader/Loader";
+import "./Wallpapers.module.scss"
 
 const ITEMS_PER_PAGE = 12;
 

@@ -1,6 +1,6 @@
 
 .iconBtn {
-  background: var(--theme-overlay-dark);
+  background: var(--theme-background-secondary);
   color: var(--color-primary);
   border: none;
   border-radius: var(--border-radius-full);
@@ -15,7 +15,7 @@
   z-index: var(--z-index-fixed);
 
   &:hover {
-    background: var(--theme-shadow-dark);
+    background: var(--theme-overlay-hover);
     color: var(--color-primary-light);
     transform: scale(1.1);
   }

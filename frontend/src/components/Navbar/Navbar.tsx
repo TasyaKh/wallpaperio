@@ -12,7 +12,7 @@ import styles from "./Navbar.module.scss";
 import { Button } from "../Buttons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon } from "@fortawesome/free-regular-svg-icons/faMoon";
-import { faBarsStaggered, faSun, faUsersViewfinder } from "@fortawesome/free-solid-svg-icons";
+import { faArrowsToEye, faBarsStaggered, faSun } from "@fortawesome/free-solid-svg-icons";
 import {  faTimes } from "@fortawesome/free-solid-svg-icons";
 import { RoleManager } from "../../utils/roles";
 import { useEffect, useState, useRef } from "react";
@@ -113,7 +113,7 @@ export const Navbar = () => {
       <nav ref={navbarRef} className={styles.navbar}>
         <div className={styles.navbarContainer}>
           <Link to="/" className={styles.logo}>
-            <img src="/logo.svg" alt="WallpaperIO" width="40" height="40" />
+            <img src="/logo-animated.svg" alt="WallpaperIO" width="40" height="40" />
           </Link>
           {showSearch && (
             <div className={styles.searchWrapper}>
@@ -123,7 +123,7 @@ export const Navbar = () => {
               />
               {/* similar */}
               <IconButton
-                icon={faUsersViewfinder}
+                icon={faArrowsToEye}
                 onClick={handleSimilarBtnClick}
                 title="Search by similar wallpapers"
                 className={styles.similarButton}
