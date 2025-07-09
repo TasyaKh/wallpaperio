@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="w-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop id="w-stop1" offset="0%" stop-color="#00f2fe">
+        <animate attributeName="stop-color" values="#00f2fe;#ff00ff;#00f2fe" dur="3s" repeatCount="indefinite"/>
+      </stop>
+      <stop id="w-stop2" offset="100%" stop-color="#ff00ff">
+        <animate attributeName="stop-color" values="#ff00ff;#00f2fe;#ff00ff" dur="3s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    <linearGradient id="dot-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop id="dot-stop1" offset="0%" stop-color="#00f2fe">
+        <animate attributeName="stop-color" values="#00f2fe;#ff00ff;#00f2fe" dur="3s" repeatCount="indefinite"/>
+      </stop>
+      <stop id="dot-stop2" offset="100%" stop-color="#ff00ff">
+        <animate attributeName="stop-color" values="#ff00ff;#00f2fe;#ff00ff" dur="3s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feMerge>
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="drop-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  <style>
+    .w-shape {
+      fill: none;
+      stroke: url(#w-gradient);
+      stroke-width: 27;
+      stroke-linecap: butt;
+      stroke-linejoin: miter;
+      stroke-miterlimit: 2;
+      filter: url(#glow) url(#drop-shadow);
+      stroke-dasharray: 350;
+      stroke-dashoffset: 350;
+      animation: drawW 1.5s cubic-bezier(.77,0,.18,1) forwards;
+    }
+    .dot {
+      fill: url(#dot-gradient);
+      filter: url(#glow) url(#drop-shadow);
+      transform-origin: 100px 35px;
+      animation: pulseDot 1.2s infinite alternate;
+    }
+    @keyframes drawW {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+    @keyframes pulseDot {
+      0% { transform: scale(1);}
+      100% { transform: scale(1.35);}
+    }
+  </style>
+  <path class="w-shape" d="M 30 150 L 70 50 L 100 120 L 130 50 L 170 150" />
+  <circle class="dot" cx="100" cy="35" r="10" />
+</svg>
