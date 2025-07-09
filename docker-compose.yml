@@ -162,6 +162,7 @@ services:
       - "3000:3000"
     depends_on:
       - postgres
+      - redis
     restart: unless-stopped
     env_file:
       - ./server/.env.prod
