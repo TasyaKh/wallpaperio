@@ -4,10 +4,12 @@ from pydantic import BaseModel
 
 import requests
 
-class SavedImagePaths(BaseModel):
+class SavedImageData(BaseModel):
     url_path_thumb: str
     url_path_medium: str
     url_path: str
+    width: int
+    height: int
 
 class ImageData(BaseModel):
     image: Union[str, bytes]
@@ -17,7 +19,7 @@ class ImageServiceBase(ABC):
     """Interface for image services"""
     
     @abstractmethod
-    def save_image(self, image_data: ImageData) -> SavedImagePaths:
+    def save_image(self, image_data: ImageData) -> SavedImageData:
         """Save image and return file paths"""
         pass
     

@@ -4,7 +4,7 @@ from config import IMG_HOST_API_KEY
 from services.images.image_service_base import (
     ImageData,
     ImageServiceBase,
-    SavedImagePaths,
+    SavedImageData,
 )
 from models.imgfoto.imgfoto_response import ImgFotoApiResponse
 
@@ -15,7 +15,7 @@ class ImgFotoService(ImageServiceBase):
         self.api_key = IMG_HOST_API_KEY
         self.headers = {"X-API-Key": self.api_key}
 
-    def save_image(self, image_data: ImageData) -> SavedImagePaths:
+    def save_image(self, image_data: ImageData) -> SavedImageData:
         image_base64 = self.get_image_as_base64(image_data)
         data = {"source": image_base64}
         response = requests.post(
@@ -35,8 +35,10 @@ class ImgFotoService(ImageServiceBase):
         url_path = image_info.url if image_info else ""
         url_path_medium = image_info.medium.url if image_info and image_info.medium else ""
         url_path_thumb = image_info.thumb.url if image_info and image_info.thumb else ""
-        return SavedImagePaths(
+        return SavedImageData(
             url_path=url_path,
             url_path_medium=url_path_medium,
             url_path_thumb=url_path_thumb,
+            width=image_info.width,
+            height=image_info.height
         )
