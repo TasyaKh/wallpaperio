@@ -295,6 +295,7 @@ func (s *WallpaperService) InitSimilarSearch(fileBytes []byte, c *gin.Context) (
 	}
 	host := c.Request.Host
 	fileURL := fmt.Sprintf("%s://%s/static/%s", scheme, host, hash)
+	fmt.Println("/InitSimilarSearch url: %v", fileURL)
 
 	// Extract features
 	features, err := s.featureSvc.ExtractFeatures(fileURL)

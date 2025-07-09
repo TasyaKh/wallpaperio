@@ -1,6 +1,5 @@
 import api from "./axios";
 import {
-  NextPreviousWallpaperFilter,
   Wallpaper,
   WallpaperResponse,
 } from "../models/wallpaper";
