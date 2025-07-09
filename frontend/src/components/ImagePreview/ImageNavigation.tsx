@@ -15,7 +15,9 @@ import { toast } from "react-toastify";
 import { saveAs } from "file-saver";
 import { installWallpaper } from "../../api/wallpapers";
 import IconButton from "../Buttons/IconButton/IconButton";
-import { useSwipeable } from 'react-swipeable';
+import { useSwipeable } from "react-swipeable";
+import { PromptPreviewButton, PromptPopup } from "./PromptPreview";
+import { UiPreferencesStorage } from "@/utils/localStorage/UiPreferencesStorage";
 
 interface ImageNavigationProps {
   onNext: () => void;
@@ -36,6 +38,9 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
   const [isInstalling, setIsInstalling] = useState(false);
   const [isFavoriting, setIsFavoriting] = useState(false);
   const { user } = useAuth();
+  const [showPrompt, setShowPrompt] = useState(() =>
+    UiPreferencesStorage.getShowPrompt()
+  );
 
   const handleImageError = () => {
     setImgError(true);
@@ -55,10 +60,7 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
 
     setIsFavoriting(true);
     try {
-      await onToggleFavorite(
-        wallpaperData.wallpaper.id,
-        !wallpaperData.is_favorite
-      );
+      onToggleFavorite(wallpaperData.wallpaper.id, !wallpaperData.is_favorite);
     } catch (err) {
       console.error("Failed to toggle favorite:", err);
     } finally {
@@ -89,6 +91,10 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
     wallpaperData.wallpaper.image_medium_url,
   ]);
 
+  useEffect(() => {
+    UiPreferencesStorage.setShowPrompt(showPrompt);
+  }, [showPrompt]);
+
   const displayImage = imgError
     ? defaultImage
     : wallpaperData.wallpaper.image_url;
@@ -105,12 +111,40 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
         key={wallpaperData.wallpaper.id}
         src={displayImage}
         alt={"Preview"}
-        placeholderSrc={wallpaperData.wallpaper.image_thumb_url}
+        placeholderSrc={wallpaperData.wallpaper.image_medium_url}
         fallbackSrc={defaultImage}
         objectFit="contain"
         onLoad={handleImageLoad}
         onError={handleImageError}
       />
+      {/* Vertical Action Button Group */}
+      <div className={styles.leftButtonGroup}>
+        <PromptPreviewButton
+          active={showPrompt}
+          onClick={() => setShowPrompt((v) => !v)}
+          disabled={isLoading}
+        />
+        {/* install */}
+        <IconButton
+          icon={faDownload}
+          onClick={installWallpaperHandler}
+          disabled={isInstalling || isLoading}
+          loading={isInstalling}
+          title={isInstalling ? "Installing..." : "Install this wallpaper"}
+        />
+        {/* favorite */}
+        <IconButton
+          icon={wallpaperData.is_favorite ? faHeart : faHeartBroken}
+          onClick={handleToggleFavorite}
+          disabled={isFavoriting || isLoading}
+          loading={isFavoriting}
+          title={"Add to favorites"}
+          className={`${styles.favoriteButton} ${wallpaperData.is_favorite ? styles.favorited : ""}`}
+        />
+      </div>
+
+      {showPrompt && <PromptPopup prompt={wallpaperData.wallpaper.prompt} />}
+
       {/* nav buttons  */}
       <IconButton
         icon={faChevronLeft}
@@ -124,24 +158,6 @@ const ImageNavigation: React.FC<ImageNavigationProps> = ({
         onClick={onNext}
         disabled={isLoading}
         className={`${styles.navButton} ${styles.nextButton}`}
-      />
-
-      <IconButton
-        icon={wallpaperData.is_favorite ? faHeart : faHeartBroken}
-        onClick={handleToggleFavorite}
-        disabled={isFavoriting || isLoading}
-        loading={isFavoriting}
-        title={"Add to favorites"}
-        className={`${styles.favoriteButton} ${wallpaperData.is_favorite ? styles.favorited : ""}`}
-      />
-
-      <IconButton
-        icon={faDownload}
-        onClick={installWallpaperHandler}
-        disabled={isInstalling || isLoading}
-        loading={isInstalling}
-        title={isInstalling ? "Installing..." : "Install this wallpaper"}
-        className={styles.installButton}
       />
     </div>
   );

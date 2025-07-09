@@ -123,7 +123,6 @@ const Favorites = () => {
             await loadMore();
             targetIndex = direction === 'next' ? 0 : wallpapers.length - 1;
           } else {
-            toast.error("No more favorites to show");
             return;
           }
         }

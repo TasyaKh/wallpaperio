@@ -1,0 +1,30 @@
+.dropArea {
+  border: 2px dashed #aaa;
+  border-radius: 12px;
+  padding: 32px 16px;
+  text-align: center;
+  background: #fafbfc;
+  color: #666;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  margin-bottom: 16px;
+  position: relative;
+}
+.dragActive {
+  border-color: #007bff;
+  background: #f0f8ff;
+  color: #007bff;
+}
+.dropIcon {
+  font-size: 2.5rem;
+  color: #bbb;
+  margin-bottom: 8px;
+}
+.dropText {
+  font-size: 1.1rem;
+  color: #888;
+}
+.error {
+  color: #d32f2f;
+  margin-top: 16px;
+}

@@ -12,12 +12,14 @@ import styles from "./Navbar.module.scss";
 import { Button } from "../Buttons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon } from "@fortawesome/free-regular-svg-icons/faMoon";
-import { faBarsProgress, faBarsStaggered, faSun } from "@fortawesome/free-solid-svg-icons";
-import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faBarsStaggered, faFileImage, faSun, faUsersViewfinder } from "@fortawesome/free-solid-svg-icons";
+import {  faTimes } from "@fortawesome/free-solid-svg-icons";
 import { RoleManager } from "../../utils/roles";
 import { useEffect, useState, useRef } from "react";
 import Search from "../Search/Search";
 import { StickyNavLinks } from "./StickyNavLinks/StickyNavLinks";
+import SimilarSearchModal from "./SimilarSearchModal/SimilarSearchModal";
+import IconButton from "../Buttons/IconButton/IconButton";
 
 export const Navbar = () => {
   const { user, loading } = useAuth();
@@ -28,6 +30,7 @@ export const Navbar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navbarRef = useRef<HTMLDivElement>(null);
   const [showStickyLinks, setShowStickyLinks] = useState(false);
+  const [showSimilarModal, setShowSimilarModal] = useState(false);
 
   const handleSearch = (query: string) => {
     const newParams = new URLSearchParams(searchParams);
@@ -97,6 +100,14 @@ export const Navbar = () => {
     location.pathname.startsWith("/wallpapers") ||
     location.pathname.startsWith("/categories");
 
+  const handleSimilarBtnClick = () => {
+    setShowSimilarModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowSimilarModal(false);
+  };
+
   return (
     <>
       <nav ref={navbarRef} className={styles.navbar}>
@@ -109,6 +120,13 @@ export const Navbar = () => {
               <Search
                 onSearch={handleSearch}
                 initialQuery={searchParams.get("search") ?? ""}
+              />
+              {/* similar */}
+              <IconButton
+                icon={faUsersViewfinder}
+                onClick={handleSimilarBtnClick}
+                title="Search by similar wallpapers"
+                className={styles.similarButton}
               />
             </div>
           )}
@@ -177,6 +195,8 @@ export const Navbar = () => {
           </div>
         </div>
       </nav>
+
+      <SimilarSearchModal open={showSimilarModal} onClose={handleCloseModal} />
 
       {showStickyLinks && <StickyNavLinks />}
     </>

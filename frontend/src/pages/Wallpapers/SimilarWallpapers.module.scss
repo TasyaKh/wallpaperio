@@ -1,0 +1,14 @@
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 20px 0;
+}
+
+.floating {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  z-index: 1000;
+}

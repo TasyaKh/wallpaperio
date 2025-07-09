@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   getWallpapers,
-  getAdjacentWallpaper,
   getWallpaperInfo,
   deleteWallpaper,
   addFavorite,
@@ -10,7 +9,6 @@ import {
   PreviewWallpaperResponse,
 } from "../../api/wallpapers";
 import { getCategories } from "../../api/categories";
-import styles from "./Wallpapers.module.scss";
 import { Wallpaper } from "../../models/wallpaper";
 import { Category } from "../../models/category";
 import ImagePreview from "../../components/ImagePreview/ImagePreview";
@@ -29,17 +27,14 @@ export default function Wallpapers() {
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
   const [total, setTotal] = useState(0);
   const [selectedWallpaper, setSelectedWallpaper] =
     useState<PreviewWallpaperResponse | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [lastSelectedWallpaperBack, setLastSelectedWallpaperBack] =
-    useState<PreviewWallpaperResponse | null>(null);
+  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
 
   const selectedCategory = searchParams.get("category") ?? "";
   const searchQuery = searchParams.get("search") ?? "";
@@ -75,18 +70,17 @@ export default function Wallpapers() {
     setSearchParams(categoryName ? { category: categoryName } : {});
   };
 
-  const handleWallpaperClick = async (wallpaper: Wallpaper) => {
+  const handleWallpaperClick = async (wallpaper: Wallpaper, idx: number) => {
+    setCurrentIndex(idx);
     try {
       const wallpaperInfo = await getWallpaperInfo(wallpaper.id);
       setSelectedWallpaper(wallpaperInfo);
       setIsPreviewOpen(true);
-      setLastSelectedWallpaperBack(wallpaperInfo);
     } catch (err) {
       console.error("Error fetching wallpaper info:", err);
       const fallbackInfo = { wallpaper, is_favorite: false };
       setSelectedWallpaper(fallbackInfo);
       setIsPreviewOpen(true);
-      setLastSelectedWallpaperBack(fallbackInfo);
     }
   };
 
@@ -103,46 +97,42 @@ export default function Wallpapers() {
   };
 
   const handleNextImage = async () => {
-    if (!lastSelectedWallpaperBack) return;
-
-    try {
-      setIsNavigating(true);
-      const response = await getAdjacentWallpaper(
-        lastSelectedWallpaperBack.wallpaper.id,
-        "next",
-        {
-          category: selectedCategory,
-          search: searchQuery,
+    if (currentIndex === null) return;
+    let nextIndex = currentIndex + 1;
+    if (nextIndex < wallpapers.length) {
+      setCurrentIndex(nextIndex);
+      try {
+        const wallpaperInfo = await getWallpaperInfo(wallpapers[nextIndex].id);
+        setSelectedWallpaper(wallpaperInfo);
+      } catch (err) {
+        console.error("Error fetching wallpaper info:", err);
+        setSelectedWallpaper({ wallpaper: wallpapers[nextIndex], is_favorite: false });
+      }
+    } else if (hasMore) {
+      await loadMore();
+      if (nextIndex < wallpapers.length) {
+        setCurrentIndex(nextIndex);
+        try {
+          const wallpaperInfo = await getWallpaperInfo(wallpapers[nextIndex].id);
+          setSelectedWallpaper(wallpaperInfo);
+        } catch (err) {
+          setSelectedWallpaper({ wallpaper: wallpapers[nextIndex], is_favorite: false });
         }
-      );
-      setSelectedWallpaper(response);
-      setLastSelectedWallpaperBack(response);
-    } catch (err) {
-      console.error("Error fetching next wallpaper:", err);
-    } finally {
-      setIsNavigating(false);
+      }
     }
   };
 
   const handlePreviousImage = async () => {
-    if (!lastSelectedWallpaperBack) return;
-
-    try {
-      setIsNavigating(true);
-      const response = await getAdjacentWallpaper(
-        lastSelectedWallpaperBack.wallpaper.id,
-        "previous",
-        {
-          category: selectedCategory,
-          search: searchQuery,
-        }
-      );
-      setSelectedWallpaper(response);
-      setLastSelectedWallpaperBack(response);
-    } catch (err) {
-      console.error("Error fetching previous wallpaper:", err);
-    } finally {
-      setIsNavigating(false);
+    if (currentIndex === null) return;
+    let prevIndex = currentIndex - 1;
+    if (prevIndex >= 0) {
+      setCurrentIndex(prevIndex);
+      try {
+        const wallpaperInfo = await getWallpaperInfo(wallpapers[prevIndex].id);
+        setSelectedWallpaper(wallpaperInfo);
+      } catch (err) {
+        setSelectedWallpaper({ wallpaper: wallpapers[prevIndex], is_favorite: false });
+      }
     }
   };
 
@@ -222,7 +212,6 @@ export default function Wallpapers() {
         setOffset(ITEMS_PER_PAGE);
         setHasMore(response.wallpapers.length < response.total);
       } catch (err) {
-        setError("Failed to load wallpapers");
         console.error("Error loading wallpapers:", err);
       } finally {
         setLoading(false);
@@ -240,11 +229,6 @@ export default function Wallpapers() {
         selectedCategory={selectedCategory}
         onCategoryChange={handleCategoryChange}
       />
-
-      {error && wallpapers.length === 0 && (
-        <div className={styles.error}>{error}</div>
-      )}
-
       {loading && wallpapers.length === 0 ? (
         <Loader text="Loading wallpapers..." />
       ) : (
@@ -257,14 +241,12 @@ export default function Wallpapers() {
           onDelete={handleDeleteWallpaper}
         />
       )}
-
       {selectedWallpaper && (
         <ImagePreview
           isOpen={isPreviewOpen}
           onClose={() => setIsPreviewOpen(false)}
           onNext={handleNextImage}
           onPrevious={handlePreviousImage}
-          isLoading={isNavigating}
           currentWallpaper={selectedWallpaper}
           onSimilarWallpaperClick={handleSimilarWallpaperClick}
           onToggleFavorite={handleToggleFavorite}

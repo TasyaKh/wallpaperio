@@ -12,8 +12,11 @@ export interface Wallpaper {
   image_medium_url?: string;
   category: Category;
   tags?: Tag[];
+  prompt?: string;
   created_at: string;
   updated_at: string;
+  width?: number;
+  height?: number;
 }
 
 export interface WallpaperResponse {

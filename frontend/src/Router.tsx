@@ -7,6 +7,7 @@ import AdminPanel from './pages/AdminPanel/AdminPanel';
 import Favorites from './pages/Favorites/Favorites';
 import NotFound from './pages/NotFound/NotFound';
 import { useAuth } from './contexts/AuthContext';
+import SimilarWallpapers from './pages/Wallpapers/SimilarWallpapers';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -37,6 +38,7 @@ const AppRouter = () => (
       <Route path="/" element={<Wallpapers />} />
       <Route path="/wallpapers" element={<Wallpapers />} />
       <Route path="/categories" element={<Categories />} />
+      <Route path="/similar-wallpapers" element={<SimilarWallpapers />} />
       {/* Protected routes - authentication required */}
       <Route
         path="/favorites"

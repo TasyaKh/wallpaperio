@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Wallpaper } from "../../models/wallpaper";
+import { Wallpaper } from "@/models/wallpaper";
 import { getSimilarWallpapers } from "../../api/wallpapers";
 import styles from "./SimilarWallpapers.module.scss";
 import { LazyImage } from "../LazyImage/LazyImage";
-import defaultImage from "../../assets/not-found-image.svg";
+import defaultImage from "@/assets/not-found-image.svg";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Loader } from "../Loader/Loader";
 
@@ -97,9 +97,9 @@ const SimilarWallpapers: React.FC<SimilarWallpapersProps> = ({
             onClick={() => onWallpaperClick(wallpaper)}
           >
             <LazyImage
-              src={imageErrors[wallpaper.id] ? defaultImage : wallpaper.image_url}
+              src={imageErrors[wallpaper.id] ? defaultImage : (wallpaper.image_medium_url ?? wallpaper.image_url)}
               alt={`Similar wallpaper ${wallpaper.id}`}
-              placeholderSrc={wallpaper.image_thumb_url}
+              placeholderSrc={wallpaper.image_medium_url}
               fallbackSrc={defaultImage}
               objectFit="cover"
               onError={() => handleImageError(wallpaper.id)}

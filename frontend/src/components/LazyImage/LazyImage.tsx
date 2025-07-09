@@ -44,10 +44,6 @@ export const LazyImage: React.FC<LazyImageProps> = ({
 
   const imageSrc = imgError && fallbackSrc ? fallbackSrc : src;
 
-  const imageStyle = {
-    objectFit: objectFit as 'cover' | 'contain',
-  };
-
   return (
     <div ref={inViewRef} className={`${styles.lazyImageContainer} ${containerClassName}`}>
       {inView && (
@@ -55,7 +51,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
           ref={imageRef}
           src={imageSrc}
           alt={alt}
-          style={imageStyle}
+          style={{ objectFit: objectFit }}
           className={`${styles.image} ${imageLoaded ? styles.loaded : styles.loading}`}
           onError={handleImageError}
           onLoad={handleImageLoad}
@@ -67,7 +63,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
           <img
             src={placeholderSrc}
             alt=""
-            style={imageStyle}
+            style={{objectFit: objectFit}}
             className={styles.placeholderImage}
           />
         </div>
