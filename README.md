@@ -1,6 +1,28 @@
 # WallpaperIO
 
-A modern wallpaper generation and management platform with AI-powered image generation capabilities.
+A modern wallpaper generation and management platform with AI-powered image generation capabilities. (light/night themes)
+
+1) page main  with wallpapers
+<img width="200" height="2000" alt="2025-07-18 15 11 57 wallpaperio online 57200562e002" src="https://github.com/user-attachments/assets/ff4fefec-37c5-4d57-94eb-facb00b6b166" />
+
+2) preview one wallpaper with similar images
+<img width="200" height="5071" alt="2025-07-18 15 12 31 wallpaperio online 932306dcb9bf" src="https://github.com/user-attachments/assets/1b85230b-1806-4dbc-aa24-c6c18c1bb45f" />
+
+3) page categories
+<img width="200" height="2019" alt="2025-07-18 15 12 58 wallpaperio online 347a37376e92" src="https://github.com/user-attachments/assets/11ec1983-c15f-4664-8953-48ccbb43a4fb" />
+
+4) page found similar wallpapers by loaded image
+<img width="200" height="6397" alt="2025-07-18 15 13 57 wallpaperio online 3455581a8e8b" src="https://github.com/user-attachments/assets/367c353e-adc8-4f40-8340-6e2e9223a64f" />
+
+5) login/auth page
+<img width="200" height="1654" alt="2025-07-18 15 14 14 wallpaperio online 49037df11f13" src="https://github.com/user-attachments/assets/1e60ddf5-f610-499c-9ec8-824fdb3b5918" />
+
+6) page favorite images
+<img width="200" height="2960" alt="2025-07-18 15 14 34 wallpaperio online 3d8f60a29714" src="https://github.com/user-attachments/assets/4aafb6fc-0de9-4bff-b77d-e21a2a39bca9" />
+
+7) page image generation (for admin only)
+<img width="200" height="1884" alt="2025-07-18 15 21 25 wallpaperio online 103659d6f72c" src="https://github.com/user-attachments/assets/f5ced2fc-f7c9-4e7e-8a54-b134f72ae83e" />
+
 
 ## 🚀 Features
 
