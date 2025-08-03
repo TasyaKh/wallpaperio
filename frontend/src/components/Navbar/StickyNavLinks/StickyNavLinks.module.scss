@@ -6,10 +6,8 @@
   left: 50%;
   transform: translateX(-50%);
   right: 0;
-  background: transparent;
+  background: var(--theme-background-primary);
   z-index: var(--z-index-sticky);
-  backdrop-filter: blur(100px);
-  -webkit-backdrop-filter: blur(100px);
   box-shadow: 0 4px 24px rgba(80, 80, 160, 0.08);
   color: var(--theme-text-primary);
   transition: box-shadow 150ms, background 150ms, color 150ms, transform 300ms ease-in-out;

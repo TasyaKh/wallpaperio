@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useLayoutEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   getWallpapers,
@@ -221,6 +221,7 @@ export default function Wallpapers() {
 
     fetchWallpapers();
   }, [selectedCategory, searchQuery]);
+
 
   return (
     <div className={"container"}>

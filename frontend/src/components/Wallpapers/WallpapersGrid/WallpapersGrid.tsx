@@ -4,7 +4,7 @@ import { Wallpaper } from "@/models/wallpaper";
 import WallpaperCard from "../WallpaperCard/WallpaperCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { RoleManager } from "@/utils/roles";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 
 interface WallpapersGridProps {
   wallpapers: Wallpaper[];
@@ -40,13 +40,16 @@ const WallpapersGrid: React.FC<WallpapersGridProps> = ({
 }) => {
   const [columnCount, setColumnCount] = React.useState(getColumnCount());
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleResize = () => setColumnCount(getColumnCount());
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const columns = useMemo(() => splitIntoColumns(wallpapers, columnCount), [wallpapers, columnCount]);
+  const columns = useMemo(
+    () => splitIntoColumns(wallpapers, columnCount),
+    [wallpapers, columnCount]
+  );
 
   const { user } = useAuth();
 
@@ -66,20 +69,24 @@ const WallpapersGrid: React.FC<WallpapersGridProps> = ({
     >
       <div className={styles.grid}>
         {columns.map((column, colIdx) => (
-          <div className={styles.column} key={colIdx}>
-            {column.map((wallpaper, idx) => (
-              <WallpaperCard
-                key={wallpaper.id}
-                wallpaper={wallpaper}
-                onClick={() => onWallpaperClick(wallpaper, idx)}
-                onDelete={
-                  user && RoleManager.canDeleteWallpapers(user.role)
-                    ? () => onDelete?.(wallpaper.id)
-                    : undefined
-                }
-                isDeleting={isDeleting}
-              />
-            ))}
+          <div className={styles.column} key={`column-${colIdx}`}>
+            {column.map((wallpaper, idx) => {
+              const globalIdx = colIdx + idx * columnCount;
+              return (
+                <React.Fragment key={`${wallpaper.id}`}>
+                  <WallpaperCard
+                    wallpaper={wallpaper}
+                    onClick={() => onWallpaperClick(wallpaper, globalIdx)}
+                    onDelete={
+                      user && RoleManager.canDeleteWallpapers(user.role)
+                        ? () => onDelete?.(wallpaper.id)
+                        : undefined
+                    }
+                    isDeleting={isDeleting}
+                  />
+                </React.Fragment>
+              );
+            })}
           </div>
         ))}
       </div>
