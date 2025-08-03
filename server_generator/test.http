@@ -24,3 +24,25 @@ Content-Type: application/json
 
 ###
 GET http://localhost:5001/api/images/generators
+
+# generate svg
+###
+POST http://localhost:5001/api/generate
+Content-Type: application/json
+
+{
+   
+  "prompt": "Generate a complete animated SVG XML text using SMIL animation. The SVG must include the <svg> root tag and valid SMIL animations depicting a natural or abstract scene, such as 'twinkling stars in a night sky' or 'leaves falling gently in autumn breeze'. The output must be concise but self-contained, ready to be saved as an .svg file and rendered as animation."
+}
+
+# convert  svg to png
+
+### Generate Lottie JSON animation
+POST http://localhost:5001/api/generate
+Content-Type: application/json
+
+{
+  "prompt": "Create an animated via CSS SVG illustration of a rocket launching into space. The rocket should have moving flames at the bottom, dynamic exhaust effects, and a trail that follows it as it ascends. Incorporate twinkling stars in the background that appear randomly and animate softly to add depth to the scene.Feel free to customize or specify specific elements youd like to include!"}
+
+### Convert animated SVG file to GIF
+POST http://localhost:5001/api/generate/svg-file-to-gif

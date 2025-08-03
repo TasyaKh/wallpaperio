@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from apscheduler.schedulers.background import BackgroundScheduler
-from routes import image_routes
+from routes import image_routes, generate_routes
 from config import DEBUG, HOST, PORT, AUTOGENERATE_IMAGES_TIMER_SEC
 from tasks.wallpaper_generation_task import generate_wallpapers_job
 
@@ -35,6 +35,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(image_routes.router, prefix="/api")
+app.include_router(generate_routes.router, prefix="/api")
 
 @app.get("/")
 async def root():

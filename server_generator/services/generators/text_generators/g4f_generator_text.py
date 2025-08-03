@@ -63,3 +63,20 @@ class G4FGeneratorText:
         }
 
         return json.dumps(final_response)
+    
+    def gen_text(self, prompt:str) -> str:
+        """
+        Generate text using g4f client with gpt-4o model
+        Returns generated text
+        """
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4o",
+                messages=[{"role": "user", "content": prompt}],
+            )
+            generated_text = response.choices[0].message.content.strip()
+            return generated_text
+        except Exception as e:
+            print(f"Error during text generation with g4f: {e}")
+            return ""
+        
